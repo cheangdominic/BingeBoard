@@ -25,7 +25,7 @@ function Footer() {
           <li><a href="/contact" className="hover:text-blue-400 transition">Contact</a></li>
         </ul>
 
-        <div className="flex gap-4 justify-center md:justify-end w-full md:w-auto">
+        <div className="flex gap-4 justify-center md:justify-end w-full md:w-auto md:ml-20">
         <a href="#" aria-label="Instagram" className="hover:opacity-75 transition">
             <img src="src\assets\instagram_footer_icon.svg" alt="Instagram" className="h-5 w-5" />
           </a>
