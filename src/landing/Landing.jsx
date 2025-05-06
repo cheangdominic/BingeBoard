@@ -3,6 +3,7 @@ import TopNavbar from './TopNavbar.jsx'
 import MottoBanner from './MottoBanner.jsx'
 import FeatureCards from './FeatureCards.jsx'
 import Statistics from './Statistics.jsx'
+import Footer from './Footer.jsx'
 
 function Landing() {
   const [count, setCount] = useState(0)
@@ -13,6 +14,7 @@ function Landing() {
     <MottoBanner/>
     <FeatureCards/>
     <Statistics/>
+    <Footer/>
     </>
   )
 }
