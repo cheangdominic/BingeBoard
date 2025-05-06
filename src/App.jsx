@@ -9,6 +9,7 @@ import SignupPage from './signup/SignupPage.jsx';
 import SocialFeature from './featurecards/SocialFeature.jsx';
 import WatchlistFeature from './featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './featurecards/BrowseFeature.jsx';
+import NotFound from './NotFound.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -23,6 +24,7 @@ function App() {
         <Route path="/socialfeature" element={<SocialFeature/>} />
         <Route path="/watchlistfeature" element={<WatchlistFeature/>} />
         <Route path="/browsefeature" element={<BrowseFeature/>} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   )
