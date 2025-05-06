@@ -5,6 +5,7 @@ import './App.css';
 import Landing from './landing/Landing.jsx'; 
 import AboutUsPage from './aboutus/AboutUsPage.jsx'; 
 import LoginPage from './login/LoginPage.jsx';
+import SignupPage from './signup/SignupPage.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -14,6 +15,7 @@ function App() {
       <Routes> 
         <Route path="/" element={<Landing />} />  
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
         <Route path="/aboutus" element={<AboutUsPage />} />
       </Routes>
     </Router>
