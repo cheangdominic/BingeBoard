@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import './App.css'
+import './App.css';
+import Landing from './landing/Landing.jsx'; 
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
-    <h1 className="text-4xl font-bold text-center text-blue-600 mt-10">Hello World</h1>
+    <Landing/>
 
     </>
   )

@@ -24,6 +24,8 @@
   },
   "homepage": "https://github.com/cheangdominic/2800-202510-BBY12#readme",
   "dependencies": {
+    "@headlessui/react": "^2.2.2",
+    "@heroicons/react": "^2.2.0",
     "@tailwindcss/vite": "^4.1.5",
     "concurrently": "^9.1.2",
     "express": "^5.1.0",
