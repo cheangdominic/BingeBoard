@@ -70,7 +70,7 @@ export default function TopNavbar() {
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
       >
         <div className="flex items-center lg:flex-1">
-          <a href="#" className="-m-1.5 p-1.5 flex items-center space-x-2">
+          <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
             <img
               alt="BingeBoard logo"
               src="src/assets/BingeBoard Icon.svg"
@@ -93,13 +93,13 @@ export default function TopNavbar() {
         </div>
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a
-            href="#"
+            href="/login"
             className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
           >
             Sign In
           </a>
           <a
-            href="#"
+            href="/signup"
             className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
           >
             Create Account
@@ -136,7 +136,7 @@ export default function TopNavbar() {
             </PopoverPanel>
           </Popover>
           <a
-            href="#"
+            href="/aboutus"
             className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
           >
             About Us
@@ -144,7 +144,7 @@ export default function TopNavbar() {
         </PopoverGroup>
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a
-            href="#"
+            href="/login"
             className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
           >
             Log In <span aria-hidden="true">&rarr;</span>
@@ -159,7 +159,7 @@ export default function TopNavbar() {
         <div className="fixed inset-0 z-10" />
         <DialogPanel className="fixed inset-y-0 right-0 z-10 w-full overflow-y-auto bg-[#000000] px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
           <div className="flex items-center justify-between">
-          <a href="#" className="-m-1.5 p-1.5 flex items-center space-x-2">
+          <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
             <img
               alt="BingeBoard logo"
               src="src/assets/BingeBoard Icon.svg"
@@ -182,13 +182,13 @@ export default function TopNavbar() {
             <div className="-my-6 divide-y text-[#ECE6DD]">
               <div className="space-y-2 py-6">
                 <a
-                  href="#"
+                  href="/login"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
                 >
                   Sign In
                 </a>
                 <a
-                  href="#"
+                  href="/signup"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
                 >
                   Create Account
@@ -212,7 +212,7 @@ export default function TopNavbar() {
                   </DisclosurePanel>
                 </Disclosure>
                 <a
-                  href="#"
+                  href="/aboutus"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
                 >
                   About Us
@@ -220,7 +220,7 @@ export default function TopNavbar() {
               </div>
               <div className="py-6">
                 <a
-                  href="#"
+                  href="/login"
                   className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
                 >
                   Log in
