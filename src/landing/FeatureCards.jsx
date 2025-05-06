@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 function FeatureCards() {
@@ -9,7 +10,9 @@ function FeatureCards() {
         BingeBoard gives you the power to...
         </h1>
         <div class="flex flex-col md:flex-row items-center justify-evenly font-coolvetica text-center gap-6">
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg gap-4 bg-[#2E2E2E]">
+        
+        <Link to="/socialfeature">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\friend_feature_icon.svg"
@@ -26,8 +29,10 @@ function FeatureCards() {
             </p>
           </div>
         </div>
+        </Link>
 
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
+        <Link to="/watchlistfeature">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\watchlist_icon.svg"
@@ -44,8 +49,10 @@ function FeatureCards() {
             </p>
           </div>
         </div>
+        </Link>
 
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
+        <Link to="/browsefeature">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\browse_tv_icon.svg"
@@ -62,6 +69,7 @@ function FeatureCards() {
             </p>
           </div>
         </div>
+        </Link>
       </div>
     </>
   );
