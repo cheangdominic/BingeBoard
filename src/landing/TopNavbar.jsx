@@ -76,7 +76,7 @@ export default function TopNavbar() {
               src="src/assets/BingeBoard Icon.svg"
               className="h-10 w-auto"
             />
-            <span className="text-white text-3xl font-bold font-coolvetica">
+            <span className="text-white text-3xl font-bold font-coolvetica hover:text-blue-400">
               BingeBoard
             </span>
           </a>
@@ -94,18 +94,18 @@ export default function TopNavbar() {
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a
             href="/login"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
           >
             Sign In
           </a>
           <a
             href="/signup"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
           >
             Create Account
           </a>
           <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-[#ECE6DD]">
+            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-[#ECE6DD] hover:text-blue-400">
               Browse
               <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
             </PopoverButton>
@@ -137,7 +137,7 @@ export default function TopNavbar() {
           </Popover>
           <a
             href="/aboutus"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
           >
             About Us
           </a>
@@ -145,7 +145,7 @@ export default function TopNavbar() {
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a
             href="/login"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD]"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
           >
             Log In <span aria-hidden="true">&rarr;</span>
           </a>
