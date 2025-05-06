@@ -76,7 +76,7 @@ export default function TopNavbar() {
               src="src/assets/BingeBoard Icon.svg"
               className="h-10 w-auto"
             />
-            <span className="text-white text-3xl font-bold font-coolvetica hover:text-blue-400">
+            <span className="text-white text-3xl font-bold font-coolvetica hover:text-blue-400 transition">
               BingeBoard
             </span>
           </a>
@@ -94,18 +94,18 @@ export default function TopNavbar() {
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a
             href="/login"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400 transition"
           >
             Sign In
           </a>
           <a
             href="/signup"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400 transition"
           >
             Create Account
           </a>
           <Popover className="relative">
-            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-[#ECE6DD] hover:text-blue-400">
+            <PopoverButton className="flex items-center gap-x-1 text-sm/6 font-semibold text-[#ECE6DD] hover:text-blue-400 transition">
               Browse
               <ChevronDownIcon aria-hidden="true" className="size-5 flex-none text-gray-400" />
             </PopoverButton>
@@ -137,7 +137,7 @@ export default function TopNavbar() {
           </Popover>
           <a
             href="/aboutus"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400 transition"
           >
             About Us
           </a>
@@ -145,7 +145,7 @@ export default function TopNavbar() {
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a
             href="/login"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ECE6DD] hover:text-blue-400 transition"
           >
             Log In <span aria-hidden="true">&rarr;</span>
           </a>
@@ -183,18 +183,18 @@ export default function TopNavbar() {
               <div className="space-y-2 py-6">
                 <a
                   href="/login"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E] transition"
                 >
                   Sign In
                 </a>
                 <a
                   href="/signup"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E] transition"
                 >
                   Create Account
                 </a>
                 <Disclosure as="div" className="-mx-3">
-                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pr-3.5 pl-3 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]">
+                  <DisclosureButton className="group flex w-full items-center justify-between rounded-lg py-2 pr-3.5 pl-3 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E] transition">
                     Browse
                     <ChevronDownIcon aria-hidden="true" className="size-5 flex-none group-data-open:rotate-180" />
                   </DisclosureButton>
@@ -204,7 +204,7 @@ export default function TopNavbar() {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-lg py-2 pr-3 pl-6 text-sm/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
+                        className="block rounded-lg py-2 pr-3 pl-6 text-sm/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E] transition"
                       >
                         {item.name}
                       </DisclosureButton>
@@ -213,7 +213,7 @@ export default function TopNavbar() {
                 </Disclosure>
                 <a
                   href="/aboutus"
-                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
+                  className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E] transition"
                 >
                   About Us
                 </a>
@@ -221,7 +221,7 @@ export default function TopNavbar() {
               <div className="py-6">
                 <a
                   href="/login"
-                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E]"
+                  className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-[#ECE6DD] hover:bg-[#2E2E2E] transition"
                 >
                   Log in
                 </a>
