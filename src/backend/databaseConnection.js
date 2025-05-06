@@ -1,13 +1,21 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { MongoClient } from 'mongodb';
 
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
 
-const MongoClient = require("mongodb").MongoClient;
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
-var database = new MongoClient(atlasURI, {});
 
+// Create a new MongoClient
+const database = new MongoClient(atlasURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+// Connect to MongoDB
 database.connect()
   .then(() => {
     console.log('Connected to the database');
@@ -16,4 +24,5 @@ database.connect()
     console.log('Not connected to the database', error);
   });
 
-module.exports = { database };
+// ES Module export
+export { database };
