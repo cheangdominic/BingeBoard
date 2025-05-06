@@ -7,6 +7,7 @@ function SignupForm() {
     password: '',
     confirmPassword: ''
   });
+
   const [errors, setErrors] = useState({
     username: '',
     email: '',
@@ -65,10 +66,38 @@ function SignupForm() {
     return valid;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log('Form submitted:', formData);
+    if (!validateForm()) return;
+
+    try {
+      const response = await fetch('http://localhost:3001/api/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok) {
+        setFormData({
+          username: '',
+          email: '',
+          password: '',
+          confirmPassword: ''
+        });
+      } else {
+        alert(data.message || 'Signup failed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('An error occurred during signup');
     }
   };
 
