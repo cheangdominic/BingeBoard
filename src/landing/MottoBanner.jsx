@@ -7,7 +7,7 @@ function MottoBanner() {
     <>
         <div className="relative">
         <img
-          src={"src/assets/image_placeholders/severance-apple-tv-plus.jpg"}
+          src={"src/assets/severance-apple-tv-plus.jpg"}
           alt="Landing banner"
           className="w-full h-[500px] object-cover"
         />
