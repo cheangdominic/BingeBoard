@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import './App.css';
 
-import Landing from './landing/Landing.jsx'; 
-import AboutUsPage from './aboutus/AboutUsPage.jsx'; 
-import LoginPage from './login/LoginPage.jsx';
-import SignupPage from './signup/SignupPage.jsx';
-import SocialFeature from './featurecards/SocialFeature.jsx';
-import WatchlistFeature from './featurecards/WatchlistFeature.jsx';
-import BrowseFeature from './featurecards/BrowseFeature.jsx';
+import Landing from './frontend/landing/Landing.jsx'; 
+import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx'; 
+import LoginPage from './frontend/login/LoginPage.jsx';
+import SignupPage from './frontend/signup/SignupPage.jsx';
+import SocialFeature from './frontend/featurecards/SocialFeature.jsx';
+import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
+import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
