@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 function Footer() {
@@ -7,16 +8,21 @@ function Footer() {
     <footer className="bg-[#000000] text-[#ECE6DD] font-coolvetica py-10 mt-20">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
         
+      <Link
+      to="/"
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      >
         <div className="flex gap-3">
         <img
               alt="BingeBoard logo"
               src="src/assets/BingeBoard Icon.svg"
               className="h-10 w-auto"
             />
-        <div className="text-3xl font-bold text-white">
+        <div className="text-3xl font-bold text-white hover:text-blue-400 transition">
           BingeBoard
         </div>
         </div>
+        </Link>
 
         <ul className="flex flex-col md:flex-row gap-4 text-center text-sm">
           <li><a href="/" className="hover:text-blue-400 transition">Home</a></li>
