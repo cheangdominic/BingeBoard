@@ -8,8 +8,8 @@ function FeatureCards() {
         <h1 class="text-white text-2xl font-bold ml-4 mt-10 mb-10 font-coolvetica text-center">
         BingeBoard gives you the power to...
         </h1>
-      <div class="flex justify-evenly font-coolvetica text-center">
-        <div class="w-[28rem] rounded overflow-hidden shadow-lg gap-4 bg-[#2E2E2E]">
+        <div class="flex flex-col md:flex-row items-center justify-evenly font-coolvetica text-center gap-6">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg gap-4 bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\friend_feature_icon.svg"
@@ -27,7 +27,7 @@ function FeatureCards() {
           </div>
         </div>
 
-        <div class="w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\watchlist_icon.svg"
@@ -45,7 +45,7 @@ function FeatureCards() {
           </div>
         </div>
 
-        <div class="w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\browse_tv_icon.svg"
