@@ -8,13 +8,13 @@ function LoginForm() {
       <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <img className="mx-auto h-10 w-auto" src="src/assets/BingeBoard Icon.svg" alt="BingeBoard Logo" />
-          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900">Sign in to your account</h2>
+          <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-[#ffffff]">Sign in to your account</h2>
         </div>
 
         <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
           <form className="space-y-6" action="#" method="POST">
             <div>
-              <label htmlFor="email" className="block text-sm/6 font-medium text-gray-900">Email address</label>
+              <label htmlFor="email" className="block text-sm/6 font-medium text-[#ffffff]">Email address</label>
               <div className="mt-2">
                 <input
                   type="email"
@@ -30,7 +30,7 @@ function LoginForm() {
 
             <div>
               <div className="flex items-center justify-between">
-                <label htmlFor="password" className="block text-sm/6 font-medium text-gray-900">Password</label>
+                <label htmlFor="password" className="block text-sm/6 font-medium text-[#ffffff]">Password</label>
                 <div className="text-sm">
                   <a href="/forgotpassword" className="font-semibold text-[#1963da] hover:text-[#ebbd34]">Forgot password?</a>
                 </div>
@@ -65,7 +65,7 @@ function LoginForm() {
             </div>
           </form>
 
-          <p className="mt-10 text-center text-sm/6 text-gray-500">
+          <p className="mt-10 text-center text-sm/6 text-[#a3a3a3]">
             Not a member?
             <a href="/signup" className="font-semibold text-[#1963da] hover:text-[#ebbd34]"> Sign up now</a>
           </p>
