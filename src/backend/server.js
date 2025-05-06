@@ -11,7 +11,6 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import { MongoClient } from 'mongodb';
 
-// Get __dirname equivalent in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -20,10 +19,11 @@ const port = process.env.PORT || 3001;
 
 const saltRounds = 12;
 
+const expireTime = 24 * 60 * 60 * 1000;
+
 app.use(bodyParser.json());
 app.use(cors());
 
-// MongoDB configuration
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
@@ -31,7 +31,6 @@ const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 
-// Initialize database connection
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
 const client = new MongoClient(atlasURI);
 
@@ -50,7 +49,6 @@ async function connectToDatabase() {
   }
 }
 
-// Session store configuration
 const mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
   crypto: {
@@ -109,7 +107,49 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-// Start server after database connection
+app.post('/api/login', async (req, res) => {
+    if (!userCollection) {
+        return res.status(500).json({ success: false, message: 'Database not connected' });
+    }
+
+    const {email, password } = req.body;
+
+    const schema = Joi.string().email().required();
+    const validationResult = schema.validate(email);
+    if (validationResult.error != null) {
+        console.log(validationResult.error);
+        res.redirect("/login");
+        return;
+    }
+
+    const result = await userCollection.find({email: email}).project({email: 1, password: 1, _id: 1}).toArray();
+    console.log(result);
+	if (result.length != 1) {
+		console.log("user not found");
+		res.redirect("/login");
+		return;
+	}
+    if (await bcrypt.compare(password, result[0].password)) {
+		console.log("correct password");
+		req.session.authenticated = true;
+		req.session.email = email;
+		req.session.cookie.maxAge = expireTime;
+        res.status(200).json({ success: true });
+
+        await database.collection('userSessions').insertOne({
+            email,
+            loginTime: new Date(),
+            sessionData: req.session,
+          });
+		return;
+	}
+	else {
+		console.log("incorrect password");
+		return;
+	}
+    
+});
+
 connectToDatabase().then(() => {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
