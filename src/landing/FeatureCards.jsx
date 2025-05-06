@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 
 function FeatureCards() {
@@ -9,7 +10,9 @@ function FeatureCards() {
         BingeBoard gives you the power to...
         </h1>
         <div class="flex flex-col md:flex-row items-center justify-evenly font-coolvetica text-center gap-6">
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg gap-4 bg-[#2E2E2E]">
+        
+        <Link to="/socialfeature">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\friend_feature_icon.svg"
@@ -20,14 +23,17 @@ function FeatureCards() {
               Connect and Share
             </div>
             <p class="text-[#ECE6DD] text-base">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              Voluptatibus quia, nulla! Maiores et perferendis eaque,
-              exercitationem praesentium nihil.
+            Binging doesn't have to be lonely. 
+            BingeBoard lets you connect with friends, 
+            share what you’re watching, and discover 
+            new favorites together—making your streaming experience social and fun.
             </p>
           </div>
         </div>
+        </Link>
 
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
+        <Link to="/watchlistfeature">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\watchlist_icon.svg"
@@ -38,14 +44,16 @@ function FeatureCards() {
               Save For Later
             </div>
             <p class="text-[#ECE6DD] text-base">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              Voluptatibus quia, nulla! Maiores et perferendis eaque,
-              exercitationem praesentium nihil.
+            Never forget that show you wanted to watch but never found the time for. 
+            With BingeBoard, you can build and manage your personal watchlist—so 
+            every must-watch moment is right where you left it.
             </p>
           </div>
         </div>
+        </Link>
 
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
+        <Link to="/browsefeature">
+        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
           <img
             class="w-full h-32"
             src="src\assets\browse_tv_icon.svg"
@@ -56,12 +64,14 @@ function FeatureCards() {
               Browse Your Next Watch
             </div>
             <p class="text-[#ECE6DD] text-base">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit.
-              Voluptatibus quia, nulla! Maiores et perferendis eaque,
-              exercitationem praesentium nihil.
+            Not sure what to watch next? 
+            BingeBoard helps you discover new shows based on your interests, 
+            trending picks, and what your friends are watching—so your next 
+            binge is always one click away.
             </p>
           </div>
         </div>
+        </Link>
       </div>
     </>
   );
