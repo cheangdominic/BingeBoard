@@ -1,19 +1,31 @@
-import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import TopNavbar from '../landing/TopNavbar.jsx';
 import Footer from '../landing/Footer.jsx';
+import { useEffect } from "react";
+import { useRef, useState } from "react";
+import { useLayoutEffect } from "react";
 
 function SocialFeature() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
+  const ref = useRef(null);
+  const [contentHeight, setContentHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    if (ref.current) {
+      setContentHeight(ref.current.scrollHeight);
+    }
+  }, []);
   return (
     <>
       <TopNavbar />
     <section className="px-4 py-4 md:py-6 bg-[#1e1e1e]">
-      <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-6 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-6 max-w-7xl mx-auto text-center">
         {[
           {
             title: "Connect and Share",
-            description:
-              "Binging doesn't have to be lonely. BingeBoard lets you connect with friends, share what you're watching, and discover new favorites together—making your streaming experience social and fun.",
             icon: "src/assets/friend_feature_icon.svg",
           },
         ].map((feature, index) => (
@@ -35,15 +47,10 @@ function SocialFeature() {
 
               <div className="p-6">
                 <motion.h3 
-                  className="text-xl font-bold text-white mb-3 transition-colors duration-300"
+                  className="text-4xl font-bold text-white mb-3 transition-colors duration-300"
                 >
                   {feature.title}
                 </motion.h3>
-                <motion.p 
-                  className="text-gray-300/90 leading-relaxed transition-colors duration-300"
-                >
-                  {feature.description}
-                </motion.p>
               </div>
               
               <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 transition-opacity duration-300" style={{
@@ -53,19 +60,30 @@ function SocialFeature() {
           </div>
         ))}
       </div>
-      <div className="flex flex-col justify-center items-center w-full max-w-7xl mx-auto mt-6 bg-[#2E2E2E] rounded-xl p-6 text-white">
-          <p className="text-gray-300">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-          </p>
-
-          <p className="text-gray-300 mt-6">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-          </p>
-        </div>
+      <motion.div
+        initial={{ height: 0, opacity: 0 }}
+        animate={{ height: contentHeight, opacity: 1 }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="overflow-hidden bg-[#2E2E2E] rounded-xl mt-6 mx-auto w-full max-w-7xl"
+      >
+      <div ref={ref} className="p-6 text-white">
+        <p className="text-gray-300">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+        </p>
+        <p className="text-gray-300 mt-6">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+        </p>
+        <p className="text-gray-300 mt-6">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+        </p>
+        <p className="text-gray-300 mt-6">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+        </p>
+      </div>
+      </motion.div>
     </section>
     <Footer />
     </>
