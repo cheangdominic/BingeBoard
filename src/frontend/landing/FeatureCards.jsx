@@ -1,79 +1,88 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { motion } from "framer-motion";
 
 function FeatureCards() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-        <h1 class="text-white text-2xl font-bold ml-4 mt-10 mb-10 font-coolvetica text-center">
+    <section className="px-4 py-12 md:py-16 bg-[#181818]">
+      <h1 className="text-white text-3xl md:text-4xl font-bold mb-12 text-center font-coolvetica">
         BingeBoard gives you the power to...
-        </h1>
-        <div class="flex flex-col md:flex-row items-center justify-evenly font-coolvetica text-center gap-6">
-        
-        <Link to="/socialfeature">
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
-          <img
-            class="w-full h-32"
-            src="src\assets\friend_feature_icon.svg"
-            alt="Sunset in the mountains"
-          ></img>
-          <div class="px-6 py-4">
-            <div class="font-bold text-xl mb-2 text-[#ECE6DD] ">
-              Connect and Share
-            </div>
-            <p class="text-[#ECE6DD] text-base">
-            Binging doesn't have to be lonely. 
-            BingeBoard lets you connect with friends, 
-            share what you’re watching, and discover 
-            new favorites together—making your streaming experience social and fun.
-            </p>
-          </div>
-        </div>
-        </Link>
+      </h1>
 
-        <Link to="/watchlistfeature">
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
-          <img
-            class="w-full h-32"
-            src="src\assets\watchlist_icon.svg"
-            alt="Sunset in the mountains"
-          ></img>
-          <div class="px-6 py-4">
-            <div class="font-bold text-xl mb-2 text-[#ECE6DD]">
-              Save For Later
-            </div>
-            <p class="text-[#ECE6DD] text-base">
-            Never forget that show you wanted to watch but never found the time for. 
-            With BingeBoard, you can build and manage your personal watchlist—so 
-            every must-watch moment is right where you left it.
-            </p>
-          </div>
-        </div>
-        </Link>
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-6 max-w-7xl mx-auto">
+        {[
+          {
+            title: "Connect and Share",
+            description:
+              "Binging doesn't have to be lonely. BingeBoard lets you connect with friends, share what you're watching, and discover new favorites together—making your streaming experience social and fun.",
+            icon: "src/assets/friend_feature_icon.svg",
+            link: "/socialfeature",
+          },
+          {
+            title: "Save For Later",
+            description:
+              "Never forget that show you wanted to watch but never found the time for. With BingeBoard, you can build and manage your personal watchlist—so every must-watch moment is right where you left it.",
+            icon: "src/assets/watchlist_icon.svg",
+            link: "/watchlistfeature",
+          },
+          {
+            title: "Browse Your Next Watch",
+            description:
+              "Not sure what to watch next? BingeBoard helps you discover new shows based on your interests, trending picks, and what your friends are watching—so your next binge is always one click away.",
+            icon: "src/assets/browse_tv_icon.svg",
+            link: "/browsefeature",
+          },
+        ].map((feature, index) => (
+          <Link to={feature.link} key={index} className="w-full max-w-md group">
+            <motion.div
+              initial={{ y: 0, scale: 1 }}
+              whileHover={{ 
+                y: -8, 
+                scale: 1.02,
+                boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.2)"
+              }}
+              transition={{ 
+                type: "spring", 
+                stiffness: 400,
+                damping: 15,
+                bounce: 0.4
+              }}
+              className="h-full bg-[#232323] rounded-xl overflow-hidden border border-gray-800 hover:border-blue-400/30 relative" // Blue border glow
+            >
+              <motion.div 
+                whileHover={{ opacity: 0.9 }}
+                className="p-1 bg-gradient-to-r from-amber-200/60 to-blue-300/60 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -rotate-45 w-200% -left-[100%]" />
+                <img
+                  className="w-full h-40 object-contain p-4 relative z-10"
+                  src={feature.icon}
+                  alt={feature.title}
+                />
+              </motion.div>
 
-        <Link to="/browsefeature">
-        <div class="w-full max-w-[28rem] rounded overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 hover:scale-105 transition-all duration-300 ease-in-out bg-[#2E2E2E]">
-          <img
-            class="w-full h-32"
-            src="src\assets\browse_tv_icon.svg"
-            alt="Sunset in the mountains"
-          ></img>
-          <div class="px-6 py-4">
-            <div class="font-bold text-xl mb-2 text-[#ECE6DD]">
-              Browse Your Next Watch
-            </div>
-            <p class="text-[#ECE6DD] text-base">
-            Not sure what to watch next? 
-            BingeBoard helps you discover new shows based on your interests, 
-            trending picks, and what your friends are watching—so your next 
-            binge is always one click away.
-            </p>
-          </div>
-        </div>
-        </Link>
+              <div className="p-6">
+                <motion.h3 
+                  whileHover={{ color: "#fef3c7" }}
+                  className="text-xl font-bold text-white mb-3 transition-colors duration-300"
+                >
+                  {feature.title}
+                </motion.h3>
+                <motion.p 
+                  whileHover={{ color: "#e5e7eb" }}
+                  className="text-gray-300/90 leading-relaxed transition-colors duration-300"
+                >
+                  {feature.description}
+                </motion.p>
+              </div>
+              
+              <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{
+                boxShadow: "inset 0 0 20px rgba(59, 130, 246, 0.15)"
+              }} />
+            </motion.div>
+          </Link>
+        ))}
       </div>
-    </>
+    </section>
   );
 }
 
