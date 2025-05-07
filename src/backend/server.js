@@ -150,6 +150,20 @@ app.post('/api/login', async (req, res) => {
     
 });
 
+app.get('/api/active-users', async (req, res) => {
+    try {
+      const usersCollection = database.collection('users');
+  
+      const activeUsers = await usersCollection.countDocuments();
+  
+      res.json({ success: true, activeUsers });
+    } catch (err) {
+      console.error("Failed to count users:", err);
+      res.status(500).json({ success: false, error: "Failed to fetch total users" });
+    }
+});
+  
+
 connectToDatabase().then(() => {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);

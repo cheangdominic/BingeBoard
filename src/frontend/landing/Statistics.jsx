@@ -4,6 +4,25 @@ import { motion, useInView } from "framer-motion";
 function Statistics() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [activeUsers, setActiveUsers] = useState(0);
+
+  useEffect(() => {
+    const fetchActiveUsers = async () => {
+      try {
+        const res = await fetch("/api/active-users");
+        const data = await res.json();
+        if (data.success) {
+          setActiveUsers(data.activeUsers);
+        }
+      } catch (err) {
+        console.error("Failed to fetch active users:", err);
+      }
+    };
+
+    fetchActiveUsers();
+    const interval = setInterval(fetchActiveUsers, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div 
@@ -13,7 +32,7 @@ function Statistics() {
       <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-12">
         <StatCard 
           icon="src/assets/person_statistics_icon.svg"
-          value={10000}
+          value={activeUsers}
           text="Active Users"
           isInView={isInView}
           colorType="blue"
