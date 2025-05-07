@@ -93,12 +93,6 @@ export default function TopNavbar() {
         </div>
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a
-            href="/login"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
-          >
-            Sign In
-          </a>
-          <a
             href="/signup"
             className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
           >
@@ -135,6 +129,12 @@ export default function TopNavbar() {
               </div>
             </PopoverPanel>
           </Popover>
+          <a
+            href="/login"
+            className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
+          >
+            FAQ
+          </a>
           <a
             href="/aboutus"
             className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
