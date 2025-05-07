@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import BottomNavbar from './frontend/home/BottomNavBar.jsx';
+import BottomNavbar from './BottomNavBar.jsx';
 
 function Home() {
   const [count, setCount] = useState(0)
