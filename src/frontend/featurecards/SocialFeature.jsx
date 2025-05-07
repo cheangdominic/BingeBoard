@@ -1,49 +1,75 @@
-import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import TopNavbar from '../landing/TopNavbar.jsx';
+import Footer from '../landing/Footer.jsx';
 
-function SocialFeatures() {
-  const [count, setCount] = useState(0);
-
+function SocialFeature() {
   return (
     <>
-        <TopNavbar/>
-        <div class="flex justify-center">
-        <div class="w-full max-w-[78rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E]">
-          <img
-            class="w-full h-64"
-            src="src\assets\friend_feature_icon.svg"
-            alt="Sunset in the mountains"
-          ></img>
-          <div class="px-6 py-4">
-            <div class="font-bold text-xl mb-2 text-[#ECE6DD] ">
-              Connect and Share
-            </div>
-            <p class="text-[#ECE6DD] text-base">
-            Binging doesn't have to be lonely. 
-            BingeBoard lets you connect with friends, 
-            share what you’re watching, and discover 
-            new favorites together—making your streaming experience social and fun.
+      <TopNavbar />
+    <section className="px-4 py-4 md:py-6 bg-[#1e1e1e]">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-6 max-w-7xl mx-auto">
+        {[
+          {
+            title: "Connect and Share",
+            description:
+              "Binging doesn't have to be lonely. BingeBoard lets you connect with friends, share what you're watching, and discover new favorites together—making your streaming experience social and fun.",
+            icon: "src/assets/friend_feature_icon.svg",
+          },
+        ].map((feature, index) => (
+          <div className="w-full max-w-10xl group">
+            <motion.div
+              initial={{ y: 0, scale: 1 }}
+              className="h-full bg-[#2E2E2E] rounded-xl overflow-hidden border border-gray-800 relative"
+            >
+              <motion.div 
+                className="p-1 bg-gradient-to-r from-amber-200/60 to-blue-300/60 relative overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -rotate-45 w-200% -left-[100%]" />
+                <img
+                  className="w-full h-40 object-contain p-4 relative z-10"
+                  src={feature.icon}
+                  alt={feature.title}
+                />
+              </motion.div>
 
-            </p>
+              <div className="p-6">
+                <motion.h3 
+                  className="text-xl font-bold text-white mb-3 transition-colors duration-300"
+                >
+                  {feature.title}
+                </motion.h3>
+                <motion.p 
+                  className="text-gray-300/90 leading-relaxed transition-colors duration-300"
+                >
+                  {feature.description}
+                </motion.p>
+              </div>
+              
+              <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 transition-opacity duration-300" style={{
+                boxShadow: "inset 0 0 20px rgba(59, 130, 246, 0.15)"
+              }} />
+            </motion.div>
           </div>
-        </div>
-        </div>
+        ))}
+      </div>
+      <div className="flex flex-col justify-center items-center w-full max-w-7xl mx-auto mt-6 bg-[#2E2E2E] rounded-xl p-6 text-white">
+          <p className="text-gray-300">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+          </p>
 
-        <div class="flex justify-center">
-        <div class="w-full max-w-[78rem] rounded overflow-hidden shadow-lg bg-[#2E2E2E] mt-2">
-          <div class="px-6 py-4">
-            <p class="text-[#ECE6DD] text-base">
-            Binging doesn't have to be lonely. 
-            BingeBoard lets you connect with friends, 
-            share what you’re watching, and discover 
-            new favorites together—making your streaming experience social and fun.
-            
-            </p>
-          </div>
+          <p className="text-gray-300 mt-6">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+          </p>
         </div>
-        </div>
+    </section>
+    <Footer />
     </>
   );
 }
 
-export default SocialFeatures;
+export default SocialFeature;

@@ -46,7 +46,7 @@ function FeatureCards() {
                 damping: 15,
                 bounce: 0.4
               }}
-              className="h-full bg-[#232323] rounded-xl overflow-hidden border border-gray-800 hover:border-blue-400/30 relative" // Blue border glow
+              className="h-full bg-[#2E2E2E] rounded-xl overflow-hidden border border-gray-800 hover:border-blue-400/30 relative"
             >
               <motion.div 
                 whileHover={{ opacity: 0.9 }}
