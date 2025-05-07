@@ -5,7 +5,7 @@ function Footer() {
     const [count, setCount] = useState(0);
 
   return (
-    <footer className="bg-[#1e1e1e] text-[#ECE6DD] font-coolvetica py-10 mt-20">
+    <footer className="bg-[#1A1A1A] text-[#ECE6DD] font-coolvetica py-10 mt-20">
       <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
         
       <Link

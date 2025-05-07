@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 
 function FeatureCards() {
   return (
-    <section className="px-4 py-12 md:py-16 bg-[#181818]">
+    <section className="px-4 py-12 md:py-16 bg-[#1e1e1e]">
       <h1 className="text-white text-3xl md:text-4xl font-bold mb-12 text-center font-coolvetica">
         BingeBoard gives you the power to...
       </h1>

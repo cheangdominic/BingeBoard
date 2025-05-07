@@ -64,7 +64,7 @@ export default function TopNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className={`bg-[#1e1e1e] sticky top-0 shadow-2xl shadow-black/60 ${mobileMenuOpen ? 'z-40' : 'z-50'}`}>
+    <header className={`bg-[#1A1A1A] sticky top-0 shadow-2xl shadow-black/60 ${mobileMenuOpen ? 'z-40' : 'z-50'}`}>
       <nav
         aria-label="Global"
         className="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8"
