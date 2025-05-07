@@ -10,6 +10,7 @@ import SocialFeature from './frontend/featurecards/SocialFeature.jsx';
 import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
+import Home from './frontend/home/Home.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -24,6 +25,7 @@ function App() {
         <Route path="/socialfeature" element={<SocialFeature/>} />
         <Route path="/watchlistfeature" element={<WatchlistFeature/>} />
         <Route path="/browsefeature" element={<BrowseFeature/>} />
+        <Route path="/home" element = {<Home />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
