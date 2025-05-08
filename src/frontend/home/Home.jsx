@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import BottomNavbar from './BottomNavBar.jsx';
+import BottomNavbar from './BottomNavbar.jsx';
 import TrendingCarousel from './TrendingCarousel.jsx'
 
 function Home() {
