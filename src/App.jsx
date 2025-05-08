@@ -2,13 +2,6 @@ import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import './App.css';
 
-import Landing from './landing/Landing.jsx'; 
-import AboutUsPage from './aboutus/AboutUsPage.jsx'; 
-import LoginPage from './login/LoginPage.jsx';
-import SignupPage from './signup/SignupPage.jsx';
-import SocialFeature from './featurecards/SocialFeature.jsx';
-import WatchlistFeature from './featurecards/WatchlistFeature.jsx';
-import BrowseFeature from './featurecards/BrowseFeature.jsx';
 import ProfilePage from './profile/ProfilePage.jsx';
 import Landing from './frontend/landing/Landing.jsx'; 
 import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx'; 
