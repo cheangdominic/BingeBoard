@@ -10,6 +10,16 @@ import ShowDetailsPage from './showdetails/ShowDetailsPage.jsx';
 import SocialFeature from './featurecards/SocialFeature.jsx';
 import WatchlistFeature from './featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './featurecards/BrowseFeature.jsx';
+import ProfilePage from './profile/ProfilePage.jsx';
+import Landing from './frontend/landing/Landing.jsx'; 
+import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx'; 
+import LoginPage from './frontend/login/LoginPage.jsx';
+import SignupPage from './frontend/signup/SignupPage.jsx';
+import SocialFeature from './frontend/featurecards/SocialFeature.jsx';
+import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
+import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
+import NotFound from './frontend/NotFound.jsx';
+import Home from './frontend/home/Home.jsx';
 
 function App() {
   const [count, setCount] = useState(0)
@@ -24,7 +34,10 @@ function App() {
         <Route path="/socialfeature" element={<SocialFeature/>} />
         <Route path="/watchlistfeature" element={<WatchlistFeature/>} />
         <Route path="/browsefeature" element={<BrowseFeature/>} />
-        <Route path="/show/:id" element={<ShowDetailsPage />} />
+         <Route path="/show/:id" element={<ShowDetailsPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/home" element = {<Home />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   )
