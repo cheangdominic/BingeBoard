@@ -8,6 +8,16 @@ function RecommendedByFriends() {
     { imageUrl: "https://via.placeholder.com/300x450" },
     { imageUrl: "https://via.placeholder.com/300x450" },
     { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
   ];
 
   return (
@@ -19,7 +29,7 @@ function RecommendedByFriends() {
         </a>
       </div>
 
-      <div className="flex overflow-x-auto space-x-4 pb-[15vh] scroll-smooth">
+      <div className="flex overflow-x-auto space-x-4 mb-[15vh] scroll-smooth">
         {recentShows.map((show, index) => (
           <div key={index} className="flex-shrink-0">
             <TVShowCard imageUrl={show.imageUrl} />

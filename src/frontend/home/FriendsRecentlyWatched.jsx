@@ -8,6 +8,16 @@ function FriendsRecentlyWatched() {
     { imageUrl: "https://via.placeholder.com/300x450" },
     { imageUrl: "https://via.placeholder.com/300x450" },
     { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
+    { imageUrl: "https://via.placeholder.com/300x450" },
   ];
 
   return (

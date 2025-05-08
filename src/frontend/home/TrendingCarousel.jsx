@@ -3,7 +3,20 @@ import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 
 export default function TrendingCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
-  const slides = ["Trending 1", "Trending 2", "Trending 3"];
+  const slides = [
+    {
+      image: "https://via.placeholder.com",
+      alt: "Trending Image 1"
+    },
+    {
+      image: "https://via.placeholder.com",
+      alt: "Trending Image 2"
+    },
+    {
+      image: "https://via.placeholder.com",
+      alt: "Trending Image 3"
+    }
+  ];
 
   const nextSlide = () => {
     if (currentSlide === slides.length - 1) {
@@ -15,25 +28,29 @@ export default function TrendingCarousel() {
   
   const prevSlide = () => {
     if (currentSlide === 0) {
-        setCurrentSlide(2);
-      } else {
-        setCurrentSlide(currentSlide - 1);
-      }
+      setCurrentSlide(slides.length - 1);
+    } else {
+      setCurrentSlide(currentSlide - 1);
+    }
   };
 
   return (
-    <div className="relative mx-auto w-[98vw] sm:w-[99vw] mt-1 sm:mt-2 h-[30vh] sm:h-[50vh] bg-black text-white overflow-hidden rounded-lg">
+    <div className="relative mx-auto w-[97vw] sm:w-[97.5vw] mt-2 sm:mt-3 h-[30vh] sm:h-[50vh] bg-black text-white overflow-hidden rounded-lg">
       <div className="h-full flex transition-transform duration-300" 
            style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-        {slides.map((content, index) => (
-          <div key={index} className="w-full h-full flex-shrink-0 flex items-center justify-center p-6">
-            <span className="text-2xl sm:text-4xl">{content}</span>
+        {slides.map((slide, index) => (
+          <div key={index} className="w-full h-full flex-shrink-0">
+            <img 
+              src={slide.image} 
+              alt={slide.alt}
+              className="w-full h-full object-cover"
+            />
           </div>
         ))}
       </div>
 
       <button 
-        className="absolute top-1/2 left-4 -translate-y-1/2 rounded-full w-10 h-10 flex items-center justify-center"
+        className="absolute top-1/2 left-4 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
         onClick={prevSlide}
         aria-label="Previous slide"
       >
@@ -41,7 +58,7 @@ export default function TrendingCarousel() {
       </button>
       
       <button 
-        className="absolute top-1/2 right-4 -translate-y-1/2 text-xl rounded-full w-10 h-10 flex items-center justify-center"
+        className="absolute top-1/2 right-4 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors"
         onClick={nextSlide}
         aria-label="Next slide"
       >
