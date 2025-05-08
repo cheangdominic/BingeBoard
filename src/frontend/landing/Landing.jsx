@@ -1,0 +1,65 @@
+import { motion } from 'framer-motion';
+import TopNavbar from './TopNavbar.jsx';
+import MottoBanner from './MottoBanner.jsx';
+import FeatureCards from './FeatureCards.jsx';
+import Statistics from './Statistics.jsx';
+import Footer from './Footer.jsx';
+
+// Single animation variant for all components
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut"
+    }
+  }
+};
+
+function Landing() {
+  return (
+    <>
+      <TopNavbar />
+      
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 0.2 }}
+      >
+        <MottoBanner />
+      </motion.div>
+      
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 0.4 }}
+      >
+        <FeatureCards />
+      </motion.div>
+      
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 0.6 }}
+      >
+        <Statistics />
+      </motion.div>
+      
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 0.8 }}
+      >
+        <Footer />
+      </motion.div>
+    </>
+  );
+}
+
+export default Landing;
