@@ -19,7 +19,7 @@ function RecommendedByFriends() {
         </a>
       </div>
 
-      <div className="flex overflow-x-auto space-x-4 pb-2 scroll-smooth">
+      <div className="flex overflow-x-auto space-x-4 pb-[15vh] scroll-smooth">
         {recentShows.map((show, index) => (
           <div key={index} className="flex-shrink-0">
             <TVShowCard imageUrl={show.imageUrl} />
