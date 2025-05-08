@@ -198,12 +198,80 @@ export default function TopNavbar() {
           >
             Browse
           </a>
-          <a
-            href="/login"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
+          <button
+            onClick={function () {
+              if (infoPanelOpen) {
+                setInfoPanelOpen(false);
+              } else {
+                setInfoPanelOpen(true);
+              }
+            }}
+            className="text-white hover:text-blue-400 transition font-semibold"
           >
             FAQ
-          </a>
+          </button>
+
+          <div
+            className={`fixed mt-14 left-0 z-50 w-80 transform bg-[#1e1e1e] shadow-xl transition-transform duration-300 ease-in-out ${
+              infoPanelOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+            style={{
+              overflowY: "auto",
+              maxHeight: "44.5rem",
+            }}
+          >
+            <style>
+              {`
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: #4a4a4a;
+        border-radius: 4px;
+        border: 2px solid #1e1e1e;
+      }
+
+      ::-webkit-scrollbar-track {
+        background-color: #2e2e2e;
+        border-radius: 4px;
+      }
+    `}
+            </style>
+
+            <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
+              <h2 className="text-lg font-semibold text-white">FAQ</h2>
+              <button
+                onClick={() => setInfoPanelOpen(false)}
+                className="text-white hover:text-red-400 transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-4 text-white space-y-2">
+              {faqs.map((faq, index) => (
+                <Disclosure key={index}>
+                  {({ open }) => (
+                    <>
+                      <DisclosureButton className="w-full flex justify-between items-center rounded bg-[#2e2e2e] px-4 py-2 text-left hover:bg-[#3a3a3a] transition">
+                        <span>{faq.question}</span>
+                        <ChevronDownIcon
+                          className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${
+                            open ? "rotate-180" : ""
+                          }`}
+                        />
+                      </DisclosureButton>
+                      <DisclosurePanel className="px-4 py-2 text-gray-300 bg-[#1a1a1a]">
+                        {faq.answer}
+                      </DisclosurePanel>
+                    </>
+                  )}
+                </Disclosure>
+              ))}
+            </div>
+          </div>
+
           <a
             href="/aboutus"
             className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
@@ -262,6 +330,81 @@ export default function TopNavbar() {
                 >
                   Browse
                 </a>
+
+                <button
+                  onClick={function () {
+                    if (infoPanelOpen) {
+                      setInfoPanelOpen(false);
+                    } else {
+                      setInfoPanelOpen(true);
+                    }
+                  }}
+                  className="text-white hover:text-blue-400 transition font-semibold"
+                >
+                  FAQ
+                </button>
+
+                <div
+                  className={`fixed top-0 left-0 z-50 w-full bg-[#1e1e1e] shadow-xl transition-transform duration-300 ease-in-out ${
+                    infoPanelOpen ? "translate-x-0" : "-translate-x-full"
+                  }`}
+                  style={{
+                    height: "100vh",
+                    overflowY: "auto",
+                  }}
+                >
+                  <style>
+                    {`
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: #4a4a4a;
+        border-radius: 4px;
+        border: 2px solid #1e1e1e;
+      }
+
+      ::-webkit-scrollbar-track {
+        background-color: #2e2e2e;
+        border-radius: 4px;
+      }
+    `}
+                  </style>
+
+                  <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
+                    <h2 className="text-lg font-semibold text-white">FAQ</h2>
+                    <button
+                      onClick={() => setInfoPanelOpen(false)}
+                      className="text-white hover:text-red-400 transition"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="p-4 text-white space-y-2">
+                    {faqs.map((faq, index) => (
+                      <Disclosure key={index}>
+                        {({ open }) => (
+                          <>
+                            <DisclosureButton className="w-full flex justify-between items-center rounded bg-[#2e2e2e] px-4 py-2 text-left hover:bg-[#3a3a3a] transition">
+                              <span>{faq.question}</span>
+                              <ChevronDownIcon
+                                className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${
+                                  open ? "rotate-180" : ""
+                                }`}
+                              />
+                            </DisclosureButton>
+                            <DisclosurePanel className="px-4 py-2 text-gray-300 bg-[#1a1a1a]">
+                              {faq.answer}
+                            </DisclosurePanel>
+                          </>
+                        )}
+                      </Disclosure>
+                    ))}
+                  </div>
+                </div>
+
                 <a
                   href="/aboutus"
                   className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-[#ffffff] hover:bg-[#2E2E2E] transition"
