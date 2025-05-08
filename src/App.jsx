@@ -6,6 +6,7 @@ import Landing from './landing/Landing.jsx';
 import AboutUsPage from './aboutus/AboutUsPage.jsx'; 
 import LoginPage from './login/LoginPage.jsx';
 import SignupPage from './signup/SignupPage.jsx';
+import ShowDetailsPage from './showdetails/ShowDetailsPage.jsx';
 import SocialFeature from './featurecards/SocialFeature.jsx';
 import WatchlistFeature from './featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './featurecards/BrowseFeature.jsx';
@@ -23,6 +24,7 @@ function App() {
         <Route path="/socialfeature" element={<SocialFeature/>} />
         <Route path="/watchlistfeature" element={<WatchlistFeature/>} />
         <Route path="/browsefeature" element={<BrowseFeature/>} />
+        <Route path="/show/:id" element={<ShowDetailsPage />} />
       </Routes>
     </Router>
   )
