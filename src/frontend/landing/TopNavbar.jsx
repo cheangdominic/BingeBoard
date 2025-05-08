@@ -95,6 +95,62 @@ export default function TopNavbar() {
       answer:
         'In the login page, click on the "Forget Password" button located above the password box.',
     },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    {
+      question: "How do I reset my password?",
+      answer:
+        'In the login page, click on the "Forget Password" button located above the password box.',
+    },
+    
   ];
 
   return (
