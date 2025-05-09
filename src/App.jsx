@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
 import './App.css';
-
 import ProfilePage from './profile/ProfilePage.jsx';
 import Landing from './frontend/landing/Landing.jsx'; 
+import ShowDetailsPage from './frontend/showdetails/ShowDetailsPage.jsx';
 import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx'; 
 import LoginPage from './frontend/login/LoginPage.jsx';
 import SignupPage from './frontend/signup/SignupPage.jsx';
@@ -26,6 +26,7 @@ function App() {
         <Route path="/socialfeature" element={<SocialFeature/>} />
         <Route path="/watchlistfeature" element={<WatchlistFeature/>} />
         <Route path="/browsefeature" element={<BrowseFeature/>} />
+        <Route path="/show/:id" element={<ShowDetailsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/home" element = {<Home />} />
         <Route path="*" element={<NotFound />} />
