@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import TVShowCard from "./TVShowCard";
+import ProfileImage from "./ProfileImage";
 
 function ReviewCard({ user, date, reviewText, rating, imageUrl }) {
   const [expanded, setExpanded] = useState(false);
@@ -9,10 +10,10 @@ function ReviewCard({ user, date, reviewText, rating, imageUrl }) {
       {/* Left side */}
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-1">
-          <img
-            src={user.profilePhoto}
-            alt="Profile"
-            className="w-10 h-10 rounded-full object-cover"
+          <ProfileImage
+          src="/img/profilePhotos/generic_profile_picture.jpg"
+          alt="User profile photo"
+              size="sm"
           />
           <div>
             <p className="text-white font-semibold text-sm">{user.username}</p>
