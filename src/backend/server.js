@@ -8,22 +8,30 @@ import Joi from 'joi';
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import path from 'path';
 import { MongoClient } from 'mongodb';
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const port = process.env.PORT || 3001;
 
 const saltRounds = 12;
-
 const expireTime = 24 * 60 * 60 * 1000;
 
-app.use(bodyParser.json());
-app.use(cors());
+// Enhanced CORS configuration
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.RENDER_EXTERNAL_URL || 'https://bingeboard-4zzn.onrender.com' 
+    : 'http://localhost:5173',
+  credentials: true
+}));
 
+app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
+
+// MongoDB connection setup
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
@@ -49,6 +57,7 @@ async function connectToDatabase() {
   }
 }
 
+// Session configuration
 const mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
   crypto: {
@@ -60,12 +69,17 @@ app.use(session({
   secret: node_session_secret,
   store: mongoStore,
   saveUninitialized: false,
-  resave: true
+  resave: true,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: expireTime
+  }
 }));
 
-app.use(express.static(__dirname + "/public"));
-app.use(express.urlencoded({ extended: false }));
+// Serve static files from Vite build
+app.use(express.static(path.join(__dirname, '../../dist')));
 
+// API Routes
 app.post('/api/signup', async (req, res) => {
   if (!userCollection) {
     return res.status(500).json({ success: false, message: 'Database not connected' });
@@ -89,17 +103,21 @@ app.post('/api/signup', async (req, res) => {
   const validationResult = schema.validate({ username, email, password });
   if (validationResult.error != null) {
     console.log(validationResult.error);
-    return res.redirect("/signup");
+    return res.status(400).json({ success: false, message: validationResult.error.details[0].message });
   }
 
   try {
+    const existingUser = await userCollection.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'Username or email already exists' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     await userCollection.insertOne({
       username: username,
       email: email,
       password: hashedPassword
     });
-    console.log("Inserted user");
     return res.json({ success: true });
   } catch (error) {
     console.error("Error inserting user:", error);
@@ -108,62 +126,63 @@ app.post('/api/signup', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-    if (!userCollection) {
-        return res.status(500).json({ success: false, message: 'Database not connected' });
-    }
+  if (!userCollection) {
+    return res.status(500).json({ success: false, message: 'Database not connected' });
+  }
 
-    const {email, password } = req.body;
+  const { email, password } = req.body;
 
-    const schema = Joi.string().email().required();
-    const validationResult = schema.validate(email);
-    if (validationResult.error != null) {
-        console.log(validationResult.error);
-        res.redirect("/login");
-        return;
-    }
+  const schema = Joi.string().email().required();
+  const validationResult = schema.validate(email);
+  if (validationResult.error != null) {
+    return res.status(400).json({ success: false, message: 'Invalid email format' });
+  }
 
-    const result = await userCollection.find({email: email}).project({email: 1, password: 1, _id: 1}).toArray();
-    console.log(result);
-	if (result.length != 1) {
-		console.log("user not found");
-		res.redirect("/login");
-		return;
-	}
-    if (await bcrypt.compare(password, result[0].password)) {
-		console.log("correct password");
-		req.session.authenticated = true;
-		req.session.email = email;
-		req.session.cookie.maxAge = expireTime;
-        res.status(200).json({ success: true });
-
-        await database.collection('userSessions').insertOne({
-            email,
-            loginTime: new Date(),
-            sessionData: req.session,
-          });
-		return;
-	}
-	else {
-		console.log("incorrect password");
-		return;
-	}
+  try {
+    const result = await userCollection.find({ email: email }).project({ email: 1, password: 1, _id: 1 }).toArray();
     
+    if (result.length != 1) {
+      return res.status(401).json({ success: false, message: 'User not found' });
+    }
+
+    if (await bcrypt.compare(password, result[0].password)) {
+      req.session.authenticated = true;
+      req.session.email = email;
+      req.session.cookie.maxAge = expireTime;
+
+      await database.collection('userSessions').insertOne({
+        email,
+        loginTime: new Date(),
+        sessionData: req.session,
+      });
+
+      return res.json({ success: true });
+    } else {
+      return res.status(401).json({ success: false, message: 'Incorrect password' });
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ success: false, message: 'Login failed' });
+  }
 });
 
 app.get('/api/active-users', async (req, res) => {
-    try {
-      const usersCollection = database.collection('users');
-  
-      const activeUsers = await usersCollection.countDocuments();
-  
-      res.json({ success: true, activeUsers });
-    } catch (err) {
-      console.error("Failed to count users:", err);
-      res.status(500).json({ success: false, error: "Failed to fetch total users" });
-    }
+  try {
+    const usersCollection = database.collection('users');
+    const activeUsers = await usersCollection.countDocuments();
+    res.json({ success: true, activeUsers });
+  } catch (err) {
+    console.error("Failed to count users:", err);
+    res.status(500).json({ success: false, error: "Failed to fetch total users" });
+  }
 });
-  
 
+// SPA Fallback Route - MUST BE LAST
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
+});
+
+// Start server
 connectToDatabase().then(() => {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
