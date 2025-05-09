@@ -177,25 +177,6 @@ export default function TopNavbar() {
               maxHeight: "44.5rem",
             }}
           >
-            <style>
-              {`
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background-color: #4a4a4a;
-        border-radius: 4px;
-        border: 2px solid #1e1e1e;
-      }
-
-      ::-webkit-scrollbar-track {
-        background-color: #2e2e2e;
-        border-radius: 4px;
-      }
-    `}
-            </style>
-
             <div className="flex items-center justify-between px-4 py-4 border-b border-gray-700">
               <h2 className="text-lg font-semibold text-white">FAQ</h2>
               <button
