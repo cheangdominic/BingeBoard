@@ -3,6 +3,7 @@ import TopNavbar from './TopNavbar.jsx';
 import MottoBanner from './MottoBanner.jsx';
 import FeatureCards from './FeatureCards.jsx';
 import Statistics from './Statistics.jsx';
+import ShowCarousel from './ShowCarousel.jsx';
 import Footer from './Footer.jsx';
 
 const fadeInUp = {
@@ -54,6 +55,15 @@ function Landing() {
         animate="visible"
         variants={fadeInUp}
         transition={{ delay: 0.8 }}
+      >
+        <ShowCarousel />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 1.0 }}
       >
         <Footer />
       </motion.div>
