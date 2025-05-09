@@ -15,11 +15,11 @@ const fadeInUp = {
 
 function AboutUsInfo() {
   const team = [
-    { name: "Valley Balfour", role: "Team Member 1" },
-    { name: "Dominic Cheang", role: "Team Member 2" },
-    { name: "Tyrone Cheang", role: "Team Member 3" },
-    { name: "Issac Kheler", role: "Team Member 4 " },
-    { name: "Bullen Kosa", role: "Team Member 5" },
+    { name: "Valley Balfour", role: "Team Member 1", image: "src/assets/team_icon.svg" },
+    { name: "Dominic Cheang", role: "Team Member 2", image: "src/assets/dominic_cheang_photo.webp" },
+    { name: "Tyrone Cheang", role: "Team Member 3", image: "src/assets/team_icon.svg" },
+    { name: "Isaac Kehler", role: "Team Member 4", image: "src/assets/team_icon.svg" },
+    { name: "Bullen Kosa", role: "Team Member 5", image: "src/assets/team_icon.svg" },
   ];
 
   return (
@@ -60,8 +60,8 @@ function AboutUsInfo() {
               >
                 <div className="flex items-center gap-x-6">
                   <img
-                    className="size-16 rounded-full"
-                    src="src/assets/team_icon.svg"
+                    className="size-20 rounded-full"
+                    src={person.image}
                     alt={person.name}
                   />
                   <div>
