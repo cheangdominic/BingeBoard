@@ -1,4 +1,3 @@
-// LoginPage.jsx
 import { motion } from 'framer-motion';
 import LoginForm from "./LoginForm";
 import TopNavbar from "../landing/TopNavbar";

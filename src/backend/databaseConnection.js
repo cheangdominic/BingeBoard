@@ -9,13 +9,11 @@ const mongodb_password = process.env.MONGODB_PASSWORD;
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
 
-// Create a new MongoClient
 const database = new MongoClient(atlasURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
 
-// Connect to MongoDB
 database.connect()
   .then(() => {
     console.log('Connected to the database');
@@ -24,5 +22,4 @@ database.connect()
     console.log('Not connected to the database', error);
   });
 
-// ES Module export
 export { database };

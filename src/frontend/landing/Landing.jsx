@@ -5,7 +5,6 @@ import FeatureCards from './FeatureCards.jsx';
 import Statistics from './Statistics.jsx';
 import Footer from './Footer.jsx';
 
-// Single animation variant for all components
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: {
