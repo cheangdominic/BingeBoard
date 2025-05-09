@@ -119,7 +119,7 @@ export default function BottomNavbar() {
                         transition: {
                           delay: 0.1 + index * 0.1,
                           duration: 0.3,
-                          type: "spring",
+                          type: "elastic",
                           stiffness: 200,
                           damping: 10,
                         },
@@ -165,7 +165,7 @@ export default function BottomNavbar() {
           >
             <motion.div
               animate={{ rotate: menuOpen ? 135 : 0 }}
-              transition={{ type: "spring", stiffness: 300 }}
+              transition={{ type: "elastic", stiffness: 300 }}
               className="text-gray-300 hover:text-blue-400 transition-colors"
             >
               <BiPlus className="w-8 h-8 md:w-10 md:h-10" />
