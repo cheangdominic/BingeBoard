@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
 
+import logo from "../../assets/BingeBoard Icon.svg";
+import instagramLogo from "../../assets/instagram_footer_icon.svg";
+import xLogo from "../../assets/X_footer_icon.svg";
+import facebookLogo from "../../assets/facebook_footer_icon.svg";
+import tiktokLogo from "../../assets/tiktok_footer_icon.svg";
+
 function Footer() {
     const [count, setCount] = useState(0);
 
@@ -15,7 +21,7 @@ function Footer() {
         <div className="flex gap-3">
         <img
               alt="BingeBoard logo"
-              src="src/assets/BingeBoard Icon.svg"
+              src={logo}
               className="h-10 w-auto"
             />
         <div className="text-3xl font-bold text-white hover:text-blue-400 transition">
@@ -33,16 +39,16 @@ function Footer() {
 
         <div className="flex gap-4 justify-center md:justify-end w-full md:w-auto md:ml-20">
         <a href="#" aria-label="Instagram" className="hover:opacity-75 transition">
-            <img src="src\assets\instagram_footer_icon.svg" alt="Instagram" className="h-5 w-5" />
+            <img src={instagramLogo} alt="Instagram" className="h-5 w-5" />
           </a>
           <a href="#" aria-label="X" className="hover:opacity-75 transition">
-            <img src="src\assets\X_footer_icon.svg" alt="X" className="h-5 w-5" />
+            <img src={xLogo} alt="X" className="h-5 w-5" />
           </a>
           <a href="#" aria-label="Facebook" className="hover:opacity-75 transition">
-            <img src="src\assets\facebook_footer_icon.svg" alt="Facebook" className="h-5 w-5" />
+            <img src={facebookLogo} alt="Facebook" className="h-5 w-5" />
           </a>
           <a href="#" aria-label="TikTok" className="hover:opacity-75 transition">
-            <img src="src\assets\tiktok_footer_icon.svg" alt="TikTok" className="h-5 w-5" />
+            <img src={tiktokLogo} alt="TikTok" className="h-5 w-5" />
           </a>
           
         </div>

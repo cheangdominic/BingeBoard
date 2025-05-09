@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'; 
-import { useParams } from 'react-router-dom'; 
+import { useState, useEffect, useCallback } from 'react';
+import { useParams } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { fetchTVShow } from '/src/backend/tmdb';
 import ShowHero from './ShowHero';
 import ShowDescription from './ShowDescription';
@@ -7,10 +8,23 @@ import EpisodeList from './EpisodeList';
 import EpisodeListView from './EpisodeListView';
 import ReviewSection from './ReviewSection';
 
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut"
+    }
+  }
+};
+
 const ShowDetailsPage = () => {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [show, setShow] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const formatCountdown = (airDate) => {
     if (!airDate) return 'Coming soon';
@@ -27,23 +41,7 @@ const ShowDetailsPage = () => {
     return [...new Set([...networks, ...providers])];
   };
 
-  useEffect(() => {
-  const loadShow = async () => {
-    try {
-      console.log("Fetching show with ID:", id);
-      const showData = await fetchTVShow(id);
-      console.log("API Response:", showData);
-      setShow(formatShowData(showData));
-    } catch (error) {
-      console.error("API Error:", error);
-    } finally {
-      setLoading(false); 
-    }
-  };
-  loadShow();
-}, [id]);
-
-  const formatShowData = (tmdbData) => ({
+  const formatShowData = useCallback((tmdbData) => ({
     title: tmdbData.name,
     releaseDate: tmdbData.first_air_date,
     description: tmdbData.overview,
@@ -53,28 +51,87 @@ const ShowDetailsPage = () => {
     platforms: getPlatforms(tmdbData),
     seasons: tmdbData.seasons?.filter(s => s.season_number > 0).map(season => ({
       number: season.season_number,
-      episodes: [], 
+      episodes: [],
       episodeCount: season.episode_count
     })) || [],
     nextEpisode: tmdbData.next_episode_to_air ? {
       countdown: formatCountdown(tmdbData.next_episode_to_air.air_date)
     } : null,
-    seasonsData: tmdbData.seasons || [], 
+    seasonsData: tmdbData.seasons || [],
     reviews: [],
-    backdropUrl: tmdbData.backdrop_path ? `https://image.tmdb.org/t/p/w500${tmdbData.backdrop_path}` : '/fallback.jpg', // Ensure backdropUrl is correctly set
-  });
+    backdropUrl: tmdbData.backdrop_path 
+      ? `https://image.tmdb.org/t/p/w500${tmdbData.backdrop_path}` 
+      : '/images/fallback.jpg',
+  }), []);
+
+  useEffect(() => {
+    const loadShow = async () => {
+      try {
+        setError(null);
+        setLoading(true);
+        const showData = await fetchTVShow(id);
+        setShow(formatShowData(showData));
+      } catch (error) {
+        setError('Failed to load show details');
+        console.error("API Error:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadShow();
+  }, [id, formatShowData]);
 
   if (loading) return <div className="text-white p-10">Loading...</div>;
+  if (error) return <div className="text-white p-10">{error}</div>;
   if (!show) return <div className="text-white p-10">Show not found</div>;
 
   return (
     <div className="min-h-screen bg-gray-900">
       <div className="p-6 max-w-8xl mx-auto space-y-6">
-        <ShowHero show={show} isLoading={loading} />
-        <ShowDescription show={show} />
-        <EpisodeList seasons={show.seasons} showId={id}/>
-        <EpisodeListView seasons={show.seasons} showId={id}/>
-        <ReviewSection reviews={show.reviews} />
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={{ delay: 0.2 }}
+        >
+          <ShowHero show={show} isLoading={loading} />
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={{ delay: 0.4 }}
+        >
+          <ShowDescription show={show} />
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={{ delay: 0.6 }}
+        >
+          <EpisodeList seasons={show.seasons} showId={id} />
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={{ delay: 0.8 }}
+        >
+          <EpisodeListView seasons={show.seasons} showId={id} />
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={{ delay: 1.0 }}
+        >
+          <ReviewSection reviews={show.reviews} />
+        </motion.div>  
       </div>
     </div>
   );

@@ -16,6 +16,7 @@ import {
 import {
   ChevronDownIcon,
 } from "@heroicons/react/20/solid";
+import logo from "../../assets/BingeBoard Icon.svg";
 
 export default function TopNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -124,7 +125,7 @@ export default function TopNavbar() {
           <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
             <img
               alt="BingeBoard logo"
-              src="src/assets/BingeBoard Icon.svg"
+              src={logo}
               className="h-10 w-auto"
             />
             <span className="text-white text-3xl font-bold font-coolvetica hover:text-blue-400 transition">

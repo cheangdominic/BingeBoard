@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
+import personIcon from "../../assets/person_statistics_icon.svg"
+import ratingIcon from "../../assets/review_rating_icon.svg";
+
 function Statistics() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -31,7 +34,7 @@ function Statistics() {
     >
       <div className="flex flex-col md:flex-row justify-center gap-8 md:gap-12">
         <StatCard 
-          icon="src/assets/person_statistics_icon.svg"
+          icon={personIcon}
           value={activeUsers}
           text="Active Users"
           isInView={isInView}
@@ -39,7 +42,7 @@ function Statistics() {
         />
         <div className="h-px md:h-auto md:w-px bg-gray-600/50 my-4 md:my-0" />
         <StatCard 
-          icon="src/assets/review_rating_icon.svg"
+          icon={ratingIcon}
           value={50000}
           text="Reviews Made"
           isInView={isInView}
