@@ -31,9 +31,19 @@ function Footer() {
         </Link>
 
         <ul className="flex flex-col md:flex-row gap-4 text-center text-sm">
+          <Link
+          to="/"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
           <li><a href="/" className="hover:text-blue-400 transition">Home</a></li>
+          </Link>
+          <Link
+          to="/"
+          onClick={() => window.scrollTo({ top: 500, behavior: 'smooth' })}
+          >
           <li><a href="/features" className="hover:text-blue-400 transition">Features</a></li>
-          <li><a href="/about" className="hover:text-blue-400 transition">About</a></li>
+          </Link>
+          <li><a href="/aboutus" className="hover:text-blue-400 transition">About Us</a></li>
           <li><a href="/contact" className="hover:text-blue-400 transition">Contact</a></li>
         </ul>
 
