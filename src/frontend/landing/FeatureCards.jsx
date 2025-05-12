@@ -1,6 +1,10 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 
+import friendIcon from "../../assets/friend_feature_icon.svg";
+import watchlistIcon from "../../assets/watchlist_icon.svg";
+import browseIcon from "../../assets/browse_tv_icon.svg";
+
 function FeatureCards() {
   return (
     <section className="px-4 py-12 md:py-16 bg-[#1e1e1e]">
@@ -14,21 +18,21 @@ function FeatureCards() {
             title: "Connect and Share",
             description:
               "Binging doesn't have to be lonely. BingeBoard lets you connect with friends, share what you're watching, and discover new favorites together—making your streaming experience social and fun.",
-            icon: "src/assets/friend_feature_icon.svg",
+            icon: friendIcon,
             link: "/socialfeature",
           },
           {
             title: "Save For Later",
             description:
               "Never forget that show you wanted to watch but never found the time for. With BingeBoard, you can build and manage your personal watchlist—so every must-watch moment is right where you left it.",
-            icon: "src/assets/watchlist_icon.svg",
+            icon: watchlistIcon,
             link: "/watchlistfeature",
           },
           {
             title: "Browse Your Next Watch",
             description:
               "Not sure what to watch next? BingeBoard helps you discover new shows based on your interests, trending picks, and what your friends are watching—so your next binge is always one click away.",
-            icon: "src/assets/browse_tv_icon.svg",
+            icon: browseIcon,
             link: "/browsefeature",
           },
         ].map((feature, index) => (

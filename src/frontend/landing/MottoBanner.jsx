@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import landingBanner from '../../assets/severance-apple-tv-plus.jpg';
 
 function MottoBanner() {
   const [buttonText, setButtonText] = useState("Get Started");
@@ -32,7 +33,7 @@ function MottoBanner() {
   return (
     <div className="relative">
       <img
-        src={"src/assets/severance-apple-tv-plus.jpg"}
+        src={landingBanner}
         alt="Landing banner"
         className="w-full h-[500px] object-cover"
       />

@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import { useRef, useState } from "react";
 import { useLayoutEffect } from "react";
 
+import browseIcon from "../../assets/browse_tv_icon.svg";
+
 function SocialFeature() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -28,7 +30,7 @@ function SocialFeature() {
             title: "Browse Your Next Watch",
             description:
               "Not sure what to watch next? BingeBoard helps you discover new shows based on your interests, trending picks, and what your friends are watching—so your next binge is always one click away.",
-            icon: "src/assets/browse_tv_icon.svg",
+            icon: browseIcon,
           },
         ].map((feature, index) => (
           <div className="w-full max-w-10xl group">
