@@ -4,7 +4,7 @@ import MottoBanner from './MottoBanner.jsx';
 import FeatureCards from './FeatureCards.jsx';
 import Statistics from './Statistics.jsx';
 import PopularReviews from './PopularReviews.jsx';
-import ShowCarousel from './ShowCarousel.jsx';
+import ShowCarousel from '../../components/ShowCarousel.jsx';
 import Footer from './Footer.jsx';
 
 const fadeInUp = {
@@ -23,7 +23,7 @@ function Landing() {
   return (
     <>
       <TopNavbar />
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
@@ -32,7 +32,7 @@ function Landing() {
       >
         <MottoBanner />
       </motion.div>
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
@@ -41,7 +41,7 @@ function Landing() {
       >
         <FeatureCards />
       </motion.div>
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
@@ -50,7 +50,7 @@ function Landing() {
       >
         <Statistics />
       </motion.div>
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
@@ -66,7 +66,11 @@ function Landing() {
         variants={fadeInUp}
         transition={{ delay: 1.0 }}
       >
-        <ShowCarousel />
+        <ShowCarousel
+          title="Airing Today"
+          tmdbEndpoint="airing_today"
+          mediaType="tv"
+        />
       </motion.div>
 
       <motion.div
