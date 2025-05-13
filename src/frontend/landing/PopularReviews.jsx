@@ -57,14 +57,14 @@ function PopularReviews() {
 
   return (
     <section>
-      <div className="flex justify-between items-center mb-4 mx-14">
+      <div className="flex justify-between items-center mb-4 pl-4">
         <h3 className="text-xl font-bold text-white">Popular Reviews</h3>
         <a href="/profile/recent-reviews" className="text-sm text-blue-400 hover:underline">
           View All
         </a>
       </div>
 
-      <div className="flex overflow-x-auto space-x-4 pb-2 scroll-smooth mx-14">
+      <div className="flex overflow-x-auto space-x-4 pb-2 scroll-smooth pl-4">
         {reviews.map((review, index) => (
           <div key={index} className="flex-shrink-0 w-[300px]">
             <ReviewCard {...review} />
