@@ -10,6 +10,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { MongoClient } from 'mongodb';
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -20,7 +21,6 @@ const port = process.env.PORT || 3001;
 const saltRounds = 12;
 const expireTime = 24 * 60 * 60 * 1000;
 
-// Enhanced CORS configuration
 app.use(cors({
   origin: process.env.NODE_ENV === 'production' 
     ? process.env.RENDER_EXTERNAL_URL || 'https://bingeboard-4zzn.onrender.com' 
@@ -31,7 +31,6 @@ app.use(cors({
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 
-// MongoDB connection setup
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
@@ -57,7 +56,6 @@ async function connectToDatabase() {
   }
 }
 
-// Session configuration
 const mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
   crypto: {
@@ -76,10 +74,8 @@ app.use(session({
   }
 }));
 
-// Serve static files from Vite build
 app.use(express.static(path.join(__dirname, '../../dist')));
 
-// API Routes
 app.post('/api/signup', async (req, res) => {
   if (!userCollection) {
     return res.status(500).json({ success: false, message: 'Database not connected' });
@@ -210,14 +206,102 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.post('/api/chat', async (req, res) => {
+  console.log('Received chat request with body:', req.body);
 
+  try {
+    // Validate input
+    if (!req.body || !req.body.messages || !Array.isArray(req.body.messages)) {
+      console.error('Invalid request format');
+      return res.status(400).json({ 
+        success: false,
+        error: 'Invalid request format. Expected { messages: [] }' 
+      });
+    }
 
-// SPA Fallback Route - MUST BE LAST
+    // Check API key
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY is not configured');
+      return res.status(500).json({ 
+        success: false,
+        error: 'Server configuration error' 
+      });
+    }
+
+    // Prepare messages - ensure they have the required structure
+    const messages = req.body.messages.map(msg => ({
+      role: msg.role || 'user',
+      content: msg.content || ''
+    }));
+
+    console.log('Sending to OpenAI:', messages);
+
+    // Make API call to OpenAI
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-3.5-turbo",
+        messages: messages,
+        max_tokens: 150,
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 10000
+      }
+    );
+
+    // Validate OpenAI response
+    if (!response.data?.choices?.[0]?.message?.content) {
+      console.error('Unexpected OpenAI response:', response.data);
+      return res.status(500).json({ 
+        success: false,
+        error: 'Unexpected API response format' 
+      });
+    }
+
+    // Return successful response
+    return res.json({ 
+      success: true,
+      reply: response.data.choices[0].message.content 
+    });
+
+  } catch (error) {
+    console.error('Chat error:', {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data
+    });
+
+    // Handle different error types
+    if (error.response) {
+      return res.status(502).json({ 
+        success: false,
+        error: error.response.data.error?.message || 'API service error' 
+      });
+    }
+    
+    if (error.code === 'ECONNABORTED') {
+      return res.status(504).json({ 
+        success: false,
+        error: 'Request timeout' 
+      });
+    }
+    
+    return res.status(500).json({ 
+      success: false,
+      error: error.message || 'Internal server error' 
+    });
+  }
+});
+
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
 
-// Start server
 connectToDatabase().then(() => {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
