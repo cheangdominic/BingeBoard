@@ -3,6 +3,7 @@ import TopNavbar from './TopNavbar.jsx';
 import MottoBanner from './MottoBanner.jsx';
 import FeatureCards from './FeatureCards.jsx';
 import Statistics from './Statistics.jsx';
+import PopularReviews from './PopularReviews.jsx';
 import ShowCarousel from './ShowCarousel.jsx';
 import Footer from './Footer.jsx';
 
@@ -56,7 +57,7 @@ function Landing() {
         variants={fadeInUp}
         transition={{ delay: 0.8 }}
       >
-        <ShowCarousel />
+        <PopularReviews />
       </motion.div>
 
       <motion.div
@@ -64,6 +65,15 @@ function Landing() {
         animate="visible"
         variants={fadeInUp}
         transition={{ delay: 1.0 }}
+      >
+        <ShowCarousel />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 1.2 }}
       >
         <Footer />
       </motion.div>
