@@ -39,6 +39,7 @@ export default function BottomNavbar() {
   };
 
   return (
+    <div className= "pb-20">
     <header className="fixed bottom-0 w-full z-50 bg-[#1A1A1A]/95 backdrop-blur-sm shadow-2xl shadow-black/60 border-t border-gray-800">
       <nav aria-label="Global" className="flex items-center relative h-16">
         <div className="flex flex-1 h-full divide-x divide-gray-800 pr-8 md:pr-10 lg:pr-12">
@@ -174,5 +175,6 @@ export default function BottomNavbar() {
         </div>
       </nav>
     </header>
+    </div>
   );
 }
