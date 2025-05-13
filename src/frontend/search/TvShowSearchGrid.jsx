@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import SearchBar from "./SearchBar";
+import TVShowFilters from "./TVShowFilters";
 
-export default function TVShowSearchPage() {
+const TVShowSearchGrid = () => {
   const [query, setQuery] = useState("");
   const [exactMatches, setExactMatches] = useState([]);
   const [broadenedShows, setBroadenedShows] = useState([]);
+  const [filteredBroadenedShows, setFilteredBroadenedShows] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -55,6 +57,7 @@ export default function TVShowSearchPage() {
 
       setExactMatches(exactMatches);
       setBroadenedShows(broadenedShows);
+      setFilteredBroadenedShows(broadenedShows);
     } catch (error) {
       console.error("Search failed:", error);
     } finally {
@@ -74,7 +77,9 @@ export default function TVShowSearchPage() {
       });
 
       setCurrentPage(nextPage);
-      setBroadenedShows(prev => [...prev, ...moreResults.data.results]);
+      const newShows = [...broadenedShows, ...moreResults.data.results];
+      setBroadenedShows(newShows);
+      setFilteredBroadenedShows(newShows);
     } catch (error) {
       console.error("Failed to load more results:", error);
     }
@@ -117,15 +122,27 @@ export default function TVShowSearchPage() {
           isSearching={isSearching}
         />
 
-        {hasSearched && (
-          <p className="text-gray-400 text-center mt-4">
-            Found {totalResults} results for "{query}"
-          </p>
-        )}
-
         <div className="mt-10 space-y-12">
+          {hasSearched && (
+            <div className="space-y-4">
+              <p className="text-gray-400 text-center">
+                Found {totalResults} results for "{query}"
+              </p>
+              
+              {/* Filters positioned right under the matches text */}
+              {broadenedShows.length > 0 && (
+                <div className="max-w-4xl mx-auto">
+                  <TVShowFilters 
+                    shows={broadenedShows} 
+                    onFilter={setFilteredBroadenedShows} 
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
           {exactMatches.length > 0 && (
-            <section>
+            <section className="pt-4">
               <motion.h2 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -166,7 +183,7 @@ export default function TVShowSearchPage() {
             </section>
           )}
 
-          {broadenedShows.length > 0 && (
+          {filteredBroadenedShows.length > 0 && (
             <section>
               <motion.h2 
                 initial={{ opacity: 0 }}
@@ -182,7 +199,7 @@ export default function TVShowSearchPage() {
                 animate="show"
                 className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8"
               >
-                {broadenedShows.map((show) => (
+                {filteredBroadenedShows.map((show) => (
                   <motion.div
                     key={show.id}
                     variants={itemVariants}
@@ -206,7 +223,7 @@ export default function TVShowSearchPage() {
                 ))}
               </motion.div>
 
-              {broadenedShows.length < totalResults && (
+              {filteredBroadenedShows.length < totalResults && (
                 <div className="flex justify-center mt-8 mb-12">
                   <button
                     onClick={loadMore}
@@ -234,4 +251,6 @@ export default function TVShowSearchPage() {
       </motion.div>
     </div>
   );
-}
+};
+
+export default TVShowSearchGrid;

@@ -5,15 +5,15 @@
   "description": "Fullstack app with Express + Vite React.",
   "type": "module",
   "scripts": {
-  "dev": "concurrently \"npm run server\" \"npm run client\"",
-  "server": "nodemon src/backend/server.js",
-  "client": "vite",
-  "build": "vite build && cd src/backend && npm install",
-  "preview": "vite preview",
-  "start": "node src/backend/server.js",
-  "lint": "eslint .",
-  "test": "echo \"Error: no test specified\" && exit 1"
-},
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon src/backend/server.js",
+    "client": "vite",
+    "build": "vite build && cd src/backend && npm install",
+    "preview": "vite preview",
+    "start": "node src/backend/server.js",
+    "lint": "eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "@headlessui/react": "^2.2.2",
     "@heroicons/react": "^2.2.0",
