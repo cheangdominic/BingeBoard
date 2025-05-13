@@ -16,6 +16,29 @@ const TVShowSearchGrid = () => {
   const [totalResults, setTotalResults] = useState(0);
   const navigate = useNavigate();
 
+  const fetchRandomShows = async () => {
+    try {
+      const randomRes = await axios.get("https://api.themoviedb.org/3/discover/tv", {
+        params: {
+          api_key: "325f0c86f4e9c504dac84ae3046cbee2",
+          sort_by: "popularity.desc", 
+          page: 1
+        },
+      });
+      setBroadenedShows(randomRes.data.results);
+      setFilteredBroadenedShows(randomRes.data.results);
+    } catch (error) {
+      console.error("Failed to fetch random shows:", error);
+    }
+  };
+
+  useEffect(() => {
+   
+    if (!query) {
+      fetchRandomShows();
+    }
+  }, [query]);
+
   const searchShows = async () => {
     if (!query.trim()) return;
 
@@ -128,8 +151,6 @@ const TVShowSearchGrid = () => {
               <p className="text-gray-400 text-center">
                 Found {totalResults} results for "{query}"
               </p>
-              
-              {/* Filters positioned right under the matches text */}
               {broadenedShows.length > 0 && (
                 <div className="max-w-4xl mx-auto">
                   <TVShowFilters 
@@ -150,7 +171,7 @@ const TVShowSearchGrid = () => {
               >
                 Exact Matches
               </motion.h2>
-              
+
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
@@ -192,7 +213,7 @@ const TVShowSearchGrid = () => {
               >
                 Related Shows
               </motion.h2>
-              
+
               <motion.div
                 variants={containerVariants}
                 initial="hidden"
