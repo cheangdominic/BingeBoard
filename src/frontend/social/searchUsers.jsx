@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import BottomNavbar from "../home/BottomNavbar.jsx";
+import BottomNavbar from "../../components/BottomNavbar.jsx";
 import SearchBar from "../search/SearchBar.jsx";
 import axios from "axios";
 

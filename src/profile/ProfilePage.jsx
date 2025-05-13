@@ -4,7 +4,7 @@ import ProfileCard from "./ProfileCard.jsx";
 import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
 import Watchlist from "./Watchlist.jsx";
-import BottomNavbar from "../frontend/home/BottomNavbar.jsx";
+import BottomNavbar from "../components/BottomNavbar.jsx";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },

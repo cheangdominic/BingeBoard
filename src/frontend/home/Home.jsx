@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import BottomNavbar from './BottomNavbar.jsx';
+import BottomNavbar from '../../components/BottomNavbar.jsx';
 import TrendingCarousel from './TrendingCarousel.jsx';
 import FriendsRecentlyWatched from './FriendsRecentlyWatched.jsx';
 import RecommendedByFriends from './RecommendedByFriends.jsx';

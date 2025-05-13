@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState } from "react";
 import { useEffect } from "react";
-import BottomNavbar from '../home/BottomNavbar.jsx';
+import BottomNavbar from '../../components/BottomNavbar.jsx';
 import ActivityCard from '../../components/ActivityCard.jsx';
 
 function ActivityPage() {

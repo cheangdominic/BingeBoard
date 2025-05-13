@@ -7,6 +7,7 @@ import ShowDescription from './ShowDescription';
 import EpisodeList from './EpisodeList';
 import EpisodeListView from './EpisodeListView';
 import ReviewSection from './ReviewSection';
+import BottomNavbar from '../../components/BottomNavbar.jsx';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -133,6 +134,7 @@ const ShowDetailsPage = () => {
           <ReviewSection reviews={show.reviews} />
         </motion.div>  
       </div>
+      <BottomNavbar />  
     </div>
   );
 };
