@@ -4,6 +4,7 @@ import TrendingCarousel from './TrendingCarousel.jsx';
 import FriendsRecentlyWatched from './FriendsRecentlyWatched.jsx';
 import RecommendedByFriends from './RecommendedByFriends.jsx';
 import RecentReviewsFiltered from './RecentReviewsFiltered.jsx';
+import ShowCarousel from '../../components/ShowCarousel.jsx';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -31,6 +32,9 @@ function Home() {
     <FriendsRecentlyWatched/>
     </motion.div>
 
+
+     <ShowCarousel title="Recently Watched" tmdbEndpoint="popular" mediaType="tv" />
+
     <motion.div
       initial="hidden"
       animate="visible"
@@ -48,6 +52,7 @@ function Home() {
     >
     <RecommendedByFriends/>
     </motion.div>
+
 
     <BottomNavbar/>
     </>
