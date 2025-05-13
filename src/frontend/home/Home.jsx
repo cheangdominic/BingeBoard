@@ -21,40 +21,49 @@ const fadeInUp = {
 function Home() {
   return (
     <>
-    <TrendingCarousel/>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 0.2 }}
+      >
+        <TrendingCarousel />
 
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={fadeInUp}
-      transition={{ delay: 0.2 }}
-    >
-    <FriendsRecentlyWatched/>
-    </motion.div>
+        <FriendsRecentlyWatched />
 
+        <ShowCarousel
+          title="Trending Today"
+          tmdbEndpoint="trending/tv/day"
+          mediaType="tv"
+        />
+        <ShowCarousel
+          title="Popular TV Shows"
+          tmdbEndpoint="popular"
+          mediaType="tv"
+        />
+        <ShowCarousel
+          title="Top Rated TV Shows"
+          tmdbEndpoint="top_rated"
+          mediaType="tv"
+        />
+        <RecentReviewsFiltered />
 
-     <ShowCarousel title="Recently Watched" tmdbEndpoint="popular" mediaType="tv" />
+        <ShowCarousel
+          title="On Air TV Shows"
+          tmdbEndpoint="on_the_air"
+          mediaType="tv"
+        />
 
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={fadeInUp}
-      transition={{ delay: 0.4 }}
-    >
-    <RecentReviewsFiltered/>
-    </motion.div>
+        <ShowCarousel
+          title="Airing Today TV Shows"
+          tmdbEndpoint="airing_today"
+          mediaType="tv"
+        />
+      
+      <RecommendedByFriends />
 
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={fadeInUp}
-      transition={{ delay: 0.6 }}
-    >
-    <RecommendedByFriends/>
-    </motion.div>
-
-
-    <BottomNavbar/>
+      </motion.div>
+      <BottomNavbar />
     </>
   )
 }
