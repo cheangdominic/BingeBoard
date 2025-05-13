@@ -105,9 +105,9 @@ function ShowCarousel({
   const allItems = shows.length > 0 ? [...shows, ...shows, ...shows] : [];
 
   return (
-    <section className="relative my-8 ml-2 mr-2">
+    <section className="relative my-8 pl-2 mr-2">
       <div className="flex justify-between items-center mb-4 px-4 md:px-0">
-        <h3 className="text-xl text-white font-bold">{title}</h3>
+        <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">{title}</h3>
         <a href="#" className="text-sm text-blue-400 hover:underline">View All</a>
       </div>
 
