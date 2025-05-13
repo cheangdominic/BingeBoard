@@ -33,8 +33,8 @@ function Home() {
 
         <ShowCarousel
           title="Trending Today"
-          tmdbEndpoint="trending/tv/day"
-          mediaType="tv"
+          tmdbEndpoint="tv/day"
+          mediaType="trending"
         />
         <ShowCarousel
           title="Popular TV Shows"
