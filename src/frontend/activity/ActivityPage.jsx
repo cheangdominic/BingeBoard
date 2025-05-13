@@ -1,10 +1,15 @@
 import { motion } from 'framer-motion';
 import { useState } from "react";
+import { useEffect } from "react";
 import BottomNavbar from '../home/BottomNavbar.jsx';
 import ActivityCard from '../../components/ActivityCard.jsx';
 
 function ActivityPage() {
     const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, []);
 
     const fadeInUp = {
         hidden: { opacity: 0, y: 20 },
