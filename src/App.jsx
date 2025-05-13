@@ -11,6 +11,7 @@ import SocialFeature from './frontend/featurecards/SocialFeature.jsx';
 import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
+import ActivityPage from './frontend/activity/ActivityPage.jsx';
 import Home from './frontend/home/Home.jsx';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
         <Route path="/browsefeature" element={<BrowseFeature/>} />
         <Route path="/show/:id" element={<ShowDetailsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/activity" element={<ActivityPage />} />
         <Route path="/home" element = {<Home />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
