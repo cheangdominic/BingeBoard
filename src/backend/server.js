@@ -177,6 +177,41 @@ app.get('/api/active-users', async (req, res) => {
   }
 });
 
+app.get('/api/users', async (req, res) => {
+  const { search } = req.query;
+
+  if (!search) {
+    return res.status(400).json({ success: false, message: 'Search query is required' });
+  }
+
+  try {
+    const exactMatches = await userCollection.find({
+      $or: [
+        { username: search },
+        { email: search }
+      ]
+    }).toArray();
+
+    const similarMatches = await userCollection.find({
+      $or: [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ]
+    }).toArray();
+
+    const filteredSimilarMatches = similarMatches.filter(
+      (user) => !exactMatches.some((exactUser) => exactUser._id.toString() === user._id.toString())
+    );
+
+    res.json({ exactMatches, similarMatches: filteredSimilarMatches });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
+  }
+});
+
+
+
 // SPA Fallback Route - MUST BE LAST
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
