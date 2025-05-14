@@ -23,14 +23,6 @@ const port = process.env.PORT || 3001;
 const saltRounds = 12;
 const expireTime = 24 * 60 * 60 * 1000;
 
-// Enhanced CORS configuration
-// app.use(cors({
-//   origin: process.env.NODE_ENV === 'production' 
-//     ? process.env.RENDER_EXTERNAL_URL || 'https://bingeboard-4zzn.onrender.com' 
-//     : 'http://localhost:5173',
-//   credentials: true
-// }));
-
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || origin.startsWith('http://localhost:')) {
@@ -54,14 +46,13 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'profile_pics',  // Folder to store images
-    allowed_formats: ['jpg', 'jpeg', 'png'],  // Supported formats
+    folder: 'profile_pics', 
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp',], 
   },
 });
 
 const upload = multer({ storage: storage });
 
-// MongoDB connection setup
 const mongodb_host = process.env.MONGODB_HOST;
 const mongodb_user = process.env.MONGODB_USER;
 const mongodb_password = process.env.MONGODB_PASSWORD;
@@ -87,7 +78,6 @@ async function connectToDatabase() {
   }
 }
 
-// Session configuration
 const mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
   crypto: {
@@ -106,10 +96,8 @@ app.use(session({
   }
 }));
 
-// Serve static files from Vite build
 app.use(express.static(path.join(__dirname, '../../dist')));
 
-// API Routes
 app.post('/api/signup', async (req, res) => {
   if (!userCollection) {
     return res.status(500).json({ success: false, message: 'Database not connected' });
@@ -264,40 +252,46 @@ app.get('/api/getUserInfo', async (req, res) => {
   }
 });
 
-app.post('/api/upload-profile-pic', upload.single('image'), async (req, res) => {
+app.post('/api/upload-profile-image', upload.single('profileImage'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    const imageUrl = req.file.path;
-
-    if (req.session.email) {
-      const updatedUser = await userCollection.updateOne(
-        { email: req.session.email },
-        { $set: { profilePic: imageUrl } }
-      );
-
-      if (updatedUser.modifiedCount === 1) {
-        return res.json({ success: true, imageUrl });
-      } else {
-        return res.status(500).json({ success: false, message: 'Failed to update user profile' });
-      }
+    if (!req.session.email) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
 
-    res.status(400).json({ success: false, message: 'User not authenticated' });
+    const imageUrl = req.file.secure_url || req.file.url || req.file.path;
+
+    const updatedUser = await userCollection.updateOne(
+      { email: req.session.email },
+      { $set: { profilePic: imageUrl } }
+    );
+
+    if (updatedUser.modifiedCount === 1) {
+      return res.json({ 
+        success: true, 
+        imageUrl,
+        message: 'Profile picture updated successfully'
+      });
+    } else {
+      return res.status(500).json({ success: false, message: 'Failed to update profile' });
+    }
   } catch (error) {
     console.error('Error uploading profile picture:', error);
-    res.status(500).json({ success: false, message: 'Failed to upload profile picture' });
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to upload profile picture',
+      error: error.message 
+    });
   }
 });
 
-// SPA Fallback Route - MUST BE LAST
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
 
-// Start server
 connectToDatabase().then(() => {
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);

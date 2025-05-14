@@ -6,18 +6,18 @@ function ProfileCard() {
   const [username, setUsername] = useState("loading...");
 
   useEffect(() => {
-  fetch("/api/getUserInfo", {
-    credentials: "include",
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      setUsername(data.username || "unknown");
+    fetch("/api/getUserInfo", {
+      credentials: "include",
     })
-    .catch((error) => {
-      console.error("Error fetching user info:", error);
-      setUsername("error");
-    });
-}, []);
+      .then((res) => res.json())
+      .then((data) => {
+        setUsername(data.username || "unknown");
+      })
+      .catch((error) => {
+        console.error("Error fetching user info:", error);
+        setUsername("error");
+      });
+  }, []);
 
   return (
     <section className="bg-[#2E2E2E] rounded-lg shadow-lg p-6 flex items-center justify-between">
