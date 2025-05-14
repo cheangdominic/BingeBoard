@@ -27,7 +27,10 @@ function Home() {
         variants={fadeInUp}
         transition={{ delay: 0.2 }}
       >
-        <TrendingCarousel />
+        <TrendingCarousel
+          tmdbEndpoint="top_rated"
+          mediaType="tv"
+        />
 
         <FriendsRecentlyWatched />
 
