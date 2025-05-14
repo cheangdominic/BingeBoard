@@ -81,13 +81,27 @@ const ShowDetailsPage = () => {
     loadShow();
   }, [id, formatShowData]);
 
-  if (loading) return <div className="text-white p-10">Loading...</div>;
-  if (error) return <div className="text-white p-10">{error}</div>;
-  if (!show) return <div className="text-white p-10">Show not found</div>;
+  if (loading) return (
+    <div className="flex items-center justify-center h-screen bg-[#1e1e1e]">
+      <div className="text-white text-lg font-medium">Loading...</div>
+    </div>
+  );
+  
+  if (error) return (
+    <div className="flex items-center justify-center h-screen bg-[#1e1e1e]">
+      <div className="text-white text-lg font-medium">{error}</div>
+    </div>
+  );
+  
+  if (!show) return (
+    <div className="flex items-center justify-center h-screen bg-[#1e1e1e]">
+      <div className="text-white text-lg font-medium">Show not found</div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-900">
-      <div className="p-6 max-w-8xl mx-auto space-y-6">
+    <div className="min-h-screen bg-[#1e1e1e] text-gray-100">
+      <div className="p-6 max-w-8xl mx-auto space-y-8">
         <motion.div
           initial="hidden"
           animate="visible"
@@ -97,30 +111,67 @@ const ShowDetailsPage = () => {
           <ShowHero show={show} isLoading={loading} />
         </motion.div>
 
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-          transition={{ delay: 0.4 }}
-        >
-          <ShowDescription show={show} />
-        </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 0.4 }}
+        className="lg:col-span-2"
+      >
+        <ShowDescription show={show} />
+      </motion.div>
 
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeInUp}
-          transition={{ delay: 0.6 }}
-        >
-          <EpisodeList seasons={show.seasons} showId={id} />
-        </motion.div>
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ delay: 0.6 }}
+            className="lg:col-span-1"
+          >
+            <div className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg">
+              <h3 className="text-xl font-bold mb-4">Show Details</h3>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-gray-400 text-sm">Status</p>
+                  <p className="font-medium">{show.status}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Creator</p>
+                  <p className="font-medium">{show.creator}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">First Aired</p>
+                  <p className="font-medium">{show.releaseDate}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Rating</p>
+                  <p className="font-medium">{show.rating}</p>
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm">Available On</p>
+                  <p className="font-medium">{show.platforms.join(', ')}</p>
+                </div>
+                {show.nextEpisode && (
+                  <div>
+                    <p className="text-gray-400 text-sm">Next Episode</p>
+                    <p className="font-medium">{show.nextEpisode.countdown}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
         <motion.div
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
           transition={{ delay: 0.8 }}
+          className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg"
         >
+          <h2 className="text-2xl font-bold mb-6">Episodes</h2>
+          <EpisodeList seasons={show.seasons} showId={id} />
           <EpisodeListView seasons={show.seasons} showId={id} />
         </motion.div>
 
@@ -129,9 +180,10 @@ const ShowDetailsPage = () => {
           animate="visible"
           variants={fadeInUp}
           transition={{ delay: 1.0 }}
+          className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg"
         >
           <ReviewSection reviews={show.reviews} />
-        </motion.div>  
+        </motion.div>
       </div>
     </div>
   );
