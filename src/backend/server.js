@@ -10,6 +10,9 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { MongoClient } from 'mongodb';
+import { v2 as cloudinary } from 'cloudinary';
+import multer from 'multer';
+import { CloudinaryStorage } from 'multer-storage-cloudinary';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,12 +24,12 @@ const saltRounds = 12;
 const expireTime = 24 * 60 * 60 * 1000;
 
 // Enhanced CORS configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.RENDER_EXTERNAL_URL || 'https://bingeboard-4zzn.onrender.com' 
-    : 'http://localhost:5173',
-  credentials: true
-}));
+// app.use(cors({
+//   origin: process.env.NODE_ENV === 'production' 
+//     ? process.env.RENDER_EXTERNAL_URL || 'https://bingeboard-4zzn.onrender.com' 
+//     : 'http://localhost:5173',
+//   credentials: true
+// }));
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -41,6 +44,22 @@ app.use(cors({
 
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'profile_pics',  // Folder to store images
+    allowed_formats: ['jpg', 'jpeg', 'png'],  // Supported formats
+  },
+});
+
+const upload = multer({ storage: storage });
 
 // MongoDB connection setup
 const mongodb_host = process.env.MONGODB_HOST;
@@ -127,7 +146,9 @@ app.post('/api/signup', async (req, res) => {
     await userCollection.insertOne({
       username: username,
       email: email,
-      password: hashedPassword
+      password: hashedPassword,
+      watchlist: [],
+      profilePic: '',
     });
     return res.json({ success: true });
   } catch (error) {
@@ -240,6 +261,34 @@ app.get('/api/getUserInfo', async (req, res) => {
   } catch (error) {
     console.error("Error fetching user info:", error);
     return res.status(500).json({ success: false, message: 'Failed to get user info' });
+  }
+});
+
+app.post('/api/upload-profile-pic', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    const imageUrl = req.file.path;
+
+    if (req.session.email) {
+      const updatedUser = await userCollection.updateOne(
+        { email: req.session.email },
+        { $set: { profilePic: imageUrl } }
+      );
+
+      if (updatedUser.modifiedCount === 1) {
+        return res.json({ success: true, imageUrl });
+      } else {
+        return res.status(500).json({ success: false, message: 'Failed to update user profile' });
+      }
+    }
+
+    res.status(400).json({ success: false, message: 'User not authenticated' });
+  } catch (error) {
+    console.error('Error uploading profile picture:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload profile picture' });
   }
 });
 
