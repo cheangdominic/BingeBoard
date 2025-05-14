@@ -28,6 +28,17 @@ app.use(cors({
   credentials: true
 }));
 
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || origin.startsWith('http://localhost:')) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
+
 app.use(bodyParser.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -210,7 +221,27 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.get('/api/getUserInfo', async (req, res) => {
+  if (!req.session.authenticated || !req.session.email) {
+    return res.status(401).json({ success: false, message: 'Not logged in' });
+  }
 
+  try {
+    const user = await userCollection.findOne(
+      { email: req.session.email },
+      { projection: { username: 1, _id: 0 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    return res.json({ success: true, username: user.username, fullName: user.fullName || "" });
+  } catch (error) {
+    console.error("Error fetching user info:", error);
+    return res.status(500).json({ success: false, message: 'Failed to get user info' });
+  }
+});
 
 // SPA Fallback Route - MUST BE LAST
 app.get(/^(?!\/api).*/, (req, res) => {
