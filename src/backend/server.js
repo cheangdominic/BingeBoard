@@ -291,6 +291,55 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
   }
 });
 
+app.post('/api/watchlist/add', async (req, res) => {
+  if (!req.session || !req.session.email) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const { showId } = req.body;
+  if (!showId) {
+    return res.status(400).json({ success: false, message: 'Missing show ID' });
+  }
+
+  try {
+    const result = await userCollection.updateOne(
+      { email: req.session.email },
+      { $addToSet: { watchlist: showId } } 
+    );
+
+    if (result.modifiedCount === 0) {
+      return res.status(200).json({ success: true, message: 'Already in watchlist' });
+    }
+
+    res.json({ success: true, message: 'Added to watchlist' });
+  } catch (err) {
+    console.error("Error updating watchlist:", err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.post('/api/watchlist/remove', async (req, res) => {
+  if (!req.session || !req.session.email) {
+    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  }
+
+  const { showId } = req.body;
+  if (!showId) {
+    return res.status(400).json({ success: false, message: 'Missing show ID' });
+  }
+
+  try {
+    await userCollection.updateOne(
+      { email: req.session.email },
+      { $pull: { watchlist: showId } }
+    );
+    res.json({ success: true, message: 'Removed from watchlist' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
