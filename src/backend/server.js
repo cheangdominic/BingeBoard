@@ -238,20 +238,23 @@ app.get('/api/getUserInfo', async (req, res) => {
   try {
     const user = await userCollection.findOne(
       { email: req.session.email },
-      { projection: { username: 1, _id: 0 } }
+      { projection: { username: 1, profilePic: 1, _id: 0 } }
     );
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    return res.json({ success: true, username: user.username, fullName: user.fullName || "" });
+    return res.json({ 
+      success: true, 
+      username: user.username, 
+      profilePic: user.profilePic || null  
+    });
   } catch (error) {
     console.error("Error fetching user info:", error);
     return res.status(500).json({ success: false, message: 'Failed to get user info' });
   }
 });
-
 app.post('/api/upload-profile-image', upload.single('profileImage'), async (req, res) => {
   try {
     if (!req.file) {
