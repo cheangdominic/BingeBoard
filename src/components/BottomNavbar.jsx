@@ -23,8 +23,6 @@ export default function BottomNavbar() {
   const location = useLocation();
 
   const fetchProfileImage = useCallback(async () => {
-    if (localStorage.getItem('profileImage')) return;
-
     try {
       const response = await axios.get("/api/getUserInfo", {
         withCredentials: true,
@@ -43,13 +41,14 @@ export default function BottomNavbar() {
     fetchProfileImage();
   }, [fetchProfileImage]);
 
+  // ✅ Listen for the image update event
   useEffect(() => {
     const handleProfileUpdate = () => {
       localStorage.removeItem('profileImage');
       setImageLoaded(false);
       fetchProfileImage();
     };
-    
+
     window.addEventListener('profileImageUpdated', handleProfileUpdate);
     return () => window.removeEventListener('profileImageUpdated', handleProfileUpdate);
   }, [fetchProfileImage]);
@@ -64,14 +63,14 @@ export default function BottomNavbar() {
     { icon: <BiHome size={20} />, label: "Home", path: "/home" },
     { icon: <BiSearch size={20} />, label: "Search", path: "/search" },
     { icon: <BiChat size={20} />, label: "Social", path: "/social" },
-    { 
+    {
       icon: (
         <div className="flex items-center justify-center w-6 h-6 rounded-full overflow-hidden border border-gray-600">
           <AnimatePresence mode="wait">
             {profileImage ? (
               <motion.img
                 key="profile-image"
-                src={`${profileImage}?${new Date().getTime()}`}
+                src={`${profileImage}?${new Date().getTime()}`} // Force refresh
                 alt="Profile"
                 className="w-full h-full object-cover"
                 initial={{ opacity: 0 }}
@@ -94,9 +93,9 @@ export default function BottomNavbar() {
             )}
           </AnimatePresence>
         </div>
-      ), 
-      label: "Profile", 
-      path: "/profile" 
+      ),
+      label: "Profile",
+      path: "/profile"
     },
   ];
 
@@ -116,16 +115,10 @@ export default function BottomNavbar() {
               <motion.button
                 key={btn.label}
                 whileHover={{ scale: 1.05 }}
-                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${
-                  location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
-                }`}
+                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${location.pathname === btn.path ? "text-blue-400" : "text-gray-300"}`}
                 onClick={() => navigate(btn.path)}
               >
-                <div className={`p-2 rounded-full transition-all ${
-                  location.pathname === btn.path
-                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20"
-                    : "hover:bg-[#2E2E2E]/50"
-                }`}>
+                <div className={`p-2 rounded-full transition-all ${location.pathname === btn.path ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" : "hover:bg-[#2E2E2E]/50"}`}>
                   {btn.icon}
                 </div>
                 <span className="mt-1">{btn.label}</span>
@@ -138,16 +131,10 @@ export default function BottomNavbar() {
               <motion.button
                 key={btn.label}
                 whileHover={{ scale: 1.05 }}
-                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${
-                  location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
-                }`}
+                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${location.pathname === btn.path ? "text-blue-400" : "text-gray-300"}`}
                 onClick={() => navigate(btn.path)}
               >
-                <div className={`p-2 rounded-full transition-all ${
-                  location.pathname === btn.path
-                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20"
-                    : "hover:bg-[#2E2E2E]/50"
-                }`}>
+                <div className={`p-2 rounded-full transition-all ${location.pathname === btn.path ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" : "hover:bg-[#2E2E2E]/50"}`}>
                   {btn.icon}
                 </div>
                 <span className="mt-1">{btn.label}</span>

@@ -1,10 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import ImageUploadModal  from './ImageUploadModal';
+import ImageUploadModal from './ImageUploadModal';
 
 export default function ProfileImage({ src, alt, size }) {
-  const [imageSrc, setImageSrc] = useState(src);
+  const [imageSrc, setImageSrc] = useState(src || '');
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const response = await axios.get('/api/getUserInfo', { withCredentials: true });
+        if (response.data.success) {
+          setImageSrc(response.data.profilePic || '/default-profile.png');
+        }
+      } catch (error) {
+        console.error("Failed to fetch profile image:", error);
+      }
+    };
+
+    fetchProfileImage();
+  }, []);
 
   const handleUpload = async (file) => {
     const formData = new FormData();
@@ -12,14 +27,17 @@ export default function ProfileImage({ src, alt, size }) {
 
     try {
       const response = await axios.post(
-        "/api/upload-profile-image", 
-        formData, 
+        "/api/upload-profile-image",
+        formData,
         { withCredentials: true }
       );
-      
+
       if (response.data.success) {
         setImageSrc(response.data.imageUrl);
         setShowModal(false);
+
+        // ✅ Dispatch custom event to notify others (like BottomNavbar)
+        window.dispatchEvent(new Event('profileImageUpdated'));
       }
     } catch (error) {
       console.error("Upload failed:", error);
@@ -28,8 +46,8 @@ export default function ProfileImage({ src, alt, size }) {
 
   return (
     <>
-      <div 
-        className="relative group cursor-pointer" 
+      <div
+        className="relative group cursor-pointer"
         onClick={() => setShowModal(true)}
       >
         <img
