@@ -4,6 +4,9 @@ export default {
     "./**/*.{html,js,jsx,ts,tsx}",  // Target all your JS, JSX, TS, and HTML files
     "!./node_modules/**/*",         // Exclude node_modules to prevent performance issues
   ],
+  safelist: [
+    { pattern: /bg-\[#.*\]/ },
+  ],
   theme: {
     extend: {},
   },
