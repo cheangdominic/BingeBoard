@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { fetchTVShow } from '/src/backend/tmdb';
+import { useAuth } from '../../context/AuthContext';
 import ShowHero from './ShowHero';
 import ShowDescription from './ShowDescription';
 import EpisodeList from './EpisodeList';
@@ -25,6 +26,10 @@ const ShowDetailsPage = () => {
   const [show, setShow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const { user } = useAuth();
+
 
   const formatCountdown = (airDate) => {
     if (!airDate) return 'Coming soon';
@@ -59,8 +64,8 @@ const ShowDetailsPage = () => {
     } : null,
     seasonsData: tmdbData.seasons || [],
     reviews: [],
-    backdropUrl: tmdbData.backdrop_path 
-      ? `https://image.tmdb.org/t/p/w500${tmdbData.backdrop_path}` 
+    backdropUrl: tmdbData.backdrop_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbData.backdrop_path}`
       : '/images/fallback.jpg',
   }), []);
 
@@ -78,21 +83,33 @@ const ShowDetailsPage = () => {
         setLoading(false);
       }
     };
-    loadShow();
+
+    if (id) {
+      loadShow();
+    }
   }, [id, formatShowData]);
 
   if (loading) return (
-    <div className="flex items-center justify-center h-screen bg-[#1e1e1e]">
-      <div className="text-white text-lg font-medium">Loading...</div>
+    <div className="min-h-screen bg-[#1e1e1e] p-6">
+      <div className="animate-pulse space-y-8">
+        <div className="h-64 bg-[#2a2a2a] rounded-xl"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-4">
+            <div className="h-8 bg-[#2a2a2a] rounded"></div>
+            <div className="h-4 bg-[#2a2a2a] rounded"></div>
+          </div>
+          <div className="lg:col-span-1 h-64 bg-[#2a2a2a] rounded-xl"></div>
+        </div>
+      </div>
     </div>
   );
-  
+
   if (error) return (
     <div className="flex items-center justify-center h-screen bg-[#1e1e1e]">
       <div className="text-white text-lg font-medium">{error}</div>
     </div>
   );
-  
+
   if (!show) return (
     <div className="flex items-center justify-center h-screen bg-[#1e1e1e]">
       <div className="text-white text-lg font-medium">Show not found</div>
@@ -113,14 +130,14 @@ const ShowDetailsPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <motion.div
-        initial="hidden"
-        animate="visible"
-        variants={fadeInUp}
-        transition={{ delay: 0.4 }}
-        className="lg:col-span-2"
-      >
-        <ShowDescription show={show} />
-      </motion.div>
+            initial="hidden"
+            animate="visible"
+            variants={fadeInUp}
+            transition={{ delay: 0.4 }}
+            className="lg:col-span-2"
+          >
+            <ShowDescription show={show} />
+          </motion.div>
 
           <motion.div
             initial="hidden"
@@ -182,7 +199,14 @@ const ShowDetailsPage = () => {
           transition={{ delay: 1.0 }}
           className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg"
         >
-          <ReviewSection reviews={show.reviews} />
+          <ReviewSection
+            showId={id}
+            showTitle={show.title}
+            currentUserId={user?._id}
+            reviews={reviews}
+            setReviews={setReviews}
+            isLoading={reviewsLoading}
+          />
         </motion.div>
       </div>
     </div>
