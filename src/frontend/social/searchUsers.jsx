@@ -40,8 +40,9 @@ function SearchUsers() {
                         className="w-12 h-12 rounded-full object-cover"
                     />
                     <div>
-                        <p className="text-white font-semibold">{user.username}</p>
-                        <p className="text-gray-400 text-sm">{user.email}</p>
+                        <p className="text-white font-semibold">@{user.username}</p>
+                        <p className="text-gray-400 text-sm">12 Connections</p>
+                        <p className="text-gray-400 text-sm">2 Groups</p>
                     </div>
                 </div>
             </Link>
