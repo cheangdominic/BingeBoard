@@ -5,7 +5,7 @@ import './App.css';
 import Landing from './frontend/landing/Landing.jsx'; 
 import ProfilePage from './profile/ProfilePage.jsx';
 import ShowDetailsPage from './frontend/showdetails/ShowDetailsPage.jsx';
-import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx'; 
+import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx';  
 import LoginPage from './frontend/login/LoginPage.jsx';
 import SignupPage from './frontend/signup/SignupPage.jsx';
 import SearchPage from './frontend/search/SearchPage.jsx';
@@ -15,6 +15,7 @@ import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
 import ActivityPage from './frontend/activity/ActivityPage.jsx';
+import LogPage from './frontend/log/LogPage.jsx';
 import SearchUsers from './frontend/social/SearchUsers.jsx';
 import UserProfile from './frontend/social/UserProfile.jsx';
 import Home from './frontend/home/Home.jsx';
@@ -36,6 +37,7 @@ function App() {
         <Route path="/show/:id" element={<ShowDetailsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/log" element={<LogPage />} />
         <Route path="/home" element = {<Home />} />
          <Route path="/search" element = {<SearchPage />} />
         <Route path="/social" element = {<SearchUsers />} />
