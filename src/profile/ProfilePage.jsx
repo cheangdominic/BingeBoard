@@ -38,7 +38,7 @@ function ProfilePage() {
 
   return (
     <>
-      <div className="p-6 max-w-6xl mx-auto font-coolvetica text-white space-y-6">
+      <div className="p-6 mx-auto font-coolvetica text-white space-y-6">
         <ProfileCard user={user} profilePic={profilePic} isOwnProfile={true} />
 
         <motion.div
