@@ -39,6 +39,10 @@ const TVShowSearchGrid = () => {
     }
   }, [query]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const searchShows = async () => {
     if (!query.trim()) return;
 

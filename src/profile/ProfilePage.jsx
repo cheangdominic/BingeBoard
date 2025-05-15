@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import React from "react";
+import { useEffect } from "react";
 import ProfileCard from "./ProfileCard.jsx";
 import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
@@ -19,6 +19,10 @@ const fadeInUp = {
 };
 
 function ProfilePage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <>
     <div className="p-6 max-w-6xl mx-auto font-coolvetica text-white space-y-6">
