@@ -26,7 +26,7 @@ function StarRating({ rating = 0 }) {
 export default function TrendingCarousel({
   tmdbEndpoint = "top_rated",
   mediaType = "tv",
-  slideLimit = 5
+  slideLimit = 10
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [trendingShows, setTrendingShows] = useState([]);
@@ -107,7 +107,7 @@ export default function TrendingCarousel({
                 alt={show.name || show.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-0 sm:top-[60%] lg:top-[63%] bg-black/70 w-full h-full px-4 pt-3 sm:pt-2 text-white rounded-lg flex flex-col justify-start">
+              <div className="absolute top-0 sm:top-[62%] lg:top-[65%] bg-black/70 w-full h-full px-4 pt-3 sm:pt-2 text-white rounded-lg flex flex-col justify-start">
                 
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm font-semibold">
@@ -125,7 +125,7 @@ export default function TrendingCarousel({
                 </div>
 
                 <div
-                  className="overflow-hidden text-md sm:text-lg text-[#d5d5d5] pr-2 line-clamp-4 sm:line-clamp-2"
+                  className="overflow-hidden text-md pt-1 sm:text-lg sm:pt-0 text-[#d5d5d5] pr-2 line-clamp-4 sm:line-clamp-2"
                   style={{
                     display: "-webkit-box",
                     WebkitBoxOrient: "vertical",
