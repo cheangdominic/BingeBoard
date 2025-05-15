@@ -3,6 +3,7 @@ dotenv.config();
 import express from 'express';
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 import Joi from 'joi';
 import bodyParser from 'body-parser';
@@ -10,6 +11,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { MongoClient } from 'mongodb';
+import { Review } from './utils.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
@@ -63,6 +65,8 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
 const client = new MongoClient(atlasURI);
 
+const mongooseURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`;
+
 let database;
 let userCollection;
 
@@ -83,6 +87,16 @@ const mongoStore = MongoStore.create({
   crypto: {
     secret: mongodb_session_secret
   }
+});
+
+// Mongoose connection
+await mongoose.connect(mongooseURI, {
+  serverSelectionTimeoutMS: 30000,
+  socketTimeoutMS: 45000
+});
+
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected to DB cluster');
 });
 
 app.use(session({
@@ -230,6 +244,196 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+const authenticate = (req, res, next) => {
+  if (!req.session.authenticated || !req.session.email) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  req.user = {
+    email: req.session.email,
+  };
+  
+  next();
+};
+
+app.get('/api/reviews', async (req, res) => {
+  try {
+    const { showId, sort = 'latest' } = req.query;
+
+    if (!showId) {
+      return res.status(400).json({ error: 'Show ID is required' });
+    }
+    
+    console.log(`Fetching reviews for show ${showId} with sort: ${sort}`);
+
+    let sortOptions = {};
+    switch (sort) {
+      case 'popular':
+        sortOptions = { 'likes.length': -1 };
+        break;
+      case 'relevant':
+        sortOptions = { rating: -1, createdAt: -1 };
+        break;
+      case 'latest':
+      default:
+        sortOptions = { createdAt: -1 };
+    }
+    
+    const reviews = await Review.find({ showId })
+      .sort(sortOptions)
+      .lean();
+    
+    console.log(`Found ${reviews.length} reviews`);
+
+    const formattedReviews = reviews.map(review => ({
+      ...review,
+      id: review._id.toString(),
+      _id: review._id.toString(),
+      likes: Array.isArray(review.likes) ? review.likes : [],
+      dislikes: Array.isArray(review.dislikes) ? review.dislikes : []
+    }));
+    
+    res.json(formattedReviews);
+  } catch (error) {
+    console.error('Error fetching reviews:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/reviews', authenticate, async (req, res) => {
+  try {
+    console.log('Creating new review, mongoose connection state:', mongoose.connection.readyState);
+    
+    const { rating, content, containsSpoiler, showId } = req.body;
+    
+    if (!showId || !content || !rating) {
+      return res.status(400).json({ 
+        error: 'Missing required fields', 
+        details: 'showId, content, and rating are required' 
+      });
+    }
+    
+    const user = await userCollection.findOne({ email: req.session.email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const reviewData = {
+      showId,
+      userId: user._id,
+      username: user.username,
+      rating: Math.min(5, Math.max(1, rating)),
+      content,
+      containsSpoiler: !!containsSpoiler,
+      likes: [],
+      dislikes: [],
+      createdAt: new Date()
+    };
+    
+    console.log('Creating review with data:', reviewData);
+    
+    const review = new Review(reviewData);
+    const savedReview = await review.save();
+    
+    console.log('Review saved successfully:', savedReview._id);
+    
+    const formattedReview = {
+      ...savedReview.toObject(),
+      id: savedReview._id.toString(),
+      _id: savedReview._id.toString()
+    };
+    
+    return res.status(201).json(formattedReview);
+  } catch (error) {
+    console.error('Review creation error:', error);
+    return res.status(500).json({
+      error: 'Database operation failed',
+      details: error.message,
+      mongodbState: mongoose.connection.readyState
+    });
+  }
+});
+
+app.put('/api/reviews/:id', authenticate, async (req, res) => {
+  try {
+    const reviewId = req.params.id;
+    const { action } = req.body;
+    
+    if (!['like', 'dislike'].includes(action)) {
+      return res.status(400).json({ error: 'Invalid action. Must be "like" or "dislike"' });
+    }
+    
+    console.log(`Processing ${action} for review ${reviewId}`);
+
+    const review = await Review.findById(reviewId);
+    if (!review) {
+      return res.status(404).json({ error: 'Review not found' });
+    }
+    
+    const user = await userCollection.findOne({ email: req.session.email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const userId = user._id;
+
+    if (!Array.isArray(review.likes)) review.likes = [];
+    if (!Array.isArray(review.dislikes)) review.dislikes = [];
+    
+    if (action === 'like') {
+      const alreadyLiked = review.likes.some(id => id.toString() === userId.toString());
+      
+      if (alreadyLiked) {
+        review.likes = review.likes.filter(id => id.toString() !== userId.toString());
+      } else {
+        review.likes.push(userId);
+        review.dislikes = review.dislikes.filter(id => id.toString() !== userId.toString());
+      }
+    } else if (action === 'dislike') {
+      const alreadyDisliked = review.dislikes.some(id => id.toString() === userId.toString());
+      
+      if (alreadyDisliked) {
+        review.dislikes = review.dislikes.filter(id => id.toString() !== userId.toString());
+      } else {
+        review.dislikes.push(userId);
+        review.likes = review.likes.filter(id => id.toString() !== userId.toString());
+      }
+    }
+
+    await review.save();
+    console.log('Review vote updated successfully');
+
+    const formattedReview = {
+      ...review.toObject(),
+      id: review._id.toString(),
+      _id: review._id.toString()
+    };
+    
+    res.json(formattedReview);
+  } catch (error) {
+    console.error('Review vote update error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
+app.get('/api/user', authenticate, async (req, res) => {
+  try {
+    const user = await userCollection.findOne(
+      { email: req.session.email },
+      { projection: { password: 0 } } 
+    );
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// SPA Fallback Route - MUST BE LAST
 app.get('/api/users/:username', async (req, res) => {
   const { username } = req.params;
 

@@ -8,9 +8,14 @@ const EpisodeListView = ({ seasons = [], showId }) => {
   const [expandedEpisode, setExpandedEpisode] = useState(null);
   const [episodesBySeason, setEpisodesBySeason] = useState({});
   const [loading, setLoading] = useState(false);
+  const [viewAll, setViewAll] = useState(false);
+  
+  const EPISODES_LIMIT = 10;
 
   const currentSeason = seasons.find(season => season.number === activeSeason) || {};
   const episodes = episodesBySeason[activeSeason] || [];
+  const displayedEpisodes = viewAll ? episodes : episodes.slice(0, EPISODES_LIMIT);
+  const hasMoreEpisodes = episodes.length > EPISODES_LIMIT;
 
   useEffect(() => {
     const loadEpisodes = async () => {
@@ -33,12 +38,16 @@ const EpisodeListView = ({ seasons = [], showId }) => {
     loadEpisodes();
   }, [activeSeason, showId, episodesBySeason]);
 
+  useEffect(() => {
+    setViewAll(false);
+  }, [activeSeason]);
+
   const displayRating = (rating) => {
     return typeof rating === "number" ? rating.toFixed(1) : "N/A";
   };
 
   return (
-    <div className="mt-8 space-y-6"> {/* Added mt-8 for top margin */}
+    <div className="mt-8 space-y-6"> 
       {/* Season Dropdown */}
       <div className="relative">
         <button
@@ -89,7 +98,7 @@ const EpisodeListView = ({ seasons = [], showId }) => {
           <div className="text-center py-8 text-gray-400 text-lg">Loading episodes...</div>
         ) : episodes.length > 0 ? (
           <div className="space-y-4">
-            {episodes.map((episode) => (
+            {displayedEpisodes.map((episode) => (
               <div
                 key={episode.id}
                 className="bg-[#3a3a3a] rounded-xl border border-[#4a4a4a] overflow-hidden hover:border-[#5a5a5a] transition-colors"
@@ -129,6 +138,18 @@ const EpisodeListView = ({ seasons = [], showId }) => {
                 )}
               </div>
             ))}
+
+            {/* View All Episodes Button */}
+            {hasMoreEpisodes && (
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => setViewAll(!viewAll)}
+                  className="bg-[#3a3a3a] hover:bg-[#4a4a4a] text-white px-6 py-3 rounded-xl transition-colors font-medium"
+                >
+                  {viewAll ? "Show Less" : `View All ${episodes.length} Episodes`}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="text-center py-8 text-gray-400 text-lg">No episodes found for this season</div>

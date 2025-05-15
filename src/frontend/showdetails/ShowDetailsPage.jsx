@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchTVShow } from '/src/backend/tmdb';
+import { useAuth } from '../../context/AuthContext';
 import ShowHero from './ShowHero';
 import ShowDescription from './ShowDescription';
 import EpisodeList from './EpisodeList';
@@ -9,7 +10,6 @@ import EpisodeListView from './EpisodeListView';
 import ReviewSection from './ReviewSection';
 import BottomNavbar from '../../components/BottomNavbar.jsx';
 import AddToWatchlistButton from './AddToWatchlistButton.jsx';
-
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -50,6 +50,9 @@ const ShowDetailsPage = () => {
   const [show, setShow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+const [reviews, setReviews] = useState([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const { user } = useAuth();
 
   const LoadingSpinner = () => (
     <motion.div 
@@ -73,7 +76,6 @@ const ShowDetailsPage = () => {
       </motion.p>
     </motion.div>
   );
-
   const formatCountdown = (airDate) => {
     if (!airDate) return 'Coming soon';
     const now = new Date();
@@ -107,8 +109,8 @@ const ShowDetailsPage = () => {
     } : null,
     seasonsData: tmdbData.seasons || [],
     reviews: [],
-    backdropUrl: tmdbData.backdrop_path 
-      ? `https://image.tmdb.org/t/p/w500${tmdbData.backdrop_path}` 
+    backdropUrl: tmdbData.backdrop_path
+      ? `https://image.tmdb.org/t/p/w500${tmdbData.backdrop_path}`
       : '/images/fallback.jpg',
   }), []);
 
@@ -126,7 +128,10 @@ const ShowDetailsPage = () => {
         setLoading(false);
       }
     };
-    loadShow();
+
+    if (id) {
+      loadShow();
+    }
   }, [id, formatShowData]);
 
   if (loading) return <LoadingSpinner />;
@@ -147,7 +152,7 @@ const ShowDetailsPage = () => {
       </motion.div>
     </motion.div>
   );
-  
+
   if (!show) return (
     <motion.div 
       className="flex items-center justify-center h-screen bg-[#1e1e1e]"
@@ -191,7 +196,7 @@ const ShowDetailsPage = () => {
           className="grid grid-cols-1 lg:grid-cols-3 gap-8"
         >
           <motion.div
-            variants={fadeInUp}
+        variants={fadeInUp}
             className="lg:col-span-2 space-y-6"
           >
             <ShowDescription show={show} />
@@ -201,7 +206,7 @@ const ShowDetailsPage = () => {
             >
               <AddToWatchlistButton showId={id} />
             </motion.div>
-          </motion.div>
+      </motion.div>
 
           <motion.div
             variants={scaleUp}
@@ -262,8 +267,16 @@ const ShowDetailsPage = () => {
           transition={{ delay: 0.8 }}
           className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
         >
-          <ReviewSection reviews={show.reviews} />
+          <ReviewSection
+            showId={id}
+            showTitle={show.title}
+            currentUserId={user?._id}
+            reviews={reviews}
+            setReviews={setReviews}
+            isLoading={reviewsLoading}
+          />
         </motion.div>
+        <BottomNavbar />
       </div>
       
       <motion.div
