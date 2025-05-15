@@ -230,6 +230,27 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+app.get('/api/users/:username', async (req, res) => {
+  const { username } = req.params;
+
+  try {
+    const user = await userCollection.findOne(
+      { username },
+      { projection: { username: 1, email: 1, profilePic: 1 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    return res.json({ success: true, user });
+  } catch (err) {
+    console.error("Error fetching user by username:", err);
+    return res.status(500).json({ success: false, message: 'Failed to fetch user' });
+  }
+});
+
+
 app.get('/api/getUserInfo', async (req, res) => {
   if (!req.session.authenticated || !req.session.email) {
     return res.status(401).json({ success: false, message: 'Not logged in' });

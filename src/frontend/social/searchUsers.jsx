@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import BottomNavbar from "../../components/BottomNavbar.jsx";
 import SearchBar from "../search/SearchBar.jsx";
 import axios from "axios";
@@ -28,6 +29,7 @@ function SearchUsers() {
     };
 
     const UserCard = ({ user, index }) => (
+    <Link to={`/user/${user.username}`}>
         <div className="bg-[#2E2E2E] rounded-xl p-4 flex items-center gap-4 border border-gray-700/40">
             <div className="w-12 h-12 rounded-full bg-blue-500/30 flex items-center justify-center text-white font-bold text-xl">
                 {user.username.charAt(0).toUpperCase()}
@@ -37,6 +39,7 @@ function SearchUsers() {
                 <p className="text-gray-400 text-sm">{user.email}</p>
             </div>
         </div>
+    </Link>
     );
 
     useEffect(() => {

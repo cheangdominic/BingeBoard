@@ -2,24 +2,28 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ImageUploadModal from './ImageUploadModal';
 
-export default function ProfileImage({ src, alt, size }) {
+export default function ProfileImage({ src, alt, size, isOwnProfile }) {
   const [imageSrc, setImageSrc] = useState(src || '');
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const fetchProfileImage = async () => {
-      try {
-        const response = await axios.get('/api/getUserInfo', { withCredentials: true });
-        if (response.data.success) {
-          setImageSrc(response.data.profilePic || '/default-profile.png');
+    if (!src && isOwnProfile) {
+      const fetchProfileImage = async () => {
+        try {
+          const response = await axios.get('/api/getUserInfo', { withCredentials: true });
+          if (response.data.success) {
+            setImageSrc(response.data.profilePic || '/default-profile.png');
+          }
+        } catch (error) {
+          console.error("Failed to fetch profile image:", error);
         }
-      } catch (error) {
-        console.error("Failed to fetch profile image:", error);
-      }
-    };
+      };
 
-    fetchProfileImage();
-  }, []);
+      fetchProfileImage();
+    } else if (src) {
+      setImageSrc(src);
+    }
+  }, [src, isOwnProfile]);
 
   const handleUpload = async (file) => {
     const formData = new FormData();
@@ -36,7 +40,6 @@ export default function ProfileImage({ src, alt, size }) {
         setImageSrc(response.data.imageUrl);
         setShowModal(false);
 
-        // ✅ Dispatch custom event to notify others (like BottomNavbar)
         window.dispatchEvent(new Event('profileImageUpdated'));
       }
     } catch (error) {
@@ -47,20 +50,22 @@ export default function ProfileImage({ src, alt, size }) {
   return (
     <>
       <div
-        className="relative group cursor-pointer"
-        onClick={() => setShowModal(true)}
+        className={`relative ${isOwnProfile ? 'group cursor-pointer' : ''}`}
+        onClick={() => isOwnProfile && setShowModal(true)}
       >
         <img
           src={imageSrc}
           alt={alt}
           className={`rounded-full ${size === 'lg' ? 'w-24 h-24' : 'w-16 h-16'} object-cover`}
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-          <span className="text-white text-sm">Edit</span>
-        </div>
+        {isOwnProfile && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-white text-sm">Edit</span>
+          </div>
+        )}
       </div>
 
-      {showModal && (
+      {isOwnProfile && showModal && (
         <ImageUploadModal
           onClose={() => setShowModal(false)}
           onConfirm={handleUpload}

@@ -15,7 +15,8 @@ import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
 import ActivityPage from './frontend/activity/ActivityPage.jsx';
-import SearchUsers from './frontend/social/searchUsers.jsx';
+import SearchUsers from './frontend/social/SearchUsers.jsx';
+import UserProfile from './frontend/social/UserProfile.jsx';
 import Home from './frontend/home/Home.jsx';
 
 
@@ -38,6 +39,7 @@ function App() {
         <Route path="/home" element = {<Home />} />
          <Route path="/search" element = {<SearchPage />} />
         <Route path="/social" element = {<SearchUsers />} />
+        <Route path="/user/:username" element = {<UserProfile />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
