@@ -2,26 +2,37 @@ import { useState, useEffect } from 'react';
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+import { Apple } from "lucide-react";
 
-function StarRating({ rating = 0 }) {
-  const fullStars = Math.floor(rating);
-  const hasHalfStar = rating - fullStars >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+function AppleRating({ rating = 0 }) {
+  const fullApples = Math.floor(rating);
+  const partialFillPercent = (rating - fullApples) * 100;
+  const hasPartialApple = partialFillPercent > 0;
+  const emptyApples = 5 - fullApples - (hasPartialApple ? 1 : 0);
+
+  const PartialApple = ({ fillPercent }) => (
+    <div className="relative w-5 h-5 inline-block">
+      <Apple className="absolute top-0 left-0 w-5 h-5 text-gray-400" />
+      <div className="absolute top-0 left-0 h-5 overflow-hidden" style={{ width: `${fillPercent}%` }}>
+        <Apple className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="flex text-yellow-400 text-sm sm:text-base lg:text-lg gap-[1px] sm:gap-[2px]">
-      {[...Array(fullStars)].map((_, i) => (
-        <FaStar key={`full-${i}`} />
+    <div className="flex gap-1">
+      {[...Array(fullApples)].map((_, i) => (
+        <Apple key={`full-${i}`} className="w-5 h-5 text-yellow-400 fill-yellow-400" />
       ))}
-      {hasHalfStar && <FaStarHalfAlt key="half" />}
-      {[...Array(emptyStars)].map((_, i) => (
-        <FaRegStar key={`empty-${i}`} />
+      {hasPartialApple && (
+        <PartialApple key="partial" fillPercent={partialFillPercent} />
+      )}
+      {[...Array(emptyApples)].map((_, i) => (
+        <Apple key={`empty-${i}`} className="w-5 h-5 text-gray-400" />
       ))}
     </div>
   );
 }
-
 
 export default function TrendingCarousel({
   tmdbEndpoint = "top_rated",
@@ -64,8 +75,8 @@ export default function TrendingCarousel({
                   overview: details.data.overview,
                   vote_average: details.data.vote_average,
                 };
-              } catch (err) {
-                console.error("Error fetching TV show details", err);
+              } catch (error) {
+                console.error("Error fetching TV show details", error);
               }
             }
             return show;
@@ -91,8 +102,6 @@ export default function TrendingCarousel({
     );
   };
 
-
-
   return (
     <div className="relative mx-auto w-[97vw] sm:w-[97.5vw] mt-2 sm:mt-3 h-[30vh] sm:h-[50vh] bg-black text-white overflow-hidden rounded-lg">
       <div
@@ -108,7 +117,6 @@ export default function TrendingCarousel({
                 className="w-full h-full object-cover"
               />
               <div className="absolute top-0 sm:top-[62%] lg:top-[65%] bg-black/70 w-full h-full px-4 pt-3 sm:pt-2 text-white rounded-lg flex flex-col justify-start">
-                
                 <div className="flex justify-between items-center mb-1">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm font-semibold">
                     <span className="text-white text-base sm:text-lg">
@@ -118,12 +126,11 @@ export default function TrendingCarousel({
                       {show.number_of_seasons} Season{show.number_of_seasons > 1 ? "s" : ""} • {show.number_of_episodes} Episode{show.number_of_episodes > 1 ? "s" : ""}
                     </span>
                   </div>
-                    <div className="flex items-center mr-4 gap-1.5 text-yellow-400 font-semibold text-opacity-90">
-                      {Math.round(show.vote_average / 2 * 100) / 100}
-                      <StarRating rating={Math.round((show.vote_average / 2) * 2) / 2} />
-                    </div>
+                  <div className="flex items-center mr-4 gap-1.5 font-semibold text-yellow-400 text-opacity-90">
+                    {Math.round(show.vote_average / 2 * 100) / 100}
+                    <AppleRating rating={Math.round((show.vote_average / 2) * 100) / 100} />
+                  </div>
                 </div>
-
                 <div
                   className="overflow-hidden text-md pt-1 sm:text-lg sm:pt-0 text-[#d5d5d5] pr-2 line-clamp-4 sm:line-clamp-2"
                   style={{
