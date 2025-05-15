@@ -8,6 +8,7 @@ import ShowDescription from './ShowDescription';
 import EpisodeList from './EpisodeList';
 import EpisodeListView from './EpisodeListView';
 import ReviewSection from './ReviewSection';
+import BottomNavbar from '../home/BottomNavbar';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -208,6 +209,7 @@ const ShowDetailsPage = () => {
             isLoading={reviewsLoading}
           />
         </motion.div>
+        <BottomNavbar />
       </div>
     </div>
   );
