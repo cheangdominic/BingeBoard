@@ -2,6 +2,26 @@ import { useState, useEffect } from 'react';
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import { FaStar, FaStarHalfAlt, FaRegStar } from "react-icons/fa";
+
+function StarRating({ rating = 0 }) {
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating - fullStars >= 0.5;
+  const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+  return (
+    <div className="flex text-yellow-400 text-sm sm:text-base lg:text-lg gap-[1px] sm:gap-[2px]">
+      {[...Array(fullStars)].map((_, i) => (
+        <FaStar key={`full-${i}`} />
+      ))}
+      {hasHalfStar && <FaStarHalfAlt key="half" />}
+      {[...Array(emptyStars)].map((_, i) => (
+        <FaRegStar key={`empty-${i}`} />
+      ))}
+    </div>
+  );
+}
+
 
 export default function TrendingCarousel({
   tmdbEndpoint = "top_rated",
@@ -42,6 +62,7 @@ export default function TrendingCarousel({
                   number_of_episodes: details.data.number_of_episodes,
                   number_of_seasons: details.data.number_of_seasons,
                   overview: details.data.overview,
+                  vote_average: details.data.vote_average,
                 };
               } catch (err) {
                 console.error("Error fetching TV show details", err);
@@ -70,6 +91,8 @@ export default function TrendingCarousel({
     );
   };
 
+
+
   return (
     <div className="relative mx-auto w-[97vw] sm:w-[97.5vw] mt-2 sm:mt-3 h-[30vh] sm:h-[50vh] bg-black text-white overflow-hidden rounded-lg">
       <div
@@ -84,15 +107,25 @@ export default function TrendingCarousel({
                 alt={show.name || show.title}
                 className="w-full h-full object-cover"
               />
-              <div className="absolute top-0 sm:top-[56%] lg:top-[60%] bg-black/70 w-full h-full px-4 pt-3 sm:pt-2 text-white rounded-lg flex flex-col justify-start">
-                <div className="font-semibold text-lg mb-1">
-                  {show.name || show.title}
-                  <div className="text-white text-opacity-70 text-xs sm:text-sm">
-                    {show.number_of_seasons} Season{show.number_of_seasons > 1 ? "s" : ""} • {show.number_of_episodes} Episode{show.number_of_episodes > 1 ? "s" : ""}
+              <div className="absolute top-0 sm:top-[60%] lg:top-[63%] bg-black/70 w-full h-full px-4 pt-3 sm:pt-2 text-white rounded-lg flex flex-col justify-start">
+                
+                <div className="flex justify-between items-center mb-1">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 text-xs sm:text-sm font-semibold">
+                    <span className="text-white text-base sm:text-lg">
+                      {show.name || show.title}
+                    </span>
+                    <span className="text-white text-opacity-70 font-semibold">
+                      {show.number_of_seasons} Season{show.number_of_seasons > 1 ? "s" : ""} • {show.number_of_episodes} Episode{show.number_of_episodes > 1 ? "s" : ""}
+                    </span>
                   </div>
+                    <div className="flex items-center mr-4 gap-1.5 text-yellow-400 font-semibold text-opacity-90">
+                      {Math.round(show.vote_average / 2 * 100) / 100}
+                      <StarRating rating={Math.round((show.vote_average / 2) * 2) / 2} />
+                    </div>
                 </div>
+
                 <div
-                  className="overflow-hidden text-lg text-[#d5d5d5] pr-2 line-clamp-4 sm:line-clamp-2"
+                  className="overflow-hidden text-md sm:text-lg text-[#d5d5d5] pr-2 line-clamp-4 sm:line-clamp-2"
                   style={{
                     display: "-webkit-box",
                     WebkitBoxOrient: "vertical",
