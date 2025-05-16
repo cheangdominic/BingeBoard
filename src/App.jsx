@@ -9,6 +9,7 @@ import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx';
 import LoginPage from './frontend/login/LoginPage.jsx';
 import SignupPage from './frontend/signup/SignupPage.jsx';
 import SearchPage from './frontend/search/SearchPage.jsx';
+import ViewAllPage from './frontend/viewall/ViewAllPage.jsx';
 
 import SocialFeature from './frontend/featurecards/SocialFeature.jsx';
 import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
@@ -26,7 +27,7 @@ function App() {
 
   return (
     <Router> 
-      <Routes> 
+      <Routes>
         <Route path="/" element={<Landing />} />  
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
@@ -39,9 +40,10 @@ function App() {
         <Route path="/activity" element={<ActivityPage />} />
         <Route path="/log" element={<LogPage />} />
         <Route path="/home" element = {<Home />} />
-         <Route path="/search" element = {<SearchPage />} />
+        <Route path="/search" element = {<SearchPage />} />
         <Route path="/social" element = {<SearchUsers />} />
         <Route path="/user/:username" element = {<UserProfile />} />
+        <Route path="/view-all/:tmdbEndpoint" element={<ViewAllPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
