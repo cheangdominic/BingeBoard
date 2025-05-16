@@ -287,7 +287,7 @@ const ShowGrid = () => {
                         <h3 className="text-white text-lg font-bold mb-2 truncate">{show.name}</h3>
                         <p className="text-gray-400 text-sm font-semibold flex items-center gap-1">
                           <Apple className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                          {(show.vote_average / 2).toFixed(1)}
+                          {show.vote_average ? Math.round((show.vote_average / 2) * 100) / 100 : "N/A"}
                         </p>
                       </div>
                     </motion.div>
