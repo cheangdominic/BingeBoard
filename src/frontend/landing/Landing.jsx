@@ -39,7 +39,11 @@ function Landing() {
         variants={fadeInUp}
         transition={{ delay: 0.4 }}
       >
-        <FeatureCards />
+        <ShowCarousel
+          title="Trending Today"
+          tmdbEndpoint="trending/tv/day"
+          mediaType="tv"
+        />
       </motion.div>
 
       <motion.div
@@ -48,7 +52,7 @@ function Landing() {
         variants={fadeInUp}
         transition={{ delay: 0.6 }}
       >
-        <Statistics />
+        <PopularReviews />
       </motion.div>
 
       <motion.div
@@ -57,7 +61,7 @@ function Landing() {
         variants={fadeInUp}
         transition={{ delay: 0.8 }}
       >
-        <PopularReviews />
+        <FeatureCards />
       </motion.div>
 
       <motion.div
@@ -66,11 +70,7 @@ function Landing() {
         variants={fadeInUp}
         transition={{ delay: 1.0 }}
       >
-        <ShowCarousel
-          title="Trending Today"
-          tmdbEndpoint="trending/tv/day"
-          mediaType="tv"
-        />
+        <Statistics />
       </motion.div>
 
       <motion.div
