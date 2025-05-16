@@ -10,6 +10,8 @@ import EpisodeListView from './EpisodeListView';
 import ReviewSection from './ReviewSection';
 import BottomNavbar from '../../components/BottomNavbar.jsx';
 import AddToWatchlistButton from './AddToWatchlistButton.jsx';
+import TopNavbar from '../../frontend/landing/TopNavbar.jsx';
+import Footer from '../../frontend/landing/Footer.jsx';
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -53,6 +55,7 @@ const ShowDetailsPage = () => {
 const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const { user } = useAuth();
+  const isAuthenticated = user;
 
   const LoadingSpinner = () => (
     <motion.div 
@@ -176,6 +179,7 @@ const [reviews, setReviews] = useState([]);
       transition={{ duration: 0.5 }}
       className="min-h-screen bg-[#1e1e1e] text-gray-100"
     >
+      {!isAuthenticated && <TopNavbar />}
       <div className="p-6 max-w-8xl mx-auto space-y-8">
         <AnimatePresence mode="wait">
           <motion.div
@@ -204,7 +208,7 @@ const [reviews, setReviews] = useState([]);
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <AddToWatchlistButton showId={id} />
+              {isAuthenticated && <AddToWatchlistButton showId={id} />}
             </motion.div>
       </motion.div>
 
@@ -276,16 +280,9 @@ const [reviews, setReviews] = useState([]);
             isLoading={reviewsLoading}
           />
         </motion.div>
-        <BottomNavbar />
+        {isAuthenticated && <BottomNavbar />}
+        {!isAuthenticated && <Footer />}
       </div>
-      
-      <motion.div
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 1.2 }}
-      >
-        <BottomNavbar />
-      </motion.div>
     </motion.div>
   );
 };
