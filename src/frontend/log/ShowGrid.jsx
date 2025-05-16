@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import SearchBar from "../search/SearchBar.jsx";
 import TVShowFilters from "../search/TVShowFilters";
 import { Apple } from "lucide-react";
-import { X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
@@ -74,7 +74,10 @@ const ShowGrid = () => {
   const [reviewText, setReviewText] = useState("");
   const [ratingWhole, setRatingWhole] = useState(0);
   const [ratingDecimal, setRatingDecimal] = useState(0);
+  const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [tagsInput, setTagsInput] = useState("");
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (ratingWhole >= 5) {
@@ -89,10 +92,10 @@ const ShowGrid = () => {
     }
   };
 
-  const fetchTrendingShowsToday = async () => {
+  const fetchTrendingShowsWeek = async () => {
     try {
       const trendingRes = await axios.get(
-        "https://api.themoviedb.org/3/trending/tv/day",
+        "https://api.themoviedb.org/3/trending/tv/week",
         {
           params: {
             api_key: "325f0c86f4e9c504dac84ae3046cbee2",
@@ -109,7 +112,7 @@ const ShowGrid = () => {
   };
 
   useEffect(() => {
-    if (!query) fetchTrendingShowsToday();
+    if (!query) fetchTrendingShowsWeek();
   }, [query]);
 
   useEffect(() => {
@@ -183,9 +186,15 @@ const ShowGrid = () => {
   };
 
   const handleCardClick = (show) => {
-    setSelectedShow(show);
-    setRatingWhole(0);
-    setRatingDecimal(0);
+    const screenWidth = window.innerWidth;
+    if (screenWidth < 640) {
+      navigate(`/log/review`, { state: { selectedShow: show } });
+    } else {
+      setSelectedShow(show);
+      setIsMobileView(false);
+      setRatingWhole(0);
+      setRatingDecimal(0);
+    }
   };
 
   const fadeInUp = {
@@ -309,9 +318,7 @@ const ShowGrid = () => {
           </div>
 
           {selectedShow && (
-            <div className="w-72 bg-zinc-900 sticky top-[4vh] rounded-xl mt-[1.5vh] p-3 shadow-xl text-white flex-shrink-0">
-
-
+            <div className="w-72 max-h-[85vh] overflow-y-auto bg-zinc-900 sticky sm:top-[3vh] lg:top-[3vh] xl:top-[3vh] rounded-xl mt-[1.5vh] p-3 shadow-xl text-white flex-shrink-0">
               <h2 className="text-xl font-bold mb-1.5">{selectedShow.name}</h2>
               <img
                 src={
@@ -333,6 +340,18 @@ const ShowGrid = () => {
                     rows={3}
                     placeholder="Write your thoughts..."
                   />
+                  <div className="flex items-center gap-2 mt-1">
+                    <input
+                      type="checkbox"
+                      id="spoiler-checkbox"
+                      checked={containsSpoilers}
+                      onChange={(e) => setContainsSpoilers(e.target.checked)}
+                      className="form-checkbox h-4 w-4 text-yellow-500 bg-zinc-800 border-zinc-600"
+                    />
+                    <label htmlFor="spoiler-checkbox" className="text-sm text-gray-300 select-none font-semibold">
+                      Contains Spoilers
+                    </label>
+                  </div>
                 </div>
                 <div className="flex flex-col">
                   <label className="block mb-1 font-semibold text-sm">Rating</label>
@@ -341,7 +360,7 @@ const ShowGrid = () => {
                     onClickApple={handleAppleClick}
                     style={{ scale: 0.85 }}
                   />
-                  <div className="flex items-center gap-1.5 mt-1">
+                  <div className="flex items-center gap-1.5 mt-1 pb-3">
                     <input
                       type="number"
                       min={0}
@@ -406,13 +425,13 @@ const ShowGrid = () => {
                     />
                   </div>
                 </div>
-                <div>
+                                <div>
                   <label className="block mb-1 font-semibold text-sm">Tags</label>
                   <input
                     type="text"
                     value={tagsInput}
                     onChange={(e) => setTagsInput(e.target.value)}
-                    className="bg-zinc-800 rounded-md p-1.5 w-full text-gray-200 text-sm"
+                    className="bg-zinc-800 rounded-md p-1.5 pt-2 pb-2 mb-4 w-full text-gray-200 text-sm"
                     placeholder="e.g., Comedy, Drama"
                   />
                 </div>
@@ -432,8 +451,6 @@ const ShowGrid = () => {
               </div>
             </div>
           )}
-
-
         </div>
       </motion.div>
     </div>

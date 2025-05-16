@@ -17,6 +17,7 @@ import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
 import ActivityPage from './frontend/activity/ActivityPage.jsx';
 import LogPage from './frontend/log/LogPage.jsx';
+import LogReviewMobilePage from './frontend/log/LogReviewMobilePage.jsx';
 import SearchUsers from './frontend/social/SearchUsers.jsx';
 import UserProfile from './frontend/social/UserProfile.jsx';
 import Home from './frontend/home/Home.jsx';
@@ -39,6 +40,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/activity" element={<ActivityPage />} />
         <Route path="/log" element={<LogPage />} />
+        <Route path="/log/review" element={<LogReviewMobilePage />} />
         <Route path="/home" element = {<Home />} />
         <Route path="/search" element = {<SearchPage />} />
         <Route path="/browse" element = {<SearchPage />} />
