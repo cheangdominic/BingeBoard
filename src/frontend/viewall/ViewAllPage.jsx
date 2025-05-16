@@ -9,6 +9,7 @@ const CARD_WIDTH = 130;
 
 export default function ViewAllPage() {
   const { tmdbEndpoint } = useParams();
+  const decodedEndpoint = decodeURIComponent(tmdbEndpoint);
   const [shows, setShows] = useState([]);
   const [page, setPage] = useState(1);
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -23,7 +24,7 @@ export default function ViewAllPage() {
 
       try {
         const res = await axios.get(
-          `https://api.themoviedb.org/3/tv/${tmdbEndpoint}?api_key=${API_KEY}&language=en-US&page=1`
+          `https://api.themoviedb.org/3/${decodedEndpoint}?api_key=${API_KEY}&language=en-US&page=1`
         );
         setShows(res.data.results || []);
       } catch (error) {
@@ -44,7 +45,7 @@ export default function ViewAllPage() {
       animate={{ opacity: 1, y: 0 }}
     >
       <h1 className="text-3xl font-bold mb-6 capitalize">
-        All {tmdbEndpoint.replace(/_/g, " ")} Shows
+        All {decodedEndpoint.replace(/_/g, " ")} Shows
       </h1>
 
       <div className="flex flex-wrap justify-start">

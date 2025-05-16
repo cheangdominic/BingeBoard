@@ -35,13 +35,11 @@ function AppleRating({ rating = 0 }) {
 }
 
 export default function TrendingCarousel({
-  tmdbEndpoint = "top_rated",
-  mediaType = "tv",
+  tmdbEndpoint = "tv/top_rated",
   slideLimit = 10
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [trendingShows, setTrendingShows] = useState([]);
-
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 
   useEffect(() => {
@@ -53,33 +51,32 @@ export default function TrendingCarousel({
 
       try {
         const res = await axios.get(
-          `https://api.themoviedb.org/3/${mediaType}/${tmdbEndpoint}?api_key=${API_KEY}&language=en-US&page=1`
+          `https://api.themoviedb.org/3/${tmdbEndpoint}?api_key=${API_KEY}&language=en-US&page=1`
         );
 
         const limitedResults = res.data.results.slice(0, slideLimit);
 
         const showDetails = await Promise.all(
           limitedResults.map(async (show) => {
-            if (mediaType === "tv") {
-              try {
-                const details = await axios.get(
-                  `https://api.themoviedb.org/3/tv/${show.id}?api_key=${API_KEY}&language=en-US`
-                );
-                return {
-                  id: show.id,
-                  name: show.name,
-                  title: show.title,
-                  backdrop_path: show.backdrop_path,
-                  number_of_episodes: details.data.number_of_episodes,
-                  number_of_seasons: details.data.number_of_seasons,
-                  overview: details.data.overview,
-                  vote_average: details.data.vote_average,
-                };
-              } catch (error) {
-                console.error("Error fetching TV show details", error);
-              }
+            const mediaType = show.media_type || "tv";
+            try {
+              const details = await axios.get(
+                `https://api.themoviedb.org/3/${mediaType}/${show.id}?api_key=${API_KEY}&language=en-US`
+              );
+              return {
+                id: show.id,
+                name: show.name,
+                title: show.title,
+                backdrop_path: show.backdrop_path,
+                number_of_episodes: details.data.number_of_episodes,
+                number_of_seasons: details.data.number_of_seasons,
+                overview: details.data.overview,
+                vote_average: details.data.vote_average,
+              };
+            } catch (error) {
+              console.error("Error fetching show details", error);
+              return show;
             }
-            return show;
           })
         );
 
@@ -90,7 +87,7 @@ export default function TrendingCarousel({
     };
 
     fetchTrendingShows();
-  }, [API_KEY, tmdbEndpoint, mediaType, slideLimit]);
+  }, [API_KEY, tmdbEndpoint, slideLimit]);
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % trendingShows.length);
