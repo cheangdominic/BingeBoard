@@ -318,7 +318,7 @@ const ShowGrid = () => {
           </div>
 
           {selectedShow && (
-            <div className="w-72 max-h-[85vh] overflow-y-auto bg-zinc-900 sticky sm:top-[3vh] lg:top-[3vh] xl:top-[3vh] rounded-xl mt-[1.5vh] p-3 shadow-xl text-white flex-shrink-0">
+            <div className="w-72 max-h-[85vh] overflow-y-auto bg-zinc-900 sticky top-[3.5vh] rounded-xl mt-[1.5vh] p-3 shadow-xl text-white flex-shrink-0">
               <h2 className="text-xl font-bold mb-1.5">{selectedShow.name}</h2>
               <img
                 src={
