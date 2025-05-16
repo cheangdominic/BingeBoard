@@ -79,8 +79,10 @@ export default function TrendingCarousel({
             }
           })
         );
-
+        showDetails.sort((a, b) => b.vote_average - a.vote_average);
         setTrendingShows(showDetails);
+
+
       } catch (error) {
         console.error("Failed to fetch trending shows:", error);
       }
