@@ -9,7 +9,7 @@ const CARD_WIDTH = 130;
 
 export default function ViewAllPage() {
   const { tmdbEndpoint } = useParams();
-  const decodedEndpoint = decodeURIComponent(tmdbEndpoint);
+  const decodedEndpoint = decodeURIComponent(tmdbEndpoint); // Used ChatGPT for help with encoding / decoding logic here and in ShowCarousel.jsx
   const [shows, setShows] = useState([]);
   const [page, setPage] = useState(1);
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
