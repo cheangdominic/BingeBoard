@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import SearchBar from "../search/SearchBar.jsx";
 import TVShowFilters from "../search/TVShowFilters";
 import { Apple } from "lucide-react";
+import { X } from "lucide-react";
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 
@@ -193,7 +194,7 @@ const ShowGrid = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1e1e1e] py-16 px-4 pb-24">
+    <div className="min-h-screen bg-[#1e1e1e] py-16 px-4 pb-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -205,21 +206,22 @@ const ShowGrid = () => {
 
         <SearchBar query={query} setQuery={setQuery} onSearch={searchShows} isSearching={isSearching} />
 
+        {hasSearched && broadenedShows.length > 0 && (
+          <div className="max-w-4xl mx-auto mt-6">
+            <TVShowFilters shows={broadenedShows} onFilter={setFilteredBroadenedShows} />
+          </div>
+        )}
+
+        {hasSearched && (
+          <div className="w-full text-center">
+            <p className="text-gray-400 inline-block">
+              Found {totalResults} results for "{query}"
+            </p>
+          </div>
+        )}
+
         <div className="flex gap-6 mt-10 items-start">
           <div className="flex-grow space-y-12">
-            {hasSearched && (
-              <div className="space-y-4">
-                <p className="text-gray-400 text-center">
-                  Found {totalResults} results for "{query}"
-                </p>
-                {broadenedShows.length > 0 && (
-                  <div className="max-w-4xl mx-auto">
-                    <TVShowFilters shows={broadenedShows} onFilter={setFilteredBroadenedShows} />
-                  </div>
-                )}
-              </div>
-            )}
-
             {exactMatches.length > 0 && (
               <section className="pt-4">
                 <h2 className="text-2xl font-semibold text-[#f1f1f1] mb-6">Exact Matches</h2>
@@ -259,7 +261,7 @@ const ShowGrid = () => {
             )}
 
             {filteredBroadenedShows.length > 0 && (
-              <section>
+              <section className="pt-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
                   {filteredBroadenedShows.map((show) => (
                     <motion.div
@@ -285,38 +287,32 @@ const ShowGrid = () => {
                         <h3 className="text-white text-lg font-bold mb-2 truncate">{show.name}</h3>
                         <p className="text-gray-400 text-sm font-semibold flex items-center gap-1">
                           <Apple className="w-4 h-4 fill-yellow-500 text-yellow-500" />
-                          {show.vote_average ? Math.round((show.vote_average / 2) * 100) / 100 : "N/A"}
+                          {(show.vote_average / 2).toFixed(1)}
                         </p>
                       </div>
                     </motion.div>
                   ))}
                 </div>
-
-                {filteredBroadenedShows.length < totalResults && (
-                  <div className="flex justify-center mt-8 mb-12">
-                    <button
-                      onClick={loadMore}
-                      className="px-6 py-3 bg-[#1963da] text-white rounded-lg hover:bg-[#1652b5] transition-colors"
-                    >
-                      Load More
-                    </button>
-                  </div>
-                )}
               </section>
             )}
 
-            {!isSearching && hasSearched && exactMatches.length === 0 && broadenedShows.length === 0 && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
-                <p className="text-gray-300 text-xl">
-                  No results found for "{query}". Try a different search term.
-                </p>
-              </motion.div>
+            {hasSearched && filteredBroadenedShows.length + exactMatches.length < totalResults && (
+              <div className="flex justify-center mt-8">
+                <button
+                  className="bg-[#1963da] hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={loadMore}
+                >
+                  Load More
+                </button>
+              </div>
             )}
           </div>
 
           {selectedShow && (
-            <div className="w-96 bg-zinc-900 rounded-xl p-6 shadow-xl text-white flex-shrink-0">
-              <h2 className="text-2xl font-bold mb-4">{selectedShow.name}</h2>
+            <div className="w-72 bg-zinc-900 sticky top-[4vh] rounded-xl mt-[1.5vh] p-3 shadow-xl text-white flex-shrink-0">
+
+
+              <h2 className="text-xl font-bold mb-1.5">{selectedShow.name}</h2>
               <img
                 src={
                   selectedShow.poster_path
@@ -324,26 +320,28 @@ const ShowGrid = () => {
                     : "https://via.placeholder.com/500x750?text=No+Image"
                 }
                 alt={selectedShow.name}
-                className="w-full rounded-lg mb-4"
+                className="w-full rounded-lg mb-2"
+                style={{ maxHeight: "300px", objectFit: "cover" }}
               />
-              <div className="space-y-4">
+              <div className="space-y-2.5">
                 <div>
-                  <label className="block mb-1 font-semibold">Review</label>
+                  <label className="block mb-1 font-semibold text-sm">Review</label>
                   <textarea
                     value={reviewText}
                     onChange={(e) => setReviewText(e.target.value)}
-                    className="bg-zinc-800 rounded-md p-3 w-full text-gray-200"
-                    rows={4}
+                    className="bg-zinc-800 rounded-md p-1.5 w-full text-gray-200 text-sm"
+                    rows={3}
                     placeholder="Write your thoughts..."
                   />
                 </div>
                 <div className="flex flex-col">
-                  <label className="block mb-1 font-semibold">Rating</label>
+                  <label className="block mb-1 font-semibold text-sm">Rating</label>
                   <AppleRating
                     rating={ratingWhole + ratingDecimal / 100}
                     onClickApple={handleAppleClick}
+                    style={{ scale: 0.85 }}
                   />
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-1.5 mt-1">
                     <input
                       type="number"
                       min={0}
@@ -370,9 +368,9 @@ const ShowGrid = () => {
                           setRatingWhole(0);
                         }
                       }}
-                      className="bg-zinc-800 p-2 rounded-md text-gray-200 w-12 text-center"
+                      className="bg-zinc-800 p-1 rounded-md text-gray-200 w-10 text-center text-sm"
                     />
-                    <span className="text-gray-200 text-xl font-bold select-none">.</span>
+                    <span className="text-gray-200 text-lg font-bold select-none">.</span>
                     <input
                       type="number"
                       min={0}
@@ -403,30 +401,39 @@ const ShowGrid = () => {
                         }
                       }}
                       disabled={ratingWhole >= 5}
-                      className={`bg-zinc-800 p-2 rounded-md text-gray-200 w-16 text-center ${ratingWhole >= 5 ? "opacity-50 cursor-not-allowed" : ""
+                      className={`bg-zinc-800 p-1 rounded-md text-gray-200 w-14 text-center text-sm ${ratingWhole >= 5 ? "opacity-50 cursor-not-allowed" : ""
                         }`}
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-1 font-semibold">Tags</label>
+                  <label className="block mb-1 font-semibold text-sm">Tags</label>
                   <input
                     type="text"
                     value={tagsInput}
                     onChange={(e) => setTagsInput(e.target.value)}
-                    className="bg-zinc-800 rounded-md p-3 w-full text-gray-200"
+                    className="bg-zinc-800 rounded-md p-1.5 w-full text-gray-200 text-sm"
                     placeholder="e.g., Comedy, Drama"
                   />
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
-                  className="mt-4 w-full py-2 bg-[#1963da] text-white rounded-lg hover:bg-[#1652b5] transition-colors"
+                  className="mt-2 w-full py-1.5 bg-[#1963da] text-white rounded-lg hover:bg-[#1652b5] transition-colors text-sm font-semibold"
                 >
                   Submit
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  onClick={() => setSelectedShow(null)}
+                  className="mt-2 w-full py-1.5 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400 transition-colors text-sm font-semibold"
+                >
+                  Cancel
                 </motion.button>
               </div>
             </div>
           )}
+
+
         </div>
       </motion.div>
     </div>
