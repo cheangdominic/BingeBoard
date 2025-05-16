@@ -27,48 +27,38 @@ function Home() {
         variants={fadeInUp}
         transition={{ delay: 0.2 }}
       >
-        <TrendingCarousel
-          tmdbEndpoint="top_rated"
-          mediaType="tv"
-        />
+        <TrendingCarousel tmdbEndpoint="tv/top_rated" />
 
         <FriendsRecentlyWatched />
 
         <ShowCarousel
           title="Trending Today"
-          tmdbEndpoint="tv/day"
-          mediaType="trending"
+          tmdbEndpoint="trending/tv/day"
         />
         <ShowCarousel
           title="Popular TV Shows"
-          tmdbEndpoint="popular"
-          mediaType="tv"
+          tmdbEndpoint="tv/popular"
         />
         <ShowCarousel
           title="Top Rated TV Shows"
-          tmdbEndpoint="top_rated"
-          mediaType="tv"
+          tmdbEndpoint="tv/top_rated"
         />
         <RecentReviewsFiltered />
 
         <ShowCarousel
           title="On Air TV Shows"
-          tmdbEndpoint="on_the_air"
-          mediaType="tv"
+          tmdbEndpoint="tv/on_the_air"
         />
-
         <ShowCarousel
           title="Airing Today TV Shows"
-          tmdbEndpoint="airing_today"
-          mediaType="tv"
+          tmdbEndpoint="tv/airing_today"
         />
-      
-      <RecommendedByFriends />
 
+        <RecommendedByFriends />
       </motion.div>
       <BottomNavbar />
     </>
-  )
+  );
 }
 
-export default Home
+export default Home;

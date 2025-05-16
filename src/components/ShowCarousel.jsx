@@ -7,10 +7,8 @@ import { motion } from "framer-motion";
 function ShowCarousel({
   title,
   tmdbEndpoint = "popular",
-  mediaType = "tv",
   cardActualWidth = 130,
   userScrollBehavior = 'smooth',
-  tag
 }) {
   const [shows, setShows] = useState([]);
   const containerRef = useRef(null);
@@ -27,17 +25,17 @@ function ShowCarousel({
       }
       try {
         const res = await axios.get(
-          `https://api.themoviedb.org/3/${mediaType}/${tmdbEndpoint}?api_key=${API_KEY}&language=en-US&page=1`
+          `https://api.themoviedb.org/3/${tmdbEndpoint}?api_key=${API_KEY}&language=en-US&page=1`
         );
         setShows(res.data.results || []);
       } catch (error) {
-        console.error(`Failed to fetch ${mediaType} "${tmdbEndpoint}":`, error);
+        console.error(`Failed to fetch "${tmdbEndpoint}":`, error);
         setShows([]);
       }
     };
 
     fetchShows();
-  }, [tmdbEndpoint, mediaType, API_KEY]);
+  }, [tmdbEndpoint, API_KEY]);
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current;
@@ -109,7 +107,7 @@ function ShowCarousel({
     <section className="relative my-8 pl-2 mr-2">
       <div className="flex justify-between items-center mb-4 px-4 md:px-0">
         <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">{title}</h3>
-        <Link to={`/view-all/${tmdbEndpoint}`}>
+        <Link to={`/view-all/${encodeURIComponent(tmdbEndpoint)}`}>
           <button className="text-sm text-blue-400 hover:underline">View All</button>
         </Link>
       </div>
@@ -121,7 +119,7 @@ function ShowCarousel({
         <div ref={contentRef} className="flex">
           {allItems.map((show, index) => (
             <motion.div
-              key={`${show.id}-${index}-${mediaType}-${tmdbEndpoint}`}
+              key={`${show.id}-${index}-${tmdbEndpoint}`}
               className="flex-shrink-0 px-1 py-2" 
               style={{ width: `${itemWidth}px` }}
               initial={{ opacity: 0, y: 20 }}
