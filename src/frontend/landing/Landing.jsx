@@ -40,8 +40,8 @@ function Landing() {
         transition={{ delay: 0.4 }}
       >
         <ShowCarousel
-          title="Trending Today"
-          tmdbEndpoint="trending/tv/day"
+          title="Trending This Week"
+          tmdbEndpoint="trending/tv/week"
           mediaType="tv"
         />
       </motion.div>
