@@ -1,13 +1,17 @@
 import { useEffect, useState } from 'react';
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { fetchSeasonEpisodes } from '/src/backend/tmdb';
+import { useAuth } from '../../context/AuthContext';
 
-const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
+
+const EpisodeList = ({ seasons, showId }) => {
   const [selectedSeason, setSelectedSeason] = useState(seasons[0]?.number || 1);
   const [episodesBySeason, setEpisodesBySeason] = useState({});
   const [selectedEpisodes, setSelectedEpisodes] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [viewAll, setViewAll] = useState(false);
+  const { user } = useAuth();
+  const isAuthenticated = user;
   
   const EPISODES_LIMIT = 20; 
 
