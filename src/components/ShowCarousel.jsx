@@ -2,14 +2,15 @@ import React, { useEffect, useState, useRef, useCallback } from "react";
 import TVShowCard from "./TVShowCard";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion"; 
+import { motion } from "framer-motion";
 
 function ShowCarousel({
   title,
   tmdbEndpoint = "popular",
   mediaType = "tv",
   cardActualWidth = 130,
-  userScrollBehavior = 'smooth'
+  userScrollBehavior = 'smooth',
+  tag
 }) {
   const [shows, setShows] = useState([]);
   const containerRef = useRef(null);
@@ -108,7 +109,9 @@ function ShowCarousel({
     <section className="relative my-8 pl-2 mr-2">
       <div className="flex justify-between items-center mb-4 px-4 md:px-0">
         <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">{title}</h3>
-        <a href="#" className="text-sm text-blue-400 hover:underline">View All</a>
+        <Link to={`/view-all/${tmdbEndpoint}`}>
+          <button className="text-sm text-blue-400 hover:underline">View All</button>
+        </Link>
       </div>
 
       <div
