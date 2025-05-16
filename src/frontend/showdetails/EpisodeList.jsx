@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { fetchSeasonEpisodes } from '/src/backend/tmdb';
 
-const EpisodeList = ({ seasons, showId }) => {
+const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
   const [selectedSeason, setSelectedSeason] = useState(seasons[0]?.number || 1);
   const [episodesBySeason, setEpisodesBySeason] = useState({});
   const [selectedEpisodes, setSelectedEpisodes] = useState([]);
@@ -39,6 +39,7 @@ const EpisodeList = ({ seasons, showId }) => {
   const hasMoreEpisodes = episodes.length > EPISODES_LIMIT;
 
   const handleEpisodeClick = (episodeId) => {
+    if (!isAuthenticated) return;
     setSelectedEpisodes(prev =>
       prev.includes(episodeId)
         ? prev.filter(id => id !== episodeId)
@@ -46,10 +47,14 @@ const EpisodeList = ({ seasons, showId }) => {
     );
   };
 
-  const handleDragStart = () => setIsDragging(true);
-  const handleDragEnd = () => setIsDragging(false);
-
-  const currentSeason = seasons.find(season => season.number === selectedSeason) || {};
+  const handleDragStart = () => {
+    if (!isAuthenticated) return;
+    setIsDragging(true);
+  };
+  const handleDragEnd = () => {
+    if (!isAuthenticated) return;
+    setIsDragging(false);
+  };
 
   return (
     <div className="bg-gradient-to-br from-[#272733] to-[#1c1c24] rounded-xl p-6 shadow-lg border border-[#343444]">
@@ -100,10 +105,10 @@ const EpisodeList = ({ seasons, showId }) => {
             onMouseDown={handleDragStart}
             onMouseUp={handleDragEnd}
             onMouseEnter={() => isDragging && handleEpisodeClick(ep.id)}
-            className={`aspect-square rounded-lg flex items-center justify-center relative cursor-pointer transition-all ${
+            className={`aspect-square rounded-lg flex items-center justify-center relative transition-all ${
               selectedEpisodes.includes(ep.id)
-                ? 'bg-blue-600 border-2 border-blue-400 shadow-lg shadow-blue-500/20'
-                : 'bg-[#343444] hover:bg-[#3f3f52] border border-[#4a4a5a]'
+                ? 'bg-blue-600 border-2 border-blue-400 shadow-lg shadow-blue-500/20 cursor-pointer'
+                : 'bg-[#343444] hover:bg-[#3f3f52] border border-[#4a4a5a] cursor-pointer'
             }`}
           >
             <span className="text-sm font-medium text-gray-200">{ep.number}</span>
@@ -130,22 +135,24 @@ const EpisodeList = ({ seasons, showId }) => {
       )}
 
       {/* Action Button */}
-      <button
-        disabled={selectedEpisodes.length === 0}
-        className={`w-full py-3.5 rounded-lg font-medium flex items-center justify-center space-x-3 transition-colors text-lg ${
-          selectedEpisodes.length > 0
-            ? 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-lg shadow-green-500/20'
-            : 'bg-[#343444] text-gray-400 cursor-not-allowed'
-        }`}
-      >
-        <FaEye className="text-base" />
-        <span>Mark Selected as Watched</span>
-        {selectedEpisodes.length > 0 && (
-          <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-sm">
-            {selectedEpisodes.length}
-          </span>
-        )}
-      </button>
+      {isAuthenticated && (
+        <button
+          disabled={selectedEpisodes.length === 0}
+          className={`w-full py-3.5 rounded-lg font-medium flex items-center justify-center space-x-3 transition-colors text-lg ${
+            selectedEpisodes.length > 0
+              ? 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-lg shadow-green-500/20'
+              : 'bg-[#343444] text-gray-400 cursor-not-allowed'
+          }`}
+        >
+          <FaEye className="text-base" />
+          <span>Mark Selected as Watched</span>
+          {selectedEpisodes.length > 0 && (
+            <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-sm">
+              {selectedEpisodes.length}
+            </span>
+          )}
+        </button>
+      )}
     </div>
   );
 };

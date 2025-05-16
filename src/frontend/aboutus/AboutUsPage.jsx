@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Landing from '../landing/TopNavbar';
 import Footer from '../landing/Footer';
@@ -16,6 +17,10 @@ const fadeInUp = {
 };
 
 function AboutUsPage() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <>
       <Landing />

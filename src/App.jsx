@@ -41,6 +41,7 @@ function App() {
         <Route path="/log" element={<LogPage />} />
         <Route path="/home" element = {<Home />} />
         <Route path="/search" element = {<SearchPage />} />
+        <Route path="/browse" element = {<SearchPage />} />
         <Route path="/social" element = {<SearchUsers />} />
         <Route path="/user/:username" element = {<UserProfile />} />
         <Route path="/view-all/:tmdbEndpoint" element={<ViewAllPage />} />
