@@ -3,7 +3,8 @@ import TopNavbar from './TopNavbar.jsx';
 import MottoBanner from './MottoBanner.jsx';
 import FeatureCards from './FeatureCards.jsx';
 import Statistics from './Statistics.jsx';
-import ShowCarousel from './ShowCarousel.jsx';
+import PopularReviews from './PopularReviews.jsx';
+import ShowCarousel from '../../components/ShowCarousel.jsx';
 import Footer from './Footer.jsx';
 
 const fadeInUp = {
@@ -22,7 +23,7 @@ function Landing() {
   return (
     <>
       <TopNavbar />
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
@@ -31,32 +32,36 @@ function Landing() {
       >
         <MottoBanner />
       </motion.div>
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
         variants={fadeInUp}
         transition={{ delay: 0.4 }}
       >
-        <FeatureCards />
+        <ShowCarousel
+          title="Trending This Week"
+          tmdbEndpoint="trending/tv/week"
+          mediaType="tv"
+        />
       </motion.div>
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
         variants={fadeInUp}
         transition={{ delay: 0.6 }}
       >
-        <Statistics />
+        <PopularReviews />
       </motion.div>
-      
+
       <motion.div
         initial="hidden"
         animate="visible"
         variants={fadeInUp}
         transition={{ delay: 0.8 }}
       >
-        <ShowCarousel />
+        <FeatureCards />
       </motion.div>
 
       <motion.div
@@ -64,6 +69,15 @@ function Landing() {
         animate="visible"
         variants={fadeInUp}
         transition={{ delay: 1.0 }}
+      >
+        <Statistics />
+      </motion.div>
+
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        transition={{ delay: 1.2 }}
       >
         <Footer />
       </motion.div>

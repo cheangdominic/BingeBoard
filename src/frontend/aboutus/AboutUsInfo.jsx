@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 
+import teamIcon from '../../assets/team_icon.svg';
+
 const fadeInUp = {
   hidden: { opacity: 0, y: 30 },
   visible: (i = 1) => ({
@@ -15,11 +17,11 @@ const fadeInUp = {
 
 function AboutUsInfo() {
   const team = [
-    { name: "Valley Balfour", role: "Team Member 1", image: "src/assets/team_icon.svg" },
-    { name: "Dominic Cheang", role: "Team Member 2", image: "src/assets/dominic_cheang_photo.webp" },
-    { name: "Tyrone Cheang", role: "Team Member 3", image: "src/assets/team_icon.svg" },
-    { name: "Isaac Kehler", role: "Team Member 4", image: "src/assets/team_icon.svg" },
-    { name: "Bullen Kosa", role: "Team Member 5", image: "src/assets/team_icon.svg" },
+    { name: "Valley Balfour", role: "Team Member 1", image: teamIcon },
+    { name: "Dominic Cheang", role: "Team Member 2", image: teamIcon},
+    { name: "Tyrone Cheang", role: "Team Member 3", image: teamIcon },
+    { name: "Isaac Kehler", role: "Team Member 4", image: teamIcon },
+    { name: "Bullen Kosa", role: "Team Member 5", image: teamIcon },
   ];
 
   return (

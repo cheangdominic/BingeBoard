@@ -16,6 +16,7 @@ import {
 import {
   ChevronDownIcon,
 } from "@heroicons/react/20/solid";
+import logo from "../../assets/BingeBoard Icon.svg";
 
 export default function TopNavbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -124,10 +125,10 @@ export default function TopNavbar() {
           <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
             <img
               alt="BingeBoard logo"
-              src="src/assets/BingeBoard Icon.svg"
+              src={logo}
               className="h-10 w-auto"
             />
-            <span className="text-white text-3xl font-bold font-coolvetica hover:text-blue-400 transition">
+            <span className="text-white text-3xl font-bold hover:text-blue-400 transition">
               BingeBoard
             </span>
           </a>
@@ -145,13 +146,13 @@ export default function TopNavbar() {
         <PopoverGroup className="hidden lg:flex lg:gap-x-12">
           <a
             href="/signup"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
+            className="text-sm/6 font-semibold text-[#ffffff] hover:text-blue-400 transition"
           >
             Create Account
           </a>
           <a
             href="/browse"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
+            className="text-sm/6 font-semibold text-[#ffffff] hover:text-blue-400 transition"
           >
             Browse
           </a>
@@ -212,7 +213,7 @@ export default function TopNavbar() {
 
           <a
             href="/aboutus"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
+            className="text-sm/6 font-semibold text-[#ffffff] hover:text-blue-400 transition"
           >
             About Us
           </a>
@@ -220,7 +221,7 @@ export default function TopNavbar() {
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           <a
             href="/login"
-            className="text-sm/6 font-semibold font-coolvetica text-[#ffffff] hover:text-blue-400 transition"
+            className="text-sm/6 font-semibold text-[#ffffff] hover:text-blue-400 transition"
           >
             Log In <span aria-hidden="true">&rarr;</span>
           </a>
@@ -240,7 +241,7 @@ export default function TopNavbar() {
                 src="src/assets/BingeBoard Icon.svg"
                 className="h-8 w-auto"
               />
-              <span className="text-white text-xl font-bold font-coolvetica">
+              <span className="text-white text-xl font-bold">
                 BingeBoard
               </span>
             </a>

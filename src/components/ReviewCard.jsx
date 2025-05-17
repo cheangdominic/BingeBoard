@@ -10,12 +10,12 @@ function ReviewCard({ user, date, reviewText, rating, imageUrl }) {
       {/* Left side */}
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-1">
-          <ProfileImage
+          { /*<ProfileImage
           src="/img/profilePhotos/generic_profile_picture.jpg"
           alt="User profile photo"
               size="sm"
-          />
-          <div>
+          /> */}
+          <div> 
             <p className="text-white font-semibold text-sm">{user.username}</p>
             <p className="text-gray-400 text-xs">{date}</p>
           </div>

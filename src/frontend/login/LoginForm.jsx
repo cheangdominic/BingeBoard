@@ -1,4 +1,5 @@
 import { useState } from "react";
+import logo from '../../assets/BingeBoard Icon.svg';
 
 function LoginForm() {
   const [formData, setFormData] = useState({
@@ -54,7 +55,7 @@ function LoginForm() {
     if (!validateForm()) return;
 
     try {
-      const response = await fetch('http://localhost:3001/api/login', {
+      const response = await fetch('/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +85,7 @@ function LoginForm() {
   return (
     <div className="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img className="mx-auto h-10 w-auto" src="src/assets/BingeBoard Icon.svg" alt="BingeBoard Logo" />
+        <img className="mx-auto h-10 w-auto" src={logo} alt="BingeBoard Logo" />
         <h2 className="mt-10 text-center text-2xl/9 font-bold tracking-tight text-[#ffffff]">Sign In to Your Account</h2>
       </div>
 

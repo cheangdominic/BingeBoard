@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import { useRef, useState } from "react";
 import { useLayoutEffect } from "react";
 
+import watchlistIcon from "../../assets/watchlist_icon.svg";
+
 function WatchlistFeature() {
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,7 +28,7 @@ function WatchlistFeature() {
         {[
           {
             title: "Save For Later",
-            icon: "src/assets/watchlist_icon.svg",
+            icon: watchlistIcon,
           },
         ].map((feature, index) => (
           <div className="w-full max-w-10xl group">
