@@ -15,6 +15,7 @@ import { Review } from './utils.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
+import axios from 'axios';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -562,6 +563,98 @@ app.post('/api/watchlist/remove', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.post('/api/chat', async (req, res) => {
+  console.log('Received chat request with body:', req.body);
+
+  try {
+    // Validate input
+    if (!req.body || !req.body.messages || !Array.isArray(req.body.messages)) {
+      console.error('Invalid request format');
+      return res.status(400).json({ 
+        success: false,
+        error: 'Invalid request format. Expected { messages: [] }' 
+      });
+    }
+
+    // Check API key
+    if (!process.env.OPENAI_API_KEY) {
+      console.error('OPENAI_API_KEY is not configured');
+      return res.status(500).json({ 
+        success: false,
+        error: 'Server configuration error' 
+      });
+    }
+
+    // Prepare messages - ensure they have the required structure
+    const messages = req.body.messages.map(msg => ({
+      role: msg.role || 'user',
+      content: msg.content || ''
+    }));
+
+    console.log('Sending to OpenAI:', messages);
+
+    // Make API call to OpenAI
+    const response = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-3.5-turbo",
+        messages: messages,
+        max_tokens: 150,
+        temperature: 0.7,
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        timeout: 10000
+      }
+    );
+
+    // Validate OpenAI response
+    if (!response.data?.choices?.[0]?.message?.content) {
+      console.error('Unexpected OpenAI response:', response.data);
+      return res.status(500).json({ 
+        success: false,
+        error: 'Unexpected API response format' 
+      });
+    }
+
+    // Return successful response
+    return res.json({ 
+      success: true,
+      reply: response.data.choices[0].message.content 
+    });
+
+  } catch (error) {
+    console.error('Chat error:', {
+      message: error.message,
+      stack: error.stack,
+      response: error.response?.data
+    });
+
+    // Handle different error types
+    if (error.response) {
+      return res.status(502).json({ 
+        success: false,
+        error: error.response.data.error?.message || 'API service error' 
+      });
+    }
+    
+    if (error.code === 'ECONNABORTED') {
+      return res.status(504).json({ 
+        success: false,
+        error: 'Request timeout' 
+      });
+    }
+    
+    return res.status(500).json({ 
+      success: false,
+      error: error.message || 'Internal server error' 
+    });
   }
 });
 
