@@ -63,7 +63,7 @@ export const fetchSeasonEpisodes = async (showId, seasonNumber) => {
     
     return data.episodes.map(episode => ({
       id: episode.id,
-      number: episode.episode_number,
+      number: Number(episode.episode_number) || 0,
       title: episode.name,
       rating: episode.vote_average,
       duration: `${episode.runtime || 24}m`,

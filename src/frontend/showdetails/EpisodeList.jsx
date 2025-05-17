@@ -1,8 +1,12 @@
-import { useEffect, useState } from 'react';
+
+const formatEpisodeNumber = (num) => {
+  const numStr = String(num);
+  const cleanNum = numStr.replace(/[^\d]/g, '');
+
+  return parseInt(cleanNum, 10) || 0;
+}; import { useEffect, useState } from 'react';
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { fetchSeasonEpisodes } from '/src/backend/tmdb';
-import { useAuth } from '../../context/AuthContext';
-
 
 const EpisodeList = ({ seasons, showId }) => {
   const [selectedSeason, setSelectedSeason] = useState(seasons[0]?.number || 1);
@@ -10,10 +14,8 @@ const EpisodeList = ({ seasons, showId }) => {
   const [selectedEpisodes, setSelectedEpisodes] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [viewAll, setViewAll] = useState(false);
-  const { user } = useAuth();
-  const isAuthenticated = user;
-  
-  const EPISODES_LIMIT = 20; 
+
+  const EPISODES_LIMIT = 20; // Show more episodes by default in the grid view
 
   useEffect(() => {
     const loadEpisodes = async () => {
@@ -33,6 +35,7 @@ const EpisodeList = ({ seasons, showId }) => {
     loadEpisodes();
   }, [selectedSeason, showId, episodesBySeason]);
 
+  // Reset viewAll and selectedEpisodes when changing seasons
   useEffect(() => {
     setViewAll(false);
     setSelectedEpisodes([]);
@@ -43,7 +46,6 @@ const EpisodeList = ({ seasons, showId }) => {
   const hasMoreEpisodes = episodes.length > EPISODES_LIMIT;
 
   const handleEpisodeClick = (episodeId) => {
-    if (!isAuthenticated) return;
     setSelectedEpisodes(prev =>
       prev.includes(episodeId)
         ? prev.filter(id => id !== episodeId)
@@ -51,14 +53,10 @@ const EpisodeList = ({ seasons, showId }) => {
     );
   };
 
-  const handleDragStart = () => {
-    if (!isAuthenticated) return;
-    setIsDragging(true);
-  };
-  const handleDragEnd = () => {
-    if (!isAuthenticated) return;
-    setIsDragging(false);
-  };
+  const handleDragStart = () => setIsDragging(true);
+  const handleDragEnd = () => setIsDragging(false);
+
+  const currentSeason = seasons.find(season => season.number === selectedSeason) || {};
 
   return (
     <div className="bg-gradient-to-br from-[#272733] to-[#1c1c24] rounded-xl p-6 shadow-lg border border-[#343444]">
@@ -89,11 +87,10 @@ const EpisodeList = ({ seasons, showId }) => {
           <button
             key={season.number}
             onClick={() => setSelectedSeason(season.number)}
-            className={`px-5 py-2.5 rounded-lg text-sm md:text-base font-medium whitespace-nowrap transition-colors ${
-              selectedSeason === season.number
+            className={`px-5 py-2.5 rounded-lg text-sm md:text-base font-medium whitespace-nowrap transition-colors ${selectedSeason === season.number
                 ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                 : 'bg-[#343444] text-gray-300 hover:bg-[#3f3f52]'
-            }`}
+              }`}
           >
             Season {season.number}
           </button>
@@ -109,13 +106,12 @@ const EpisodeList = ({ seasons, showId }) => {
             onMouseDown={handleDragStart}
             onMouseUp={handleDragEnd}
             onMouseEnter={() => isDragging && handleEpisodeClick(ep.id)}
-            className={`aspect-square rounded-lg flex items-center justify-center relative transition-all ${
-              selectedEpisodes.includes(ep.id)
-                ? 'bg-blue-600 border-2 border-blue-400 shadow-lg shadow-blue-500/20 cursor-pointer'
-                : 'bg-[#343444] hover:bg-[#3f3f52] border border-[#4a4a5a] cursor-pointer'
-            }`}
+            className={`aspect-square rounded-lg flex items-center justify-center relative cursor-pointer transition-all ${selectedEpisodes.includes(ep.id)
+                ? 'bg-blue-600 border-2 border-blue-400 shadow-lg shadow-blue-500/20'
+                : 'bg-[#343444] hover:bg-[#3f3f52] border border-[#4a4a5a]'
+              }`}
           >
-            <span className="text-sm font-medium text-gray-200">{ep.number}</span>
+            <span className="text-sm font-medium text-gray-200">{formatEpisodeNumber(ep.number)}</span>
             <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
               <span className="text-sm font-bold text-yellow-400">
                 {ep.rating?.toFixed(1) ?? 'N/A'}
@@ -139,24 +135,21 @@ const EpisodeList = ({ seasons, showId }) => {
       )}
 
       {/* Action Button */}
-      {isAuthenticated && (
-        <button
-          disabled={selectedEpisodes.length === 0}
-          className={`w-full py-3.5 rounded-lg font-medium flex items-center justify-center space-x-3 transition-colors text-lg ${
-            selectedEpisodes.length > 0
-              ? 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-lg shadow-green-500/20'
-              : 'bg-[#343444] text-gray-400 cursor-not-allowed'
+      <button
+        disabled={selectedEpisodes.length === 0}
+        className={`w-full py-3.5 rounded-lg font-medium flex items-center justify-center space-x-3 transition-colors text-lg ${selectedEpisodes.length > 0
+            ? 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-lg shadow-green-500/20'
+            : 'bg-[#343444] text-gray-400 cursor-not-allowed'
           }`}
-        >
-          <FaEye className="text-base" />
-          <span>Mark Selected as Watched</span>
-          {selectedEpisodes.length > 0 && (
-            <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-sm">
-              {selectedEpisodes.length}
-            </span>
-          )}
-        </button>
-      )}
+      >
+        <FaEye className="text-base" />
+        <span>Mark Selected as Watched</span>
+        {selectedEpisodes.length > 0 && (
+          <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-sm">
+            {selectedEpisodes.length}
+          </span>
+        )}
+      </button>
     </div>
   );
 };
