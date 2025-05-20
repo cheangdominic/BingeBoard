@@ -8,7 +8,7 @@ function ShowCarousel({
   title,
   tmdbEndpoint = "popular",
   cardActualWidth = 130,
-  userScrollBehavior = 'smooth',
+  userScrollBehavior = "smooth",
 }) {
   const [shows, setShows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,23 +72,21 @@ function ShowCarousel({
     if (!container || !shows.length || itemWidth <= 0) return;
 
     const contentWidthPerClone = shows.length * itemWidth;
-    if (contentWidthPerClone <= 0) return;
-
     const currentPos = container.scrollLeft;
     let newScrollLeft = currentPos;
     let didTeleport = false;
 
-    if (currentPos >= contentWidthPerClone * 2 - (container.offsetWidth / 2)) {
+    if (currentPos >= contentWidthPerClone * 2 - container.offsetWidth / 2) {
       newScrollLeft = currentPos - contentWidthPerClone;
       didTeleport = true;
-    } else if (currentPos <= contentWidthPerClone - (container.offsetWidth / 2)) {
+    } else if (currentPos <= contentWidthPerClone - container.offsetWidth / 2) {
       newScrollLeft = currentPos + contentWidthPerClone;
       didTeleport = true;
     }
 
     if (didTeleport) {
       const originalBehavior = container.style.scrollBehavior;
-      container.style.scrollBehavior = 'auto';
+      container.style.scrollBehavior = "auto";
       container.scrollLeft = newScrollLeft;
       container.style.scrollBehavior = originalBehavior;
     }
@@ -99,26 +97,24 @@ function ShowCarousel({
     const content = contentRef.current;
 
     if (!container || !content || !shows.length || itemWidth <= 0) {
-      if (content) content.style.width = '0px';
+      if (content) content.style.width = "0px";
       return;
     }
 
     const numItems = shows.length;
     const contentWidthPerClone = numItems * itemWidth;
-    if (contentWidthPerClone <= 0) return;
-
     content.style.width = `${contentWidthPerClone * 3}px`;
     const initialScrollPosition = contentWidthPerClone;
 
     const originalBehavior = container.style.scrollBehavior;
-    container.style.scrollBehavior = 'auto';
+    container.style.scrollBehavior = "auto";
     container.scrollLeft = initialScrollPosition;
     container.style.scrollBehavior = userScrollBehavior;
 
-    container.addEventListener('scroll', handleScroll, { passive: true });
+    container.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
-      container.removeEventListener('scroll', handleScroll);
+      container.removeEventListener("scroll", handleScroll);
     };
   }, [shows, itemWidth, handleScroll, userScrollBehavior]);
 
@@ -138,17 +134,11 @@ function ShowCarousel({
       className="flex-shrink-0 mx-2 py-2"
       style={{ width: `${itemWidth}px` }}
       initial={{ opacity: 0 }}
-      animate={{ 
-        opacity: 1,
-        transition: { duration: 0.5 }
-      }}
+      animate={{ opacity: 1, transition: { duration: 0.5 } }}
     >
-      <motion.div 
+      <motion.div
         className="bg-gray-700 rounded-lg overflow-hidden"
-        style={{ 
-          width: `${itemWidth}px`, 
-          height: `${itemWidth * 1.5}px` 
-        }}
+        style={{ width: `${itemWidth}px`, height: `${itemWidth * 1.5}px` }}
         animate={{
           background: [
             'linear-gradient(90deg, #2d3748 0%, #4a5568 50%, #2d3748 100%)',
@@ -159,7 +149,7 @@ function ShowCarousel({
         transition={{
           duration: 1.5,
           repeat: Infinity,
-          ease: "linear"
+          ease: "linear",
         }}
       />
     </motion.div>
@@ -178,7 +168,8 @@ function ShowCarousel({
 
       <div
         ref={containerRef}
-        className="relative w-full overflow-x-auto no-scrollbar px-4"
+        className="relative w-full overflow-x-auto overflow-y-hidden no-scrollbar px-4"
+        style={{ maxHeight: `${cardActualWidth * 1.5 + 20}px` }}
       >
         <div ref={contentRef} className="flex">
           {isLoading ? (
@@ -192,33 +183,25 @@ function ShowCarousel({
                   key={`${show.id}-${index}-${tmdbEndpoint}`}
                   className="flex-shrink-0 mx-2 py-2"
                   style={{ width: `${itemWidth}px` }}
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ 
-                    opacity: 1, 
-                    y: 0, 
-                    scale: 1,
-                    transition: { 
-                      delay: index * 0.03,
-                      type: "spring",
-                      stiffness: 100,
-                      damping: 10
-                    }
-                  }}
-                  whileHover={{ 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{
                     scale: 1.05,
-                    transition: { duration: 0.2 }
+                    boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.3)",
                   }}
-                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
                 >
                   <Link to={`/show/${show.id}`}>
-                    <div className="transition-transform duration-300 ease-in-out hover:shadow-lg">
-                      <TVShowCard
-                        imageUrl={show.poster_path ? `https://image.tmdb.org/t/p/w300${show.poster_path}` : undefined}
-                        title={show.name || show.title}
-                        cardWidth={cardActualWidth}
-                        averageRating={show.averageRating}
-                      />
-                    </div>
+                    <TVShowCard
+                      imageUrl={
+                        show.poster_path
+                          ? `https://image.tmdb.org/t/p/w300${show.poster_path}`
+                          : undefined
+                      }
+                      title={show.name || show.title}
+                      cardWidth={cardActualWidth}
+                      averageRating={show.averageRating}
+                    />
                   </Link>
                 </motion.div>
               ))}
