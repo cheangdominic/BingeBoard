@@ -3,21 +3,18 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext";
 import TopNavbar from '../landing/TopNavbar.jsx';
 import Footer from '../landing/Footer.jsx';
-import { useEffect } from "react";
-import { useRef, useState } from "react";
-import { useLayoutEffect } from "react";
-
+import { useEffect, useRef, useState, useLayoutEffect } from "react";
 import friendIcon from "../../assets/friend_feature_icon.svg";
 
 function SocialFeature() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       navigate('/home');
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -31,25 +28,26 @@ function SocialFeature() {
       setContentHeight(ref.current.scrollHeight);
     }
   }, []);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
       <TopNavbar />
       <section className="px-4 py-4 md:py-6 bg-[#1e1e1e]">
         <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-6 max-w-7xl mx-auto text-center">
-          {[
-            {
-              title: "Connect and Share",
-              icon: friendIcon,
-            },
-          ].map((feature, index) => (
-            <div className="w-full max-w-10xl group">
+          {[{
+            title: "Connect and Share",
+            icon: friendIcon,
+          }].map((feature, index) => (
+            <div className="w-full max-w-10xl group" key={index}>
               <motion.div
                 initial={{ y: 0, scale: 1 }}
                 className="h-full bg-[#2E2E2E] rounded-xl overflow-hidden border border-gray-800 relative"
               >
-                <motion.div
-                  className="p-1 bg-gradient-to-r from-amber-200/60 to-blue-300/60 relative overflow-hidden"
-                >
+                <motion.div className="p-1 bg-gradient-to-r from-amber-200/60 to-blue-300/60 relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/15 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 -rotate-45 w-200% -left-[100%]" />
                   <img
                     className="w-full h-40 object-contain p-4 relative z-10"
@@ -57,18 +55,17 @@ function SocialFeature() {
                     alt={feature.title}
                   />
                 </motion.div>
-
                 <div className="p-6">
-                  <motion.h3
-                    className="text-4xl font-bold text-white mb-3 transition-colors duration-300"
-                  >
+                  <motion.h3 className="text-4xl font-bold text-white mb-3 transition-colors duration-300">
                     {feature.title}
                   </motion.h3>
                 </div>
-
-                <div className="absolute inset-0 rounded-xl pointer-events-none opacity-0 transition-opacity duration-300" style={{
-                  boxShadow: "inset 0 0 20px rgba(59, 130, 246, 0.15)"
-                }} />
+                <div
+                  className="absolute inset-0 rounded-xl pointer-events-none opacity-0 transition-opacity duration-300"
+                  style={{
+                    boxShadow: "inset 0 0 20px rgba(59, 130, 246, 0.15)"
+                  }}
+                />
               </motion.div>
             </div>
           ))}
@@ -84,16 +81,13 @@ function SocialFeature() {
               Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
             </p>
             <p className="text-gray-300 mt-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
             </p>
             <p className="text-gray-300 mt-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida.
             </p>
             <p className="text-gray-300 mt-6">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien.
+              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida. Nullam euismod metus vel dui pretium tincidunt. Nam sed orci orci. Curabitur at urna vitae odio gravida pharetra sed in sapien. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia ipsum at libero mollis, vel suscipit felis fermentum. Aenean in ante lectus. Quisque malesuada ipsum ut dolor efficitur, et volutpat sapien tempus. Integer maximus purus et nisi lacinia, nec vulputate velit gravida.
             </p>
           </div>
         </motion.div>
