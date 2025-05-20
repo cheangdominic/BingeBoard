@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import BottomNavbar from "../../components/BottomNavbar.jsx";
@@ -53,6 +55,15 @@ function SearchUsers() {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
+
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
 
     return (
         <>

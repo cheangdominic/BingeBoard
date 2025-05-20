@@ -1,11 +1,22 @@
 import { motion } from 'framer-motion';
 import { useState } from "react";
 import { useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../context/AuthContext";
 import BottomNavbar from '../../components/BottomNavbar.jsx';
 import ActivityCard from '../../components/ActivityCard.jsx';
 
 function ActivityPage() {
     const [count, setCount] = useState(0);
+
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
 
     useEffect(() => {
         window.scrollTo(0, 0);

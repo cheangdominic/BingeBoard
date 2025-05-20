@@ -1,4 +1,7 @@
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../context/AuthContext";
 import SignupForm from "./SignupForm";
 import TopNavbar from "../landing/TopNavbar";
 import Footer from '../landing/Footer.jsx';
@@ -16,6 +19,14 @@ const fadeInUp = {
 };
 
 function SignupPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
   return (
     <>
       <TopNavbar />
