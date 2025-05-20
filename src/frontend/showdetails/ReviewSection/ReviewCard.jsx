@@ -1,15 +1,23 @@
 import { useState } from 'react';
-import { Apple, Flame } from 'lucide-react';
+import { Apple, ThumbsUp, ThumbsDown } from 'lucide-react';
 
 export default function ReviewCard({ review, onVote, currentUserId }) {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Convert IDs to strings for reliable comparison
+  const userIdStr = currentUserId ? currentUserId.toString() : null;
   
-  const userLiked = Array.isArray(review.likes) && 
-    review.likes.some(id => id === currentUserId || id.toString() === currentUserId);
-  const userDisliked = Array.isArray(review.dislikes) && 
-    review.dislikes.some(id => id === currentUserId || id.toString() === currentUserId);
+  // Check if user has liked/disliked
+  const userLiked = Array.isArray(review.likes) &&
+    review.likes.some(id => id && id.toString() === userIdStr);
   
-  const isCurrentUser = review.userId === currentUserId;
+  const userDisliked = Array.isArray(review.dislikes) &&
+    review.dislikes.some(id => id && id.toString() === userIdStr);
+  
+  // Check if this is the user's own review
+  const isCurrentUser = review.userId && 
+    userIdStr && 
+    review.userId.toString() === userIdStr;
 
   return (
     <div className="bg-[#333333] rounded-xl p-6 shadow-[0_4px_12px_rgba(0,0,0,0.25)] mb-6 transition-all hover:shadow-[0_6px_16px_rgba(0,0,0,0.3)]">
@@ -42,7 +50,7 @@ export default function ReviewCard({ review, onVote, currentUserId }) {
         {review.content && review.content.length > 200 && (
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="text-blue-400 hover:text-blue-300 text-sm mt-1 font-medium"
+            className="text-blue-400 hover:text-blue-300 text-sm mt-1 font-medium cursor-pointer"
           >
             {isExpanded ? 'Show less' : 'Read more'}
           </button>
@@ -52,7 +60,7 @@ export default function ReviewCard({ review, onVote, currentUserId }) {
       {review.containsSpoiler && (
         <div className="bg-[#3a3a3a] p-3 rounded-lg mb-4 border-l-4 border-yellow-400">
           <p className="text-yellow-400 font-medium flex items-center">
-            <span className="mr-2">⚠️</span> 
+            <span className="mr-2">⚠️</span>
             <span>Spoiler Warning</span>
           </p>
         </div>
@@ -60,29 +68,43 @@ export default function ReviewCard({ review, onVote, currentUserId }) {
 
       <div className="flex justify-between items-center pt-3 border-t border-[#3a3a3a]">
         <div className="flex space-x-4">
+          {/* Like button */}
           <button
-            onClick={() => onVote(review._id || review.id, 'like')}
-            className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors ${userLiked ? 'bg-blue-900/30 text-blue-400' : 'text-gray-400 hover:bg-[#3a3a3a] hover:text-blue-400'}`}
-            disabled={isCurrentUser}
+            onClick={() => currentUserId && !isCurrentUser && onVote(review._id || review.id, 'like')}
+            className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors ${
+              !currentUserId || isCurrentUser ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${
+              userLiked
+                ? 'bg-blue-900/30 text-blue-400'
+                : 'text-gray-400 hover:bg-[#3a3a3a] hover:text-blue-400'
+            }`}
+            title={!currentUserId ? "Log in to vote" : isCurrentUser ? "You can't vote on your own review" : "Like this review"}
           >
-            <Flame className="w-5 h-5" />
+            <ThumbsUp className={`w-5 h-5 ${userLiked ? 'fill-blue-400' : ''}`} />
             <span className="font-medium">
               {Array.isArray(review.likes) ? review.likes.length : 0}
             </span>
           </button>
-          
+
+          {/* Dislike button */}
           <button
-            onClick={() => onVote(review._id || review.id, 'dislike')}
-            className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors ${userDisliked ? 'bg-red-900/30 text-red-400' : 'text-gray-400 hover:bg-[#3a3a3a] hover:text-red-400'}`}
-            disabled={isCurrentUser}
+            onClick={() => currentUserId && !isCurrentUser && onVote(review._id || review.id, 'dislike')}
+            className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors ${
+              !currentUserId || isCurrentUser ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+            } ${
+              userDisliked
+                ? 'bg-red-900/30 text-red-400'
+                : 'text-gray-400 hover:bg-[#3a3a3a] hover:text-red-400'
+            }`}
+            title={!currentUserId ? "Log in to vote" : isCurrentUser ? "You can't vote on your own review" : "Dislike this review"}
           >
-            <Flame className="w-5 h-5 rotate-180" />
+            <ThumbsDown className={`w-5 h-5 ${userDisliked ? 'fill-red-400' : ''}`} />
             <span className="font-medium">
               {Array.isArray(review.dislikes) ? review.dislikes.length : 0}
             </span>
           </button>
         </div>
-        
+
         {review.containsSpoiler && (
           <span className="text-xs bg-[#3a3a3a] text-gray-400 px-2 py-1 rounded-full">
             Contains Spoilers
