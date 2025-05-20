@@ -1,5 +1,5 @@
 import React from "react";
-import ReviewCard from "../components/ReviewCard";
+import ReviewCard from "../../components/ReviewCard";
 
 function RecentReviews() {
   const reviews = [ // TODO: replace placeholder cards with reviews from db

@@ -4,7 +4,7 @@ import ProfileCard from "./ProfileCard.jsx";
 import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
 import WatchlistCarousel from "./WatchlistCarousel.jsx";
-import BottomNavbar from "../components/BottomNavbar.jsx";
+import BottomNavbar from "../../components/BottomNavbar.jsx";
 import LogoutButton from "./LogoutButton.jsx";
 
 const fadeInUp = {

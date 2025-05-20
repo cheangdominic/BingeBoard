@@ -1,5 +1,5 @@
-import LocationInfo from './../components/LocationInfo.jsx';
-import ProfileImage from './../components/ProfileImage.jsx';
+import LocationInfo from '../../components/LocationInfo.jsx';
+import ProfileImage from '../../components/ProfileImage.jsx';
 import LogoutButton from "./LogoutButton.jsx";
 
 

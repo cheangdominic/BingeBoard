@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
 import Landing from './frontend/landing/Landing.jsx';
-import ProfilePage from './profile/ProfilePage.jsx';
+import ProfilePage from './frontend/profile/ProfilePage.jsx';
 import ShowDetailsPage from './frontend/showdetails/ShowDetailsPage.jsx';
 import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx';
 import LoginPage from './frontend/login/LoginPage.jsx';

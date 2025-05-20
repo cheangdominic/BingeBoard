@@ -1,10 +1,10 @@
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import ProfileCard from "../../profile/ProfileCard.jsx";
-import RecentlyWatched from "../../profile/RecentlyWatched.jsx";
-import RecentReviews from "../../profile/RecentReviews.jsx";
-import Watchlist from "../../profile/Watchlist.jsx";
+import ProfileCard from "../../frontend/profile/ProfileCard.jsx";
+import RecentlyWatched from "../../frontend/profile/RecentlyWatched.jsx";
+import RecentReviews from "../../frontend/profile/RecentReviews.jsx";
+import Watchlist from "../../frontend/profile/Watchlist.jsx";
 import BottomNavbar from "../../components/BottomNavbar.jsx";
 
 const fadeInUp = {
