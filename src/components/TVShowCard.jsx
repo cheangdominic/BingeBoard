@@ -1,18 +1,28 @@
 import React from "react";
+import AppleRating from "./AppleRating";
 
-function TVShowCard({ imageUrl, size = "md" }) {
-  const sizes = {
-    sm: "w-[72px] h-[108px]",
-    md: "w-[120px] h-[180px]",
-  };
-
+function TVShowCard({ imageUrl, title, cardWidth, averageRating }) {
   return (
-    <div className={`flex-shrink-0 ${sizes[size]} rounded-lg overflow-hidden shadow bg-[#2E2E2E]`}>
+    <div className="relative group w-full" style={{ width: cardWidth }}>
       <img
-        src={imageUrl}
-        alt="TV Show Poster"
-        className="w-full h-full object-cover"
+        src={imageUrl || "/fallback-image.jpg"}
+        alt={title}
+        className="w-full rounded-lg object-cover"
       />
+
+      <div
+        className="
+          absolute bottom-0 left-0 right-0 
+          h-0 group-hover:h-1/3 
+          bg-black/70 text-white 
+          flex items-center justify-center 
+          transition-all duration-300 ease-in-out
+          rounded-b-lg
+          overflow-hidden
+        "
+      >
+        <AppleRating rating={averageRating ? averageRating / 2 : 0} />
+      </div>
     </div>
   );
 }

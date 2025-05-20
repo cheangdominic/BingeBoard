@@ -660,6 +660,41 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+app.get('/api/average-rating', async (req, res) => {
+  try {
+    const { showId } = req.query;
+
+    if (!showId) {
+      return res.status(400).json({ error: 'Show ID is required' });
+    }
+
+    const result = await Review.aggregate([
+      { $match: { showId } },
+      {
+        $group: {
+          _id: '$showId',
+          averageRating: { $avg: '$rating' },
+          totalReviews: { $sum: 1 }
+        }
+      }
+    ]);
+
+    if (result.length === 0) {
+      return res.json({ averageRating: null, totalReviews: 0 });
+    }
+
+    const { averageRating, totalReviews } = result[0];
+
+    res.json({
+      averageRating: parseFloat(averageRating.toFixed(2)),
+      totalReviews
+    });
+  } catch (error) {
+    console.error('Error calculating average rating:', error);
+    res.status(500).json({ error: 'Failed to calculate average rating' });
+  }
+});
+
 app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
