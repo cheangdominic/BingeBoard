@@ -41,23 +41,23 @@ function ProfilePage() {
       <div className="p-6 mx-auto font-coolvetica text-white space-y-6">
         <ProfileCard user={user} profilePic={profilePic} isOwnProfile={true} />
 
-        <motion.div
+        {/* <motion.div
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
           transition={{ delay: 0.2 }}
         >
           <RecentlyWatched />
-        </motion.div>
+        </motion.div> */}
 
-        <motion.div
+        {/* <motion.div
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
           transition={{ delay: 0.4 }}
         >
           <RecentReviews />
-        </motion.div>
+        </motion.div> */}
 
         <motion.div
           initial="hidden"

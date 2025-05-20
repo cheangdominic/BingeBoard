@@ -29,12 +29,18 @@ function Home() {
       >
         <TrendingCarousel tmdbEndpoint="tv/top_rated" />
 
-        <FriendsRecentlyWatched />
+        {/* <FriendsRecentlyWatched /> */}
 
         <ShowCarousel
           title="Trending Today"
           tmdbEndpoint="trending/tv/day"
         />
+
+        <ShowCarousel
+          title="Airing Today TV Shows"
+          tmdbEndpoint="tv/airing_today"
+        />
+
         <ShowCarousel
           title="Popular TV Shows"
           tmdbEndpoint="tv/popular"
@@ -43,18 +49,14 @@ function Home() {
           title="Top Rated TV Shows"
           tmdbEndpoint="tv/top_rated"
         />
-        <RecentReviewsFiltered />
+        {/* <RecentReviewsFiltered /> */}
 
         <ShowCarousel
           title="On Air TV Shows"
           tmdbEndpoint="tv/on_the_air"
         />
-        <ShowCarousel
-          title="Airing Today TV Shows"
-          tmdbEndpoint="tv/airing_today"
-        />
 
-        <RecommendedByFriends />
+        {/* <RecommendedByFriends /> */}
       </motion.div>
       <BottomNavbar />
     </>
