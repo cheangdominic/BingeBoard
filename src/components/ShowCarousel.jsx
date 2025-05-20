@@ -178,7 +178,7 @@ function ShowCarousel({
 
       <div
         ref={containerRef}
-        className="relative w-full overflow-x-auto overflow-y-hidden no-scrollbar px-4"
+        className="relative w-full overflow-x-auto no-scrollbar px-4"
       >
         <div ref={contentRef} className="flex">
           {isLoading ? (
