@@ -5,6 +5,7 @@ import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
 import WatchlistCarousel from "./WatchlistCarousel.jsx";
 import BottomNavbar from "../components/BottomNavbar.jsx";
+import LogoutButton from "./LogoutButton.jsx";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -66,6 +67,9 @@ function ProfilePage() {
           transition={{ delay: 0.6 }}
         >
           <WatchlistCarousel user={user} />
+          <LogoutButton/>
+
+
         </motion.div>
       </div>
       <BottomNavbar />
