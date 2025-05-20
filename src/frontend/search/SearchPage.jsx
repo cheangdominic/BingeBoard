@@ -6,14 +6,13 @@ import { useAuth } from "../../context/AuthContext";
 
 function SearchPage() {
   const { user } = useAuth();
-  const isAuthenticated = !!user;
 
   return (
     <>
-      {!isAuthenticated && <TopNavbar />}
+      {!user && <TopNavbar />}
       <TVShowSearchGrid />
-      {isAuthenticated && <BottomNavbar />}
-      {!isAuthenticated && <Footer />}
+      {user && <BottomNavbar />}
+      {!user && <Footer />}
     </>
   );
 }
