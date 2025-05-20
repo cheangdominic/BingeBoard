@@ -57,6 +57,7 @@ function WatchlistCarousel({
     const scrollPos = container.scrollLeft;
     const containerWidth = container.offsetWidth;
 
+    // Teleport to opposite end when reaching boundaries
     if (scrollPos >= contentWidth * 2 - containerWidth / 2) {
       container.style.scrollBehavior = 'auto';
       container.scrollLeft = scrollPos - contentWidth;
@@ -78,7 +79,6 @@ function WatchlistCarousel({
     }
 
     const contentWidth = shows.length * itemWidth;
-    
     content.style.width = `${contentWidth * 3}px`;
     container.style.scrollBehavior = 'auto';
     container.scrollLeft = contentWidth;
@@ -130,6 +130,11 @@ function WatchlistCarousel({
     <section className="relative my-8 pl-2 mr-2">
       <div className="flex justify-between items-center mb-4 px-4 md:px-0">
         <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">{title}</h3>
+        <Link to="/view-all/watchlist" state={{ watchlist: user.watchlist }}>
+  <button className="text-sm text-white font-semibold hover:underline">
+    View All
+  </button>
+</Link>
       </div>
 
       <div

@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 
-import Landing from './frontend/landing/Landing.jsx'; 
+import Landing from './frontend/landing/Landing.jsx';
 import ProfilePage from './profile/ProfilePage.jsx';
 import ShowDetailsPage from './frontend/showdetails/ShowDetailsPage.jsx';
-import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx';  
+import AboutUsPage from './frontend/aboutus/AboutUsPage.jsx';
 import LoginPage from './frontend/login/LoginPage.jsx';
 import SignupPage from './frontend/signup/SignupPage.jsx';
 import SearchPage from './frontend/search/SearchPage.jsx';
@@ -24,29 +24,28 @@ import Home from './frontend/home/Home.jsx';
 
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <Router> 
+    <Router>
       <Routes>
-        <Route path="/" element={<Landing />} />  
+        <Route path="/" element={<Landing />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/aboutus" element={<AboutUsPage />} />
-        <Route path="/socialfeature" element={<SocialFeature/>} />
-        <Route path="/watchlistfeature" element={<WatchlistFeature/>} />
-        <Route path="/browsefeature" element={<BrowseFeature/>} />
+        <Route path="/socialfeature" element={<SocialFeature />} />
+        <Route path="/watchlistfeature" element={<WatchlistFeature />} />
+        <Route path="/browsefeature" element={<BrowseFeature />} />
         <Route path="/show/:id" element={<ShowDetailsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/activity" element={<ActivityPage />} />
         <Route path="/log" element={<LogPage />} />
         <Route path="/log/review" element={<LogReviewMobilePage />} />
-        <Route path="/home" element = {<Home />} />
-        <Route path="/search" element = {<SearchPage />} />
-        <Route path="/browse" element = {<SearchPage />} />
-        <Route path="/social" element = {<SearchUsers />} />
-        <Route path="/user/:username" element = {<UserProfile />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/search" element={<SearchPage />} />
+        <Route path="/browse" element={<SearchPage />} />
+        <Route path="/social" element={<SearchUsers />} />
+        <Route path="/user/:username" element={<UserProfile />} />
         <Route path="/view-all/:tmdbEndpoint" element={<ViewAllPage />} />
+        <Route path="/view-all/watchlist" element={<ViewAllPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
