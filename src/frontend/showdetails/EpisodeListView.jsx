@@ -9,7 +9,7 @@ const EpisodeListView = ({ seasons = [], showId }) => {
   const [episodesBySeason, setEpisodesBySeason] = useState({});
   const [loading, setLoading] = useState(false);
   const [viewAll, setViewAll] = useState(false);
-  
+
   const EPISODES_LIMIT = 10;
 
   const currentSeason = seasons.find(season => season.number === activeSeason) || {};
@@ -43,11 +43,11 @@ const EpisodeListView = ({ seasons = [], showId }) => {
   }, [activeSeason]);
 
   const displayRating = (rating) => {
-    return typeof rating === "number" ? rating.toFixed(1) : "N/A";
+    return (typeof rating === "number" && rating > 0) ? rating.toFixed(1) : "N/A";
   };
 
   return (
-    <div className="mt-8 space-y-6"> 
+    <div className="mt-8 space-y-6">
       {/* Season Dropdown */}
       <div className="relative">
         <button
@@ -68,9 +68,8 @@ const EpisodeListView = ({ seasons = [], showId }) => {
                   setIsDropdownOpen(false);
                   setExpandedEpisode(null);
                 }}
-                className={`w-full text-left px-5 py-3 hover:bg-[#3a3a3a] transition-colors ${
-                  activeSeason === season.number ? "text-blue-400 font-medium" : "text-gray-300"
-                }`}
+                className={`w-full text-left px-5 py-3 hover:bg-[#3a3a3a] transition-colors ${activeSeason === season.number ? "text-blue-400 font-medium" : "text-gray-300"
+                  }`}
               >
                 Season {season.number} • {season.episodeCount || 0} episodes
               </button>
@@ -110,10 +109,12 @@ const EpisodeListView = ({ seasons = [], showId }) => {
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-1">
                       <span className="text-blue-400 font-medium">Episode {episode.number}</span>
-                      {episode.rating && (
+                      {(episode.rating > 0) && (
                         <div className="flex items-center bg-[#2a2a2a] px-2 py-1 rounded-full">
                           <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 mr-1" />
-                          <span className="text-sm font-medium text-white">{displayRating(episode.rating)}</span>
+                          <span className="text-sm font-medium text-white">
+                            {displayRating(episode.rating)}
+                          </span>
                         </div>
                       )}
                     </div>
@@ -123,9 +124,8 @@ const EpisodeListView = ({ seasons = [], showId }) => {
                     <p className="text-gray-400 mt-1">{episode.duration || "Duration N/A"}</p>
                   </div>
                   <ChevronDown
-                    className={`w-5 h-5 text-gray-400 transition-transform ${
-                      expandedEpisode === episode.id ? "rotate-180" : ""
-                    }`}
+                    className={`w-5 h-5 text-gray-400 transition-transform ${expandedEpisode === episode.id ? "rotate-180" : ""
+                      }`}
                   />
                 </div>
 

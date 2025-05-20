@@ -363,8 +363,6 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Invalid action. Must be "like" or "dislike"' });
     }
     
-    console.log(`Processing ${action} for review ${reviewId}`);
-
     const review = await Review.findById(reviewId);
     if (!review) {
       return res.status(404).json({ error: 'Review not found' });
@@ -380,36 +378,42 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
     if (!Array.isArray(review.likes)) review.likes = [];
     if (!Array.isArray(review.dislikes)) review.dislikes = [];
     
+    const isOwnReview = review.userId && review.userId.toString() === userId.toString();
+    if (isOwnReview) {
+      return res.status(403).json({ error: 'You cannot vote on your own review' });
+    }
+
+    const userIdStr = userId.toString();
+    const alreadyLiked = review.likes.some(id => id && id.toString() === userIdStr);
+    const alreadyDisliked = review.dislikes.some(id => id && id.toString() === userIdStr);
+    
     if (action === 'like') {
-      const alreadyLiked = review.likes.some(id => id.toString() === userId.toString());
-      
       if (alreadyLiked) {
-        review.likes = review.likes.filter(id => id.toString() !== userId.toString());
+        review.likes = review.likes.filter(id => id && id.toString() !== userIdStr);
       } else {
         review.likes.push(userId);
-        review.dislikes = review.dislikes.filter(id => id.toString() !== userId.toString());
+        review.dislikes = review.dislikes.filter(id => id && id.toString() !== userIdStr);
       }
     } else if (action === 'dislike') {
-      const alreadyDisliked = review.dislikes.some(id => id.toString() === userId.toString());
-      
       if (alreadyDisliked) {
-        review.dislikes = review.dislikes.filter(id => id.toString() !== userId.toString());
+        review.dislikes = review.dislikes.filter(id => id && id.toString() !== userIdStr);
       } else {
         review.dislikes.push(userId);
-        review.likes = review.likes.filter(id => id.toString() !== userId.toString());
+        review.likes = review.likes.filter(id => id && id.toString() !== userIdStr);
       }
     }
 
     await review.save();
-    console.log('Review vote updated successfully');
 
-    const formattedReview = {
+    const responseReview = {
       ...review.toObject(),
       id: review._id.toString(),
-      _id: review._id.toString()
+      _id: review._id.toString(),
+      likes: review.likes.map(id => id.toString()),
+      dislikes: review.dislikes.map(id => id.toString())
     };
     
-    res.json(formattedReview);
+    res.json(responseReview);
   } catch (error) {
     console.error('Review vote update error:', error);
     res.status(500).json({ error: error.message });

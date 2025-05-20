@@ -1,3 +1,4 @@
+// Refactored ReviewSection.jsx with improved vote handling
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Star, Filter, Flame, Clock } from "lucide-react";
@@ -11,13 +12,12 @@ export default function ReviewSection({ showId, showTitle, currentUserId }) {
   const [showForm, setShowForm] = useState(false);
   const [sortMethod, setSortMethod] = useState("relevant");
   const [showSpoilers, setShowSpoilers] = useState(false);
+  const [voteInProgress, setVoteInProgress] = useState(false);
 
   const fetchReviews = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-
-      console.log("Fetching reviews for showId:", showId); 
 
       const { data } = await axios.get(`/api/reviews`, {
         params: {
@@ -25,8 +25,6 @@ export default function ReviewSection({ showId, showTitle, currentUserId }) {
           sort: sortMethod
         }
       });
-
-      console.log("Received reviews data:", data); 
 
       if (!Array.isArray(data)) {
         throw new Error("Invalid response format");
@@ -57,47 +55,78 @@ export default function ReviewSection({ showId, showTitle, currentUserId }) {
 
   const createReview = async (reviewData) => {
     try {
-      console.log("Submitting review:", { ...reviewData, showId });
-
       const { data } = await axios.post('/api/reviews', {
         ...reviewData,
         showId
       });
 
-      console.log("Review submission successful:", data);
-
       setReviews(prev => [data, ...prev]);
       setShowForm(false);
     } catch (err) {
-      console.error("Review submission failed:", err);
       throw err.response?.data?.error || 'Failed to submit review.';
     }
   };
 
   const voteReview = async (reviewId, action) => {
     try {
-      console.log(`Voting ${action} for review ${reviewId}`);
-
+      if (voteInProgress) return;
+      setVoteInProgress(true);
+      
       if (!currentUserId) {
-        console.error("Cannot vote: User not logged in");
         setError("Please log in to vote on reviews");
+        setVoteInProgress(false);
         return;
       }
 
-      const { data } = await axios.put(`/api/reviews/${reviewId}`, { action });
+      // Optimistic update
+      setReviews(prev => prev.map(review => {
+        if (review._id === reviewId || review.id === reviewId) {
+          const updatedReview = { ...review };
+          
+          // Ensure arrays exist
+          updatedReview.likes = Array.isArray(updatedReview.likes) ? [...updatedReview.likes] : [];
+          updatedReview.dislikes = Array.isArray(updatedReview.dislikes) ? [...updatedReview.dislikes] : [];
+          
+          // Convert all IDs to strings for comparison
+          const userIdStr = currentUserId.toString();
+          const hasLiked = updatedReview.likes.some(id => id && id.toString() === userIdStr);
+          const hasDisliked = updatedReview.dislikes.some(id => id && id.toString() === userIdStr);
+          
+          if (action === 'like') {
+            if (hasLiked) {
+              updatedReview.likes = updatedReview.likes.filter(id => id && id.toString() !== userIdStr);
+            } else {
+              updatedReview.likes.push(currentUserId); // Keep original ID format
+              updatedReview.dislikes = updatedReview.dislikes.filter(id => id && id.toString() !== userIdStr);
+            }
+          } else if (action === 'dislike') {
+            if (hasDisliked) {
+              updatedReview.dislikes = updatedReview.dislikes.filter(id => id && id.toString() !== userIdStr);
+            } else {
+              updatedReview.dislikes.push(currentUserId); // Keep original ID format
+              updatedReview.likes = updatedReview.likes.filter(id => id && id.toString() !== userIdStr);
+            }
+          }
+          
+          return updatedReview;
+        }
+        return review;
+      }));
 
-      console.log("Vote successful, updated review:", data);
-
-      setReviews(prev => prev.map(r =>
-        (r._id === reviewId || r.id === reviewId) ? {
-          ...data,
-          _id: data._id || data.id,
-          id: data.id || data._id
-        } : r
-      ));
+      // API call
+      const response = await axios.put(`/api/reviews/${reviewId}`, { action });
+      
+      // Refresh reviews after a short delay to ensure server state is reflected
+      setTimeout(() => {
+        fetchReviews();
+      }, 1000);
+      
     } catch (err) {
       console.error("Voting failed:", err);
       setError(err.response?.data?.message || "Voting failed");
+      fetchReviews(); // Revert to server state
+    } finally {
+      setVoteInProgress(false);
     }
   };
 
@@ -140,11 +169,24 @@ export default function ReviewSection({ showId, showTitle, currentUserId }) {
         </label>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="text-center py-4 px-6 bg-red-900/20 border border-red-800 rounded-lg mb-6">
+          <p className="text-red-400">{error}</p>
+          <button 
+            onClick={() => setError(null)}
+            className="text-sm text-red-400 hover:text-red-300 mt-2"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Add Review Button or Sign In Prompt */}
       {currentUserId && !showForm ? (
         <button
           onClick={() => setShowForm(true)}
-          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="mb-6 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
         >
           Write a Review
         </button>
@@ -154,7 +196,7 @@ export default function ReviewSection({ showId, showTitle, currentUserId }) {
           <p className="text-gray-300 mb-4">Sign in to review {showTitle}</p>
           <a
             href="/login"
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg cursor-pointer"
           >
             Sign In
           </a>
@@ -171,12 +213,6 @@ export default function ReviewSection({ showId, showTitle, currentUserId }) {
       )}
 
       {/* Reviews Display */}
-      {error && (
-        <div className="text-center py-4 px-6 bg-red-900/20 border border-red-800 rounded-lg mb-6">
-          <p className="text-red-400">{error}</p>
-        </div>
-      )}
-
       {loading ? (
         <div className="text-center py-8 text-gray-400">
           Loading reviews...
