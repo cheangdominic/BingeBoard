@@ -21,8 +21,8 @@ const TVShowSearchGrid = () => {
       const randomRes = await axios.get("https://api.themoviedb.org/3/discover/tv", {
         params: {
           api_key: "325f0c86f4e9c504dac84ae3046cbee2",
-          sort_by: "popularity.desc", 
-          page: 1
+          sort_by: "popularity.desc",
+          page: 1,
         },
       });
       setBroadenedShows(randomRes.data.results);
@@ -33,7 +33,6 @@ const TVShowSearchGrid = () => {
   };
 
   useEffect(() => {
-   
     if (!query) {
       fetchRandomShows();
     }
@@ -49,13 +48,13 @@ const TVShowSearchGrid = () => {
     setIsSearching(true);
     setHasSearched(true);
     setCurrentPage(1);
-    
+
     try {
       const exactRes = await axios.get("https://api.themoviedb.org/3/search/tv", {
         params: {
           api_key: "325f0c86f4e9c504dac84ae3046cbee2",
           query: `"${query}"`,
-          page: 1
+          page: 1,
         },
       });
 
@@ -63,7 +62,7 @@ const TVShowSearchGrid = () => {
         params: {
           api_key: "325f0c86f4e9c504dac84ae3046cbee2",
           query: query,
-          page: 1
+          page: 1,
         },
       });
 
@@ -75,12 +74,10 @@ const TVShowSearchGrid = () => {
       );
 
       const exactMatches = uniqueResults.filter(
-        show => show.name.toLowerCase() === query.toLowerCase()
+        (show) => show.name.toLowerCase() === query.toLowerCase()
       );
 
-      const broadenedShows = uniqueResults.filter(
-        show => !exactMatches.includes(show)
-      );
+      const broadenedShows = uniqueResults.filter((show) => !exactMatches.includes(show));
 
       setExactMatches(exactMatches);
       setBroadenedShows(broadenedShows);
@@ -99,7 +96,7 @@ const TVShowSearchGrid = () => {
         params: {
           api_key: "325f0c86f4e9c504dac84ae3046cbee2",
           query: query,
-          page: nextPage
+          page: nextPage,
         },
       });
 
@@ -121,33 +118,68 @@ const TVShowSearchGrid = () => {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+    show: { opacity: 1, y: 0 },
   };
+
+  const renderGrid = (shows) => (
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="show"
+      className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6 md:gap-8"
+    >
+      {shows.map((show) => (
+        <motion.div
+          key={show.id}
+          variants={itemVariants}
+          whileHover={{ scale: 1.05 }}
+          className="bg-[#2a2a2a] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
+          onClick={() => handleCardClick(show.id)}
+        >
+          <div className="aspect-[2/3] w-full">
+            <img
+              src={
+                show.poster_path
+                  ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
+                  : "https://via.placeholder.com/500x750?text=No+Poster"
+              }
+              alt={show.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="p-3 sm:p-4">
+            <h3 className="text-base sm:text-lg text-[#f1f1f1] font-semibold line-clamp-1">
+              {show.name}
+            </h3>
+            <p className="text-gray-400 text-sm">{show.first_air_date}</p>
+            <p className="text-gray-300 text-xs sm:text-sm mt-2 line-clamp-3">
+              {show.overview || "No description available."}
+            </p>
+          </div>
+        </motion.div>
+      ))}
+    </motion.div>
+  );
 
   return (
     <div className="min-h-screen bg-[#1e1e1e] py-16 px-4 pb-24">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-6xl mx-auto"
+        className="max-w-7xl mx-auto"
       >
         <h1 className="text-3xl font-semibold text-center text-[#1963da] mb-8">
           Search for a TV Show
         </h1>
 
-        <SearchBar 
-          query={query} 
-          setQuery={setQuery} 
-          onSearch={searchShows}
-          isSearching={isSearching}
-        />
+        <SearchBar query={query} setQuery={setQuery} onSearch={searchShows} isSearching={isSearching} />
 
         <div className="mt-10 space-y-12">
           {hasSearched && (
@@ -157,10 +189,7 @@ const TVShowSearchGrid = () => {
               </p>
               {broadenedShows.length > 0 && (
                 <div className="max-w-4xl mx-auto">
-                  <TVShowFilters 
-                    shows={broadenedShows} 
-                    onFilter={setFilteredBroadenedShows} 
-                  />
+                  <TVShowFilters shows={broadenedShows} onFilter={setFilteredBroadenedShows} />
                 </div>
               )}
             </div>
@@ -168,85 +197,27 @@ const TVShowSearchGrid = () => {
 
           {exactMatches.length > 0 && (
             <section className="pt-4">
-              <motion.h2 
+              <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-2xl font-semibold text-[#f1f1f1] mb-6"
               >
                 Exact Matches
               </motion.h2>
-
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8"
-              >
-                {exactMatches.map((show) => (
-                  <motion.div
-                    key={show.id}
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-[#2a2a2a] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
-                    onClick={() => handleCardClick(show.id)} 
-                  >
-                    <img
-                      src={show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster'}
-                      alt={show.name}
-                      className="w-full h-80 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="text-xl text-[#f1f1f1] font-semibold">{show.name}</h3>
-                      <p className="text-gray-400 text-sm">{show.first_air_date}</p>
-                      <p className="text-gray-300 text-sm mt-2 line-clamp-3">
-                        {show.overview || "No description available."}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
+              {renderGrid(exactMatches)}
             </section>
           )}
 
           {filteredBroadenedShows.length > 0 && (
             <section>
-              <motion.h2 
+              <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-2xl font-semibold text-[#f1f1f1] mb-6"
               >
                 Related Shows
               </motion.h2>
-
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="show"
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8"
-              >
-                {filteredBroadenedShows.map((show) => (
-                  <motion.div
-                    key={show.id}
-                    variants={itemVariants}
-                    whileHover={{ scale: 1.05 }}
-                    className="bg-[#2a2a2a] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
-                    onClick={() => handleCardClick(show.id)} 
-                  >
-                    <img
-                      src={show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : 'https://via.placeholder.com/500x750?text=No+Poster'}
-                      alt={show.name}
-                      className="w-full h-80 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="text-xl text-[#f1f1f1] font-semibold">{show.name}</h3>
-                      <p className="text-gray-400 text-sm">{show.first_air_date}</p>
-                      <p className="text-gray-300 text-sm mt-2 line-clamp-3">
-                        {show.overview || "No description available."}
-                      </p>
-                    </div>
-                  </motion.div>
-                ))}
-              </motion.div>
+              {renderGrid(filteredBroadenedShows)}
 
               {filteredBroadenedShows.length < totalResults && (
                 <div className="flex justify-center mt-8 mb-12">
@@ -262,14 +233,8 @@ const TVShowSearchGrid = () => {
           )}
 
           {!isSearching && hasSearched && exactMatches.length === 0 && broadenedShows.length === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-20"
-            >
-              <p className="text-gray-300 text-xl">
-                No results found for "{query}". Try a different search term.
-              </p>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
+              <p className="text-gray-300 text-xl">No results found for "{query}". Try a different search term.</p>
             </motion.div>
           )}
         </div>
