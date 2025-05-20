@@ -1,7 +1,7 @@
 import React from "react";
 import AppleRating from "./AppleRating";
 
-function TVShowCard({ imageUrl, title, cardWidth, averageRating }) {
+function TVShowCard({ imageUrl, title, cardWidth, averageRating, onRemove }) {
   return (
     <div className="group relative" style={{ width: cardWidth }}>
       <div className="relative rounded-lg overflow-hidden">
@@ -33,6 +33,7 @@ function TVShowCard({ imageUrl, title, cardWidth, averageRating }) {
           {title}
         </div>
 
+       
         <div
           className="
             absolute bottom-0 left-0 right-0

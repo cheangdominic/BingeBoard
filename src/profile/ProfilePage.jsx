@@ -48,9 +48,9 @@ function ProfilePage() {
           transition={{ delay: 0.2 }}
         >
           <RecentlyWatched />
-        </motion.div> */}
+        </motion.div>
 
-        {/* <motion.div
+        <motion.div
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
