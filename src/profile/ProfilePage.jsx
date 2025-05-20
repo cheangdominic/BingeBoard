@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import ProfileCard from "./ProfileCard.jsx";
 import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
-import Watchlist from "./Watchlist.jsx";
+import WatchlistCarousel from "./WatchlistCarousel.jsx";
 import BottomNavbar from "../components/BottomNavbar.jsx";
 
 const fadeInUp = {
@@ -32,7 +32,7 @@ function ProfilePage() {
       });
   }, []);
 
-  if (!user) return;
+  if (!user) return <div className="p-6 text-white">Loading profile...</div>;
 
   const profilePic = user.profilePic || "/img/profilePhotos/generic_profile_picture.jpg";
 
@@ -65,7 +65,7 @@ function ProfilePage() {
           variants={fadeInUp}
           transition={{ delay: 0.6 }}
         >
-          <Watchlist />
+          <WatchlistCarousel user={user} />
         </motion.div>
       </div>
       <BottomNavbar />
