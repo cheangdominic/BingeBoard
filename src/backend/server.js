@@ -62,6 +62,8 @@ const mongodb_password = process.env.MONGODB_PASSWORD;
 const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
+ const apiKey = process.env.VITE_TMDB_API_KEY;
+ const baseUrl = process.env.VITE_TMDB_BASE_URL;
 
 const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
 const client = new MongoClient(atlasURI);
@@ -256,6 +258,52 @@ const authenticate = (req, res, next) => {
   next();
 };
 
+async function fetchShowDetailsFromTMDB(showId) {
+  if (!showId) {
+    console.warn('Attempted to fetch show details with empty ID');
+    return { name: 'Unknown Show', poster_path: null };
+  }
+  
+  if (!apiKey) {
+    console.error('TMDB_API_KEY is missing in environment variables');
+    return { name: `Show #${showId}`, poster_path: null };
+  }
+
+  console.log(`Fetching details for show ID: ${showId}`);
+
+  const axiosConfig = {
+    params: { api_key: apiKey },
+    timeout: 8000,
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    }
+  };
+
+  try {
+    const tvRes = await axios.get(`${baseUrl}/tv/${showId}`, axiosConfig);
+    
+    if (tvRes.data && tvRes.data.name) {
+      console.log(`Successfully retrieved TV show: ${tvRes.data.name}`);
+      return {
+        name: tvRes.data.name,
+        poster_path: tvRes.data.poster_path
+      };
+    }
+  } catch (tvErr) {
+    console.error(`TV lookup failed for ID ${showId}:`, {
+      status: tvErr.response?.status,
+      data: tvErr.response?.data,
+      message: tvErr.message
+    });
+  }
+
+  return { 
+    name: `Show #${showId}`, 
+    poster_path: null 
+  };
+}
+
 app.get('/api/reviews', async (req, res) => {
   try {
     const { showId, sort = 'latest' } = req.query;
@@ -435,6 +483,56 @@ app.get('/api/user', authenticate, async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/user/reviews', authenticate, async (req, res) => {
+  try {
+    const user = await userCollection.findOne({ email: req.session.email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const userId = user._id;
+    console.log(`Fetching reviews for user: ${userId}`);
+    
+    const userReviews = await Review.find({ userId: userId })
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    console.log(`Found ${userReviews.length} reviews for user ${userId}`);
+    
+    const reviewsWithShowDetails = await Promise.all(
+      userReviews.map(async (review) => {
+        let showIdToUse = null;
+
+        if (review.showId) showIdToUse = review.showId;
+        else if (review.tmdbId) showIdToUse = review.tmdbId;
+        else if (review.show_id) showIdToUse = review.show_id;
+        
+        console.log(`Processing review ${review._id}, using show ID: ${showIdToUse}`);
+
+        let showData = { name: 'Unknown Show', poster_path: null };
+        if (showIdToUse) {
+          showData = await fetchShowDetailsFromTMDB(showIdToUse);
+        }
+
+        return {
+          ...review,
+          id: review._id.toString(),
+          showId: showIdToUse,
+          showName: showData.name,
+          posterPath: showData.poster_path,
+          likes: Array.isArray(review.likes) ? review.likes : [],
+          dislikes: Array.isArray(review.dislikes) ? review.dislikes : []
+        };
+      })
+    );
+    
+    res.json(reviewsWithShowDetails);
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 });
 
