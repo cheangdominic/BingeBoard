@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import BottomNavbar from "../../components/BottomNavbar.jsx";
 import SearchBar from "../search/SearchBar.jsx";
 import axios from "axios";
+import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 
 function SearchUsers() {
     const [query, setQuery] = useState("");
@@ -13,6 +14,15 @@ function SearchUsers() {
     const [similarMatches, setSimilarMatches] = useState([]);
     const [hasSearched, setHasSearched] = useState(false);
     const [searchAnimationKey, setSearchAnimationKey] = useState(0);
+
+    const { user, loading: authLoading } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            navigate('/login');
+        }
+    }, [user, authLoading, navigate]);
 
     const fetchUsers = async () => {
         if (!query.trim()) return;
@@ -56,14 +66,15 @@ function SearchUsers() {
         window.scrollTo(0, 0);
     }, []);
 
-    const { user } = useAuth();
-    const navigate = useNavigate();
+    if (authLoading) {
+        return (
+            <LoadingSpinner />
+        );
+    }
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-        }
-    }, [user, navigate]);
+    if (!user) {
+        return null;
+    }
 
     return (
         <>
@@ -85,7 +96,7 @@ function SearchUsers() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
-                    className="mt-10 flex flex-col gap-6"
+                    className="mt-10 flex flex-col gap-6 max-w-6xl mx-auto"
                 >
                     <>
                         {exactMatches.length > 0 && (
@@ -94,8 +105,8 @@ function SearchUsers() {
                                     Exact Matches
                                 </h3>
                                 <div className="flex flex-col gap-4">
-                                    {exactMatches.map((user) => (
-                                        <UserCard key={user._id} user={user} />
+                                    {exactMatches.map((u) => (
+                                        <UserCard key={u._id} user={u} />
                                     ))}
                                 </div>
                             </div>
@@ -118,8 +129,8 @@ function SearchUsers() {
                                     Similar Matches
                                 </h3>
                                 <div className="flex flex-col gap-4">
-                                    {similarMatches.map((user, index) => (
-                                        <UserCard key={user._id} user={user} index={index} />
+                                    {similarMatches.map((u, index) => (
+                                        <UserCard key={u._id} user={u} index={index} />
                                     ))}
                                 </div>
                             </div>
@@ -135,6 +146,11 @@ function SearchUsers() {
                                         No similar matches found.
                                     </p>
                                 </div>
+                            </div>
+                        )}
+                         {!hasSearched && (
+                            <div className="text-center mt-10">
+                                <p className="text-gray-400">Enter a username to start searching for users.</p>
                             </div>
                         )}
                     </>

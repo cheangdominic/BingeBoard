@@ -5,18 +5,19 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext";
 import BottomNavbar from '../../components/BottomNavbar.jsx';
 import ActivityCard from '../../components/ActivityCard.jsx';
+import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 
 function ActivityPage() {
     const [count, setCount] = useState(0);
 
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (!user) {
+        if (!authLoading && !user) {
             navigate('/login');
         }
-    }, [user, navigate]);
+    }, [user, authLoading, navigate]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -34,7 +35,6 @@ function ActivityPage() {
         }
     };
 
-    // Helper to get "Month Year" from a date string
     const getMonthYear = (dateStr) => {
         const date = new Date(dateStr);
         return date.toLocaleString('default', { month: 'long', year: 'numeric' });
@@ -67,7 +67,17 @@ function ActivityPage() {
         },
     ];
 
-    let lastMonth = ""; // Track the last rendered month
+    let lastMonth = "";
+
+    if (authLoading) {
+        return (
+            <LoadingSpinner />
+        );
+    }
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <>

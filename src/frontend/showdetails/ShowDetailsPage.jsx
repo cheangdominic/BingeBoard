@@ -13,6 +13,7 @@ import BottomNavbar from '../../components/BottomNavbar.jsx';
 import AddToWatchlistButton from './AddToWatchlistButton.jsx';
 import TopNavbar from '../../frontend/landing/TopNavbar.jsx';
 import Footer from '../../frontend/landing/Footer.jsx';
+import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -68,29 +69,6 @@ const ShowDetailsPage = () => {
       behavior: 'smooth'
     });
   };
-
-  const LoadingSpinner = () => (
-    <motion.div 
-      className="flex flex-col items-center justify-center h-screen bg-[#1e1e1e] gap-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
-      />
-      <motion.p 
-        className="text-white text-lg font-medium"
-        initial={{ y: 10 }}
-        animate={{ y: 0 }}
-        transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}
-      >
-        Loading show details...
-      </motion.p>
-    </motion.div>
-  );
 
   const formatCountdown = (airDate) => {
     if (!airDate) return 'Coming soon';
@@ -315,7 +293,7 @@ const ShowDetailsPage = () => {
           >
             Episodes
           </motion.h2>
-          <EpisodeList seasons={show.seasons} showId={id} />
+          <EpisodeList seasons={show.seasons} showId={id} isAuthenticated={isAuthenticated} />
         </motion.div>
 
         <motion.div
