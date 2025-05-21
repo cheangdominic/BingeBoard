@@ -11,13 +11,13 @@ import SignupPage from './frontend/signup/SignupPage.jsx';
 import SearchPage from './frontend/search/SearchPage.jsx';
 import ViewAllPage from './frontend/viewall/ViewAllPage.jsx';
 
-import SocialFeature from './frontend/featurecards/SocialFeature.jsx';
+import SocialFeature from './frontend/featurecards/BrowseFeature.jsx';
 import WatchlistFeature from './frontend/featurecards/WatchlistFeature.jsx';
 import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
 import ActivityPage from './frontend/activity/ActivityPage.jsx';
 import LogPage from './frontend/log/LogPage.jsx';
-import SearchUsers from './frontend/social/SearchUsers.jsx';
+import SearchUsers from './frontend/social/searchUsers.jsx';
 import UserProfile from './frontend/social/UserProfile.jsx';
 import Home from './frontend/home/Home.jsx';
 
