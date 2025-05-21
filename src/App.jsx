@@ -17,9 +17,9 @@ import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
 import ActivityPage from './frontend/activity/ActivityPage.jsx';
 import LogPage from './frontend/log/LogPage.jsx';
-import SearchUsers from './frontend/social/searchUsers.jsx';
 import UserProfile from './frontend/social/UserProfile.jsx';
 import Home from './frontend/home/Home.jsx';
+import SearchUser from './frontend/social/SearchUser.jsx';
 
 
 function App() {
@@ -40,7 +40,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/browse" element={<SearchPage />} />
-        <Route path="/social" element={<SearchUsers />} />
+        <Route path="/social" element={<SearchUser />} />
         <Route path="/user/:username" element={<UserProfile />} />
         <Route path="/view-all/:tmdbEndpoint" element={<ViewAllPage />} />
         <Route path="/view-all/watchlist" element={<ViewAllPage />} />
