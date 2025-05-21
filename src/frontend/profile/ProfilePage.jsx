@@ -93,7 +93,7 @@ function ProfilePage() {
           transition={{ delay: 0.2 }}
         >
           <RecentlyWatched userId={user._id} />
-        </motion.div>
+        </motion.div> */}
 
         <motion.div
           initial="hidden"
@@ -102,7 +102,7 @@ function ProfilePage() {
           transition={{ delay: 0.4 }}
         >
           <RecentReviews userId={user._id} />
-        </motion.div>*/}
+        </motion.div>
 
         <motion.div
           initial="hidden"
