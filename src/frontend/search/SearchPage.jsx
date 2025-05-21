@@ -3,17 +3,21 @@ import Footer from "../../frontend/landing/Footer.jsx";
 import BottomNavbar from "../../components/BottomNavbar.jsx";
 import TVShowSearchGrid from "./TvShowSearchGrid.jsx";
 import { useAuth } from "../../context/AuthContext";
+import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 
 function SearchPage() {
-  const { user } = useAuth();
-  const isAuthenticated = !!user;
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <>
-      {!isAuthenticated && <TopNavbar />}
+      {!user && <TopNavbar />}
       <TVShowSearchGrid />
-      {isAuthenticated && <BottomNavbar />}
-      {!isAuthenticated && <Footer />}
+      {user && <BottomNavbar />}
+      {!user && <Footer />}
     </>
   );
 }

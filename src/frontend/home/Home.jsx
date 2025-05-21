@@ -1,9 +1,9 @@
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../context/AuthContext";
 import BottomNavbar from '../../components/BottomNavbar.jsx';
 import TrendingCarousel from './TrendingCarousel.jsx';
-import FriendsRecentlyWatched from './FriendsRecentlyWatched.jsx';
-import RecommendedByFriends from './RecommendedByFriends.jsx';
-import RecentReviewsFiltered from './RecentReviewsFiltered.jsx';
 import ShowCarousel from '../../components/ShowCarousel.jsx';
 
 const fadeInUp = {
@@ -19,6 +19,23 @@ const fadeInUp = {
 };
 
 function Home() {
+  const { user, loading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <>
       <motion.div
@@ -28,35 +45,11 @@ function Home() {
         transition={{ delay: 0.2 }}
       >
         <TrendingCarousel tmdbEndpoint="tv/top_rated" />
-
-        {/* <FriendsRecentlyWatched /> */}
-
-        <ShowCarousel
-          title="Trending Today"
-          tmdbEndpoint="trending/tv/day"
-        />
-
-        <ShowCarousel
-          title="Airing Today TV Shows"
-          tmdbEndpoint="tv/airing_today"
-        />
-
-        <ShowCarousel
-          title="Popular TV Shows"
-          tmdbEndpoint="tv/popular"
-        />
-        <ShowCarousel
-          title="Top Rated TV Shows"
-          tmdbEndpoint="tv/top_rated"
-        />
-        {/* <RecentReviewsFiltered /> */}
-
-        <ShowCarousel
-          title="On Air TV Shows"
-          tmdbEndpoint="tv/on_the_air"
-        />
-
-        {/* <RecommendedByFriends /> */}
+        <ShowCarousel title="Trending Today" tmdbEndpoint="trending/tv/day" />
+        <ShowCarousel title="Airing Today TV Shows" tmdbEndpoint="tv/airing_today" />
+        <ShowCarousel title="Popular TV Shows" tmdbEndpoint="tv/popular" />
+        <ShowCarousel title="Top Rated TV Shows" tmdbEndpoint="tv/top_rated" />
+        <ShowCarousel title="On Air TV Shows" tmdbEndpoint="tv/on_the_air" />
       </motion.div>
       <BottomNavbar />
     </>

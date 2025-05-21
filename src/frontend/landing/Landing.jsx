@@ -1,4 +1,7 @@
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../context/AuthContext";
 import TopNavbar from './TopNavbar.jsx';
 import MottoBanner from './MottoBanner.jsx';
 import FeatureCards from './FeatureCards.jsx';
@@ -20,6 +23,14 @@ const fadeInUp = {
 };
 
 function Landing() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
   return (
     <>
       <TopNavbar />

@@ -1,5 +1,5 @@
 import React from "react";
-import TVShowCard from "../components/TVShowCard";
+import TVShowCard from "../../components/TVShowCard";
 
 function RecentlyWatched() {
   const recentShows = [ // TODO: replace with real tv shows from db

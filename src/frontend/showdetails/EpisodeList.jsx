@@ -1,21 +1,21 @@
+import { useEffect, useState } from 'react';
+import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { fetchSeasonEpisodes } from '/src/backend/tmdb';
 
 const formatEpisodeNumber = (num) => {
   const numStr = String(num);
   const cleanNum = numStr.replace(/[^\d]/g, '');
-
   return parseInt(cleanNum, 10) || 0;
-}; import { useEffect, useState } from 'react';
-import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import { fetchSeasonEpisodes } from '/src/backend/tmdb';
+};
 
-const EpisodeList = ({ seasons, showId }) => {
+const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
   const [selectedSeason, setSelectedSeason] = useState(seasons[0]?.number || 1);
   const [episodesBySeason, setEpisodesBySeason] = useState({});
   const [selectedEpisodes, setSelectedEpisodes] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [viewAll, setViewAll] = useState(false);
 
-  const EPISODES_LIMIT = 20; // Show more episodes by default in the grid view
+  const EPISODES_LIMIT = 20;
 
   useEffect(() => {
     const loadEpisodes = async () => {
@@ -31,11 +31,9 @@ const EpisodeList = ({ seasons, showId }) => {
         }
       }
     };
-
     loadEpisodes();
   }, [selectedSeason, showId, episodesBySeason]);
 
-  // Reset viewAll and selectedEpisodes when changing seasons
   useEffect(() => {
     setViewAll(false);
     setSelectedEpisodes([]);
@@ -60,7 +58,6 @@ const EpisodeList = ({ seasons, showId }) => {
 
   return (
     <div className="bg-gradient-to-br from-[#272733] to-[#1c1c24] rounded-xl p-6 shadow-lg border border-[#343444]">
-      {/* Header */}
       <div className="flex justify-between items-center mb-5">
         <div>
           <h2 className="text-2xl font-bold text-gray-100">Season {selectedSeason} Episodes</h2>
@@ -81,7 +78,6 @@ const EpisodeList = ({ seasons, showId }) => {
         </div>
       </div>
 
-      {/* Season Selector */}
       <div className="flex space-x-3 mb-6 overflow-x-auto pb-3 scrollbar-thin scrollbar-thumb-[#3a3a3a] scrollbar-track-transparent">
         {seasons.map(season => (
           <button
@@ -97,31 +93,39 @@ const EpisodeList = ({ seasons, showId }) => {
         ))}
       </div>
 
-      {/* Episodes Grid */}
       <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-4 mb-6">
-        {displayedEpisodes.map(ep => (
-          <div
-            key={ep.id}
-            onClick={() => handleEpisodeClick(ep.id)}
-            onMouseDown={handleDragStart}
-            onMouseUp={handleDragEnd}
-            onMouseEnter={() => isDragging && handleEpisodeClick(ep.id)}
-            className={`aspect-square rounded-lg flex items-center justify-center relative cursor-pointer transition-all ${selectedEpisodes.includes(ep.id)
-                ? 'bg-blue-600 border-2 border-blue-400 shadow-lg shadow-blue-500/20'
-                : 'bg-[#343444] hover:bg-[#3f3f52] border border-[#4a4a5a]'
-              }`}
-          >
-            <span className="text-sm font-medium text-gray-200">{formatEpisodeNumber(ep.number)}</span>
-            <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
-              <span className="text-sm font-bold text-yellow-400">
-                {ep.rating?.toFixed(1) ?? 'N/A'}
-              </span>
+        {displayedEpisodes.map(ep => {
+          const isSelected = selectedEpisodes.includes(ep.id);
+          const canSelect = isAuthenticated;
+
+          return (
+            <div
+              key={ep.id}
+              onClick={canSelect ? () => handleEpisodeClick(ep.id) : undefined}
+              onMouseDown={canSelect ? handleDragStart : undefined}
+              onMouseUp={canSelect ? handleDragEnd : undefined}
+              onMouseEnter={canSelect && isDragging ? () => handleEpisodeClick(ep.id) : undefined}
+              className={`aspect-square rounded-lg flex items-center justify-center relative transition-all cursor-pointer 
+                ${canSelect
+                  ? isSelected
+                    ? 'bg-blue-600 border-2 border-blue-400 shadow-lg shadow-blue-500/20'
+                    : 'bg-[#343444] hover:bg-[#3f3f52] border border-[#4a4a5a]'
+                  : 'bg-[#343444] border border-[#4a4a5a] cursor-not-allowed'
+                }`}
+            >
+              <span className="text-sm font-medium text-gray-200">{formatEpisodeNumber(ep.number)}</span>
+              {canSelect && (
+                <div className="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity rounded-lg">
+                  <span className="text-sm font-bold text-yellow-400">
+                    {ep.rating?.toFixed(1) ?? 'N/A'}
+                  </span>
+                </div>
+              )}
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
-      {/* View All Button */}
       {hasMoreEpisodes && (
         <div className="flex justify-center mb-6">
           <button
@@ -134,22 +138,23 @@ const EpisodeList = ({ seasons, showId }) => {
         </div>
       )}
 
-      {/* Action Button */}
-      <button
-        disabled={selectedEpisodes.length === 0}
-        className={`w-full py-3.5 rounded-lg font-medium flex items-center justify-center space-x-3 transition-colors text-lg ${selectedEpisodes.length > 0
-            ? 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-lg shadow-green-500/20'
-            : 'bg-[#343444] text-gray-400 cursor-not-allowed'
-          }`}
-      >
-        <FaEye className="text-base" />
-        <span>Mark Selected as Watched</span>
-        {selectedEpisodes.length > 0 && (
-          <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-sm">
-            {selectedEpisodes.length}
-          </span>
-        )}
-      </button>
+      {isAuthenticated && (
+        <button
+          disabled={selectedEpisodes.length === 0}
+          className={`w-full py-3.5 rounded-lg font-medium flex items-center justify-center space-x-3 transition-colors text-lg ${selectedEpisodes.length > 0
+              ? 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-lg shadow-green-500/20'
+              : 'bg-[#343444] text-gray-400 cursor-not-allowed'
+            }`}
+        >
+          <FaEye className="text-base" />
+          <span>Mark Selected as Watched</span>
+          {selectedEpisodes.length > 0 && (
+            <span className="bg-white/20 px-2.5 py-0.5 rounded-full text-sm">
+              {selectedEpisodes.length}
+            </span>
+          )}
+        </button>
+      )}
     </div>
   );
 };

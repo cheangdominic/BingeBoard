@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from "../../context/AuthContext";
 import Landing from '../landing/TopNavbar';
 import Footer from '../landing/Footer';
 import AboutUsInfo from './AboutUsInfo';
@@ -20,6 +22,15 @@ function AboutUsPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/home');
+    }
+  }, [user, navigate]);
 
   return (
     <>

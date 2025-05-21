@@ -1,10 +1,22 @@
 import { motion } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext.jsx';
+import { useNavigate } from 'react-router-dom';
 import { useState, useEffect } from "react";
 import BottomNavbar from '../../components/BottomNavbar.jsx';
 import { Apple, ThumbsUp, ThumbsDown, AlertTriangle } from 'lucide-react';
+import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 import axios from 'axios';
 
 function ActivityPage() {
+    const [count, setCount] = useState(0);
+    const { user, loading: authLoading } = useAuth();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (!authLoading && !user) {
+            navigate('/login');
+        }
+    }, [user, authLoading, navigate]);
   const [userReviews, setUserReviews] = useState([]);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [loading, setLoading] = useState(true);

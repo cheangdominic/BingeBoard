@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { FaChevronDown } from 'react-icons/fa';
 import { fetchTVShow } from '/src/backend/tmdb';
 import { useAuth } from '../../context/AuthContext';
 import ShowHero from './ShowHero';
@@ -12,6 +13,8 @@ import BottomNavbar from '../../components/BottomNavbar.jsx';
 import AddToWatchlistButton from './AddToWatchlistButton.jsx';
 import TopNavbar from '../../frontend/landing/TopNavbar.jsx';
 import Footer from '../../frontend/landing/Footer.jsx';
+import LoadingSpinner from '../../components/LoadingSpinner.jsx';
+
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
   visible: {
@@ -52,33 +55,21 @@ const ShowDetailsPage = () => {
   const [show, setShow] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-const [reviews, setReviews] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const { user } = useAuth();
   const isAuthenticated = user;
+  const episodesRef = useRef(null);
+  const seasonViewRef = useRef(null);
+  const reviewsRef = useRef(null);
 
-  const LoadingSpinner = () => (
-    <motion.div 
-      className="flex flex-col items-center justify-center h-screen bg-[#1e1e1e] gap-4"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-        className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full"
-      />
-      <motion.p 
-        className="text-white text-lg font-medium"
-        initial={{ y: 10 }}
-        animate={{ y: 0 }}
-        transition={{ repeat: Infinity, repeatType: "reverse", duration: 1 }}
-      >
-        Loading show details...
-      </motion.p>
-    </motion.div>
-  );
+  const scrollToRef = (ref) => {
+    window.scrollTo({
+      top: ref.current.offsetTop - 20,
+      behavior: 'smooth'
+    });
+  };
+
   const formatCountdown = (airDate) => {
     if (!airDate) return 'Coming soon';
     const now = new Date();
@@ -193,6 +184,47 @@ const [reviews, setReviews] = useState([]);
           </motion.div>
         </AnimatePresence>
 
+        <motion.div 
+          className="flex flex-wrap justify-center gap-4 my-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <motion.button
+            onClick={() => scrollToRef(episodesRef)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] rounded-full shadow-lg hover:shadow-xl transition-all"
+            whileHover={{ 
+              scale: 1.05,
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)"
+            }}
+          >
+            <span>Log Episodes</span>
+            <FaChevronDown className="text-blue-400" />
+          </motion.button>
+          <motion.button
+            onClick={() => scrollToRef(seasonViewRef)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] rounded-full shadow-lg hover:shadow-xl transition-all"
+            whileHover={{ 
+              scale: 1.05,
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)"
+            }}
+          >
+            <span>Episodes by Season</span>
+            <FaChevronDown className="text-blue-400" />
+          </motion.button>
+          <motion.button
+            onClick={() => scrollToRef(reviewsRef)}
+            className="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] rounded-full shadow-lg hover:shadow-xl transition-all"
+            whileHover={{ 
+              scale: 1.05,
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)"
+            }}
+          >
+            <span>Reviews</span>
+            <FaChevronDown className="text-blue-400" />
+          </motion.button>
+        </motion.div>
+
         <motion.div
           variants={staggerContainer}
           initial="hidden"
@@ -200,7 +232,7 @@ const [reviews, setReviews] = useState([]);
           className="grid grid-cols-1 lg:grid-cols-3 gap-8"
         >
           <motion.div
-        variants={fadeInUp}
+            variants={fadeInUp}
             className="lg:col-span-2 space-y-6"
           >
             <ShowDescription show={show} />
@@ -210,7 +242,7 @@ const [reviews, setReviews] = useState([]);
             >
               {isAuthenticated && <AddToWatchlistButton showId={id} />}
             </motion.div>
-      </motion.div>
+          </motion.div>
 
           <motion.div
             variants={scaleUp}
@@ -248,6 +280,7 @@ const [reviews, setReviews] = useState([]);
         </motion.div>
 
         <motion.div
+          ref={episodesRef}
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
@@ -260,11 +293,28 @@ const [reviews, setReviews] = useState([]);
           >
             Episodes
           </motion.h2>
-          <EpisodeList seasons={show.seasons} showId={id} />
+          <EpisodeList seasons={show.seasons} showId={id} isAuthenticated={isAuthenticated} />
+        </motion.div>
+
+        <motion.div
+          ref={seasonViewRef}
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          transition={{ delay: 0.7 }}
+          className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
+        >
+          <motion.h2 
+            className="text-2xl font-bold mb-6"
+            whileHover={{ scale: 1.01 }}
+          >
+            Episodes by Season
+          </motion.h2>
           <EpisodeListView seasons={show.seasons} showId={id} />
         </motion.div>
 
         <motion.div
+          ref={reviewsRef}
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
