@@ -10,7 +10,7 @@
     "client": "vite",
     "build": "vite build && cd src/backend && npm install",
     "preview": "vite preview",
-    "start": "node src/backend/server.js",
+    "start": "node .src/backend/server.js",
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
