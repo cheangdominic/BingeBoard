@@ -16,6 +16,8 @@ import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import axios from 'axios';
+import { Activity } from './utils.js';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,8 +51,8 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'profile_pics', 
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp',], 
+    folder: 'profile_pics',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'webp',],
   },
 });
 
@@ -111,6 +113,78 @@ app.use(session({
   }
 }));
 
+async function logActivity(userId, action, targetId = null, details = {}) {
+  try {
+    // For actions that involve shows
+    if (['review_create', 'review_like', 'review_dislike', 'watchlist_add', 'watchlist_remove'].includes(action)) {
+      if (targetId) {
+        try {
+          // Use environment variables instead of VITE_* variables
+          const tmdbUrl = `${process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3'}/tv/${targetId}`;
+          
+          const response = await axios.get(tmdbUrl, {
+            params: {
+              api_key: process.env.TMDB_API_KEY
+            },
+            timeout: 5000 // 5 second timeout
+            
+          });
+
+          if (response.data) {
+         
+            details.showName = response.data.name || 
+                              response.data.original_name || 
+                              response.data.original_title || 
+                              "Unknown Show";
+            
+            details.showImage = response.data.poster_path
+              ? `https://image.tmdb.org/t/p/w500${response.data.poster_path}`
+              : "https://via.placeholder.com/300x450";
+          }
+        } catch (apiError) {
+          console.error('Failed to fetch show details from TMDB:', {
+            error: apiError.message,
+            targetId,
+            action,
+            response: apiError.response?.data
+          });
+          details.showName = `Show ID: ${targetId}`; // More informative than "Unknown Show"
+          details.showImage = "https://via.placeholder.com/300x450";
+        }
+      } else {
+        console.warn(`Target ID missing for action: ${action}`);
+      }
+    }
+    
+
+    // For profile updates
+    if (action === 'profile_update') {
+      const user = await userCollection.findOne({ _id: userId });
+      if (user) {
+        details.profilePhoto = user.profilePic || '';
+      }
+    }
+
+    const activity = new Activity({
+      userId,
+      action,
+      targetId,
+      details,
+    });
+
+    await activity.save();
+  } catch (error) {
+    console.error('Failed to log activity:', {
+      error: error.message,
+      stack: error.stack,
+      userId,
+      action,
+      targetId
+    });
+  }
+}
+
+
 app.use(express.static(path.join(__dirname, '../../dist')));
 
 app.post('/api/signup', async (req, res) => {
@@ -119,11 +193,11 @@ app.post('/api/signup', async (req, res) => {
   }
 
   const { username, email, password } = req.body;
-  
+
   if (!username || !email || !password) {
-    return res.status(400).json({ 
+    return res.status(400).json({
       success: false,
-      message: 'All fields are required' 
+      message: 'All fields are required'
     });
   }
 
@@ -153,6 +227,8 @@ app.post('/api/signup', async (req, res) => {
       watchlist: [],
       profilePic: '',
     });
+    await logActivity(insertResult.insertedId, 'account_creation');
+
     return res.json({ success: true });
   } catch (error) {
     console.error("Error inserting user:", error);
@@ -175,7 +251,7 @@ app.post('/api/login', async (req, res) => {
 
   try {
     const result = await userCollection.find({ email: email }).project({ email: 1, password: 1, _id: 1 }).toArray();
-    
+
     if (result.length != 1) {
       return res.status(401).json({ success: false, message: 'User not found' });
     }
@@ -190,6 +266,8 @@ app.post('/api/login', async (req, res) => {
         loginTime: new Date(),
         sessionData: req.session,
       });
+
+      await logActivity(result[0]._id, 'login');
 
       return res.json({ success: true });
     } else {
@@ -252,7 +330,7 @@ const authenticate = (req, res, next) => {
   req.user = {
     email: req.session.email,
   };
-  
+
   next();
 };
 
@@ -263,7 +341,7 @@ app.get('/api/reviews', async (req, res) => {
     if (!showId) {
       return res.status(400).json({ error: 'Show ID is required' });
     }
-    
+
     console.log(`Fetching reviews for show ${showId} with sort: ${sort}`);
 
     let sortOptions = {};
@@ -278,11 +356,11 @@ app.get('/api/reviews', async (req, res) => {
       default:
         sortOptions = { createdAt: -1 };
     }
-    
+
     const reviews = await Review.find({ showId })
       .sort(sortOptions)
       .lean();
-    
+
     console.log(`Found ${reviews.length} reviews`);
 
     const formattedReviews = reviews.map(review => ({
@@ -292,7 +370,7 @@ app.get('/api/reviews', async (req, res) => {
       likes: Array.isArray(review.likes) ? review.likes : [],
       dislikes: Array.isArray(review.dislikes) ? review.dislikes : []
     }));
-    
+
     res.json(formattedReviews);
   } catch (error) {
     console.error('Error fetching reviews:', error);
@@ -303,21 +381,21 @@ app.get('/api/reviews', async (req, res) => {
 app.post('/api/reviews', authenticate, async (req, res) => {
   try {
     console.log('Creating new review, mongoose connection state:', mongoose.connection.readyState);
-    
+
     const { rating, content, containsSpoiler, showId } = req.body;
-    
+
     if (!showId || !content || !rating) {
-      return res.status(400).json({ 
-        error: 'Missing required fields', 
-        details: 'showId, content, and rating are required' 
+      return res.status(400).json({
+        error: 'Missing required fields',
+        details: 'showId, content, and rating are required'
       });
     }
-    
+
     const user = await userCollection.findOne({ email: req.session.email });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     const reviewData = {
       showId,
       userId: user._id,
@@ -329,20 +407,28 @@ app.post('/api/reviews', authenticate, async (req, res) => {
       dislikes: [],
       createdAt: new Date()
     };
-    
+
     console.log('Creating review with data:', reviewData);
-    
+
     const review = new Review(reviewData);
     const savedReview = await review.save();
-    
+
     console.log('Review saved successfully:', savedReview._id);
-    
+
     const formattedReview = {
       ...savedReview.toObject(),
       id: savedReview._id.toString(),
       _id: savedReview._id.toString()
     };
-    
+
+
+    await logActivity(user._id, 'review_create', showId, {
+      rating,
+      content,
+      containsSpoiler,
+    }
+    );
+
     return res.status(201).json(formattedReview);
   } catch (error) {
     console.error('Review creation error:', error);
@@ -358,35 +444,51 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
   try {
     const reviewId = req.params.id;
     const { action } = req.body;
-    
+
     if (!['like', 'dislike'].includes(action)) {
       return res.status(400).json({ error: 'Invalid action. Must be "like" or "dislike"' });
     }
-    
+
     const review = await Review.findById(reviewId);
     if (!review) {
       return res.status(404).json({ error: 'Review not found' });
     }
-    
+
     const user = await userCollection.findOne({ email: req.session.email });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     const userId = user._id;
+    const userIdStr = userId.toString();
 
     if (!Array.isArray(review.likes)) review.likes = [];
     if (!Array.isArray(review.dislikes)) review.dislikes = [];
-    
-    const isOwnReview = review.userId && review.userId.toString() === userId.toString();
+
+    const isOwnReview = review.userId && review.userId.toString() === userIdStr;
     if (isOwnReview) {
       return res.status(403).json({ error: 'You cannot vote on your own review' });
     }
 
-    const userIdStr = userId.toString();
     const alreadyLiked = review.likes.some(id => id && id.toString() === userIdStr);
     const alreadyDisliked = review.dislikes.some(id => id && id.toString() === userIdStr);
-    
+
+    // Log activity
+    if (action === 'like') {
+      if (alreadyLiked) {
+        await logActivity(userId, 'review_unlike', reviewId);
+      } else {
+        await logActivity(userId, 'review_like', reviewId);
+      }
+    } else if (action === 'dislike') {
+      if (alreadyDisliked) {
+        await logActivity(userId, 'review_undislike', reviewId);
+      } else {
+        await logActivity(userId, 'review_dislike', reviewId);
+      }
+    }
+
+    // Modify review votes
     if (action === 'like') {
       if (alreadyLiked) {
         review.likes = review.likes.filter(id => id && id.toString() !== userIdStr);
@@ -412,7 +514,7 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
       likes: review.likes.map(id => id.toString()),
       dislikes: review.dislikes.map(id => id.toString())
     };
-    
+
     res.json(responseReview);
   } catch (error) {
     console.error('Review vote update error:', error);
@@ -421,17 +523,18 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
 });
 
 
+
 app.get('/api/user', authenticate, async (req, res) => {
   try {
     const user = await userCollection.findOne(
       { email: req.session.email },
-      { projection: { password: 0 } } 
+      { projection: { password: 0 } }
     );
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    
+
     res.json(user);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -475,11 +578,11 @@ app.get('/api/getUserInfo', async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    return res.json({ 
-      success: true, 
-      username: user.username, 
+    return res.json({
+      success: true,
+      username: user.username,
       profilePic: user.profilePic || null,
-      watchlist: user.watchlist || [] 
+      watchlist: user.watchlist || []
     });
   } catch (error) {
     console.error("Error fetching user info:", error);
@@ -497,6 +600,11 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
       return res.status(401).json({ success: false, message: 'Not authenticated' });
     }
 
+    const user = await userCollection.findOne({ email: req.session.email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
     const imageUrl = req.file.secure_url || req.file.url || req.file.path;
 
     const updatedUser = await userCollection.updateOne(
@@ -505,8 +613,9 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
     );
 
     if (updatedUser.modifiedCount === 1) {
-      return res.json({ 
-        success: true, 
+      await logActivity(user._id, 'profile_update', null, { field: 'profilePic' });
+      return res.json({
+        success: true,
         imageUrl,
         message: 'Profile picture updated successfully'
       });
@@ -515,11 +624,48 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
     }
   } catch (error) {
     console.error('Error uploading profile picture:', error);
-    res.status(500).json({ 
-      success: false, 
+    res.status(500).json({
+      success: false,
       message: 'Failed to upload profile picture',
-      error: error.message 
+      error: error.message
     });
+  }
+});
+
+app.get('/api/activities', authenticate, async (req, res) => {
+  try {
+    const user = await userCollection.findOne({ email: req.session.email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const activities = await Activity.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    res.json(activities);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/users/:username/activities', async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await userCollection.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const activities = await Activity.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .lean();
+
+    res.json(activities);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
@@ -534,15 +680,21 @@ app.post('/api/watchlist/add', async (req, res) => {
   }
 
   try {
+    const user = await userCollection.findOne({ email: req.session.email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
     const result = await userCollection.updateOne(
       { email: req.session.email },
-      { $addToSet: { watchlist: showId } } 
+      { $addToSet: { watchlist: showId } }
     );
 
     if (result.modifiedCount === 0) {
       return res.status(200).json({ success: true, message: 'Already in watchlist' });
     }
 
+    await logActivity(user._id, 'watchlist_add', showId);
     res.json({ success: true, message: 'Added to watchlist' });
   } catch (err) {
     console.error("Error updating watchlist:", err);
@@ -561,10 +713,17 @@ app.post('/api/watchlist/remove', async (req, res) => {
   }
 
   try {
+    const user = await userCollection.findOne({ email: req.session.email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
     await userCollection.updateOne(
       { email: req.session.email },
       { $pull: { watchlist: showId } }
     );
+
+    await logActivity(user._id, 'watchlist_remove', showId);
     res.json({ success: true, message: 'Removed from watchlist' });
   } catch (err) {
     console.error(err);
@@ -579,18 +738,18 @@ app.post('/api/chat', async (req, res) => {
     // Validate input
     if (!req.body || !req.body.messages || !Array.isArray(req.body.messages)) {
       console.error('Invalid request format');
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        error: 'Invalid request format. Expected { messages: [] }' 
+        error: 'Invalid request format. Expected { messages: [] }'
       });
     }
 
     // Check API key
     if (!process.env.OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not configured');
-      return res.status(500).json({ 
+      return res.status(500).json({
         success: false,
-        error: 'Server configuration error' 
+        error: 'Server configuration error'
       });
     }
 
@@ -623,16 +782,16 @@ app.post('/api/chat', async (req, res) => {
     // Validate OpenAI response
     if (!response.data?.choices?.[0]?.message?.content) {
       console.error('Unexpected OpenAI response:', response.data);
-      return res.status(500).json({ 
+      return res.status(500).json({
         success: false,
-        error: 'Unexpected API response format' 
+        error: 'Unexpected API response format'
       });
     }
 
     // Return successful response
-    return res.json({ 
+    return res.json({
       success: true,
-      reply: response.data.choices[0].message.content 
+      reply: response.data.choices[0].message.content
     });
 
   } catch (error) {
@@ -644,22 +803,22 @@ app.post('/api/chat', async (req, res) => {
 
     // Handle different error types
     if (error.response) {
-      return res.status(502).json({ 
+      return res.status(502).json({
         success: false,
-        error: error.response.data.error?.message || 'API service error' 
+        error: error.response.data.error?.message || 'API service error'
       });
     }
-    
+
     if (error.code === 'ECONNABORTED') {
-      return res.status(504).json({ 
+      return res.status(504).json({
         success: false,
-        error: 'Request timeout' 
+        error: 'Request timeout'
       });
     }
-    
-    return res.status(500).json({ 
+
+    return res.status(500).json({
       success: false,
-      error: error.message || 'Internal server error' 
+      error: error.message || 'Internal server error'
     });
   }
 });
