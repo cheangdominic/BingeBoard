@@ -21,7 +21,7 @@ const genreMap = {
   37: "Western"
 };
 
-const ratingSteps = [2, 4, 6, 8];
+const ratingSteps = [1, 2, 3, 4];
 
 export default function TVShowFilters({ shows, onFilter }) {
   const [filters, setFilters] = useState({
@@ -69,11 +69,12 @@ export default function TVShowFilters({ shows, onFilter }) {
         if (!filters.year.includes(showYear)) return false;
       }
 
-      if (filters.minRating.length && show.vote_average) {
-        if (!filters.minRating.some(r => show.vote_average >= r)) {
+      if (filters.minRating.length) {
+        if (show.vote_average == null || !filters.minRating.some(r => show.vote_average >= r * 2)) {
           return false;
         }
       }
+
 
       if (filters.genre.length && show.genre_ids) {
         if (!filters.genre.some(g => show.genre_ids.includes(parseInt(g)))) {
