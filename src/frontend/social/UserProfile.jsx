@@ -2,10 +2,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
-import ProfileCard from "../../profile/ProfileCard.jsx";
-import RecentlyWatched from "../../profile/RecentlyWatched.jsx";
-import RecentReviews from "../../profile/RecentReviews.jsx";
-import Watchlist from "../../profile/Watchlist.jsx";
+import ProfileCard from "../profile/ProfileCard.jsx";
+import RecentlyWatched from "../profile/RecentlyWatched.jsx";
+import RecentReviews from "../profile/RecentReviews.jsx";
+import Watchlist from "../profile/Watchlist.jsx";
 import BottomNavbar from "../../components/BottomNavbar.jsx";
 import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 

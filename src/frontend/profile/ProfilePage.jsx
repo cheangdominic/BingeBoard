@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext.jsx";
 import ProfileCard from "./ProfileCard.jsx";
 import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
 import WatchlistCarousel from "./WatchlistCarousel.jsx";
 import BottomNavbar from "../../components/BottomNavbar.jsx";
 import LogoutButton from "./LogoutButton.jsx";
-import LoadingSpinner from "../components/LoadingSpinner.jsx";
+import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
