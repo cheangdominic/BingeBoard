@@ -103,7 +103,7 @@ await mongoose.connect(mongooseURI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000
 });
-
+app.set('trust proxy', 1);
 mongoose.connection.on('connected', () => {
   console.log('Mongoose connected to DB cluster');
 });
@@ -113,7 +113,7 @@ app.use(session({
   store: mongoStore,
   saveUninitialized: false,
   resave: true,
-cookie: {
+  cookie: {
     secure: true,
     maxAge: expireTime,
     sameSite: 'none'
@@ -330,6 +330,17 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
+const authenticate = (req, res, next) => {
+  if (!req.session.authenticated || !req.session.email) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  req.user = {
+    email: req.session.email,
+  };
+
+  next();
+};
+
 async function fetchShowDetailsFromTMDB(showId) {
   if (!showId) {
     console.warn('Attempted to fetch show details with empty ID');
@@ -420,7 +431,7 @@ app.get('/api/reviews', async (req, res) => {
   }
 });
 
-app.post('/api/reviews', async (req, res) => {
+app.post('/api/reviews', authenticate, async (req, res) => {
   try {
     console.log('Creating new review, mongoose connection state:', mongoose.connection.readyState);
 
@@ -482,7 +493,7 @@ app.post('/api/reviews', async (req, res) => {
   }
 });
 
-app.put('/api/reviews/:id', async (req, res) => {
+app.put('/api/reviews/:id', authenticate, async (req, res) => {
   try {
     const reviewId = req.params.id;
     const { action } = req.body;
@@ -566,7 +577,7 @@ app.put('/api/reviews/:id', async (req, res) => {
 
 
 
-app.get('/api/user', async (req, res) => {
+app.get('/api/user', authenticate, async (req, res) => {
   try {
     const user = await userCollection.findOne(
       { email: req.session.email },
@@ -583,7 +594,7 @@ app.get('/api/user', async (req, res) => {
   }
 });
 
-app.get('/api/user/reviews', async (req, res) => {
+app.get('/api/user/reviews', authenticate, async (req, res) => {
   try {
     const user = await userCollection.findOne({ email: req.session.email });
     if (!user) {
@@ -724,7 +735,7 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
   }
 });
 
-app.get('/api/activities', async (req, res) => {
+app.get('/api/activities', authenticate, async (req, res) => {
   try {
     const user = await userCollection.findOne({ email: req.session.email });
     if (!user) {
