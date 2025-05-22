@@ -3,7 +3,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "../search/SearchBar.jsx";
 import TVShowFilters from "../search/TVShowFilters";
-import { X, CheckCircle, Eye as EyeIcon } from "lucide-react";
+import { X, CheckCircle, Eye as EyeIcon } from "lucide-react"; // Eye imported as EyeIcon
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import AppleRatingDisplay from '../../components/AppleRatingDisplay';
@@ -27,7 +27,7 @@ const fetchSeasonEpisodes = async (showId, seasonNumber) => {
       rating: ep.vote_average,
     }));
   } catch (error) {
-    console.error(`Error fetching episodes for show ${showId}, season ${seasonNumber}:`, error);
+    // console.error(`Error fetching episodes for show ${showId}, season ${seasonNumber}:`, error);
     return [];
   }
 };
@@ -84,6 +84,7 @@ const EpisodeList = ({
           const fetchedEpisodes = await fetchSeasonEpisodes(showId, selectedSeason);
           setEpisodesBySeason(prev => ({ ...prev, [selectedSeason]: fetchedEpisodes }));
         } catch (err) {
+          // console.error(`Failed to load episodes for season ${selectedSeason}:`, err.message);
           setEpisodesBySeason(prev => ({ ...prev, [selectedSeason]: [] }));
         } finally {
           setIsLoadingEpisodes(false);
@@ -132,7 +133,9 @@ const EpisodeList = ({
       setSelectedEpisodesInfo([]);
     } catch (error) {
       console.error("Failed to mark episodes as watched:", error.response?.data || error.message);
-      alert(`Error: ${error.response?.data?.message || "Could not mark episodes as watched."}`);
+      // alert(`Error: ${error.response?.data?.message || "Could not mark episodes as watched."}`);
+      setWatchedToastMessage(`Error: ${error.response?.data?.message || "Could not mark episodes as watched."}`); // Show error in toast
+      setShowWatchedToast(true); // Or use a different toast for errors
     } finally {
       setIsMarkingWatched(false);
     }
@@ -323,7 +326,6 @@ const ShowGrid = () => {
       setBroadenedShows(trendingRes.data.results);
       setFilteredBroadenedShows(trendingRes.data.results);
     } catch (error) {
-      console.error("Failed to fetch trending shows:", error);
       setBroadenedShows([]);
       setFilteredBroadenedShows([]);
     } finally {
@@ -379,7 +381,6 @@ const ShowGrid = () => {
           })) || [];
         setFormattedShowSeasons(adaptedSeasons);
       } catch (error) {
-        console.error("Failed to fetch show details for seasons:", error);
         setFormattedShowSeasons([]);
         setSelectedShowDetails(null);
       } finally {
@@ -394,6 +395,8 @@ const ShowGrid = () => {
   const searchShows = async () => {
     if (!query.trim()) {
       setExactMatches([]);
+      setBroadenedShows([]);
+      setFilteredBroadenedShows([]);
       setHasSearched(false);
       setTotalResults(0);
       setCurrentPage(1);
@@ -421,16 +424,14 @@ const ShowGrid = () => {
         }
       });
       setExactMatches(tempExactMatches);
-      const allCombinedResults = [...exactRes.data.results, ...broadRes.data.results];
+      const allCombinedResults = [...new Set([...exactRes.data.results, ...broadRes.data.results].map(s => JSON.stringify(s)))].map(s => JSON.parse(s));
+
       const uniqueBroadened = allCombinedResults.filter(
-        (show, index, self) =>
-          index === self.findIndex((s) => s.id === show.id) &&
-          !tempExactMatches.find(em => em.id === show.id)
+        (show) => !tempExactMatches.some(em => em.id === show.id)
       );
       setBroadenedShows(uniqueBroadened);
       setFilteredBroadenedShows(uniqueBroadened);
     } catch (error) {
-      console.error("Search failed:", error);
       setExactMatches([]); setBroadenedShows([]); setFilteredBroadenedShows([]); setTotalResults(0);
     } finally {
       setIsSearching(false);
@@ -663,7 +664,7 @@ const ShowGrid = () => {
             >
               <button 
                 onClick={closeModal} 
-                className="fixed top-[5.5vh] right-[17.5vw] text-gray-400 hover:text-white z-20" 
+                className="absolute top-6 right-6 text-gray-400 hover:text-white z-20" 
                 aria-label="Close review modal"
                 disabled={!modalCanClose} 
               >
@@ -804,7 +805,7 @@ const ShowGrid = () => {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
-                className="fixed top-10 inset-x-0 mx-auto w-fit z-[100] bg-zinc-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3"
+                className="fixed top-10 inset-x-0 mx-auto w-fit z-[100] bg-blue-700 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3"
             >
                 <EyeIcon size={24} /> 
                 <span>{watchedToastMessage}</span>
