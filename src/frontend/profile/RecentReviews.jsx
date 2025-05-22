@@ -67,7 +67,7 @@ function RecentReviews({ userId }) {
   return (
     <section>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold">Recent Reviews</h3>
+        <h3 className="text-xl font-bold pl-4">Recent Reviews</h3>
         <button
           onClick={() => navigate('/activity')}
           className="text-sm text-blue-400 hover:underline"

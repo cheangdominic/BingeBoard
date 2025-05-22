@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import logo from '../../assets/BingeBoard Icon.svg';
 
 function SignupForm() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -32,7 +35,7 @@ function SignupForm() {
 
   const validateForm = () => {
     let valid = true;
-    const newErrors = { ...errors };
+    const newErrors = { username: '', email: '', password: '', confirmPassword: '' };
 
     if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
@@ -82,23 +85,26 @@ function SignupForm() {
           email: formData.email,
           password: formData.password
         }),
+        credentials: 'include',
       });
 
       const data = await response.json();
       
-      if (response.ok) {
+      if (response.ok && data.success) {
         setFormData({
           username: '',
           email: '',
           password: '',
           confirmPassword: ''
         });
+        window.location.reload();
+        navigate('/home');
       } else {
-        alert(data.message || 'Signup failed');
+        alert(data.message || 'Signup failed. Please try again.');
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('An error occurred during signup');
+      console.error('Error during signup:', error);
+      alert('An error occurred during signup. Please check the console.');
     }
   };
 

@@ -16,25 +16,24 @@ const TVShowSearchGrid = () => {
   const [totalResults, setTotalResults] = useState(0);
   const navigate = useNavigate();
 
-  const fetchRandomShows = async () => {
+  const fetchTrendingShowsThisWeek = async () => {
     try {
-      const randomRes = await axios.get("https://api.themoviedb.org/3/discover/tv", {
+      const trendingRes = await axios.get("https://api.themoviedb.org/3/trending/tv/week", {
         params: {
           api_key: "325f0c86f4e9c504dac84ae3046cbee2",
-          sort_by: "popularity.desc",
-          page: 1,
         },
       });
-      setBroadenedShows(randomRes.data.results);
-      setFilteredBroadenedShows(randomRes.data.results);
+      setBroadenedShows(trendingRes.data.results);
+      setFilteredBroadenedShows(trendingRes.data.results);
     } catch (error) {
-      console.error("Failed to fetch random shows:", error);
+      console.error("Failed to fetch trending shows this week:", error);
     }
   };
 
+
   useEffect(() => {
     if (!query) {
-      fetchRandomShows();
+      fetchTrendingShowsThisWeek();
     }
   }, [query]);
 
@@ -73,15 +72,17 @@ const TVShowSearchGrid = () => {
         (show, index, self) => index === self.findIndex((s) => s.id === show.id)
       );
 
-      const exactMatches = uniqueResults.filter(
+      const exactMatchesData = uniqueResults.filter(
         (show) => show.name.toLowerCase() === query.toLowerCase()
       );
 
-      const broadenedShows = uniqueResults.filter((show) => !exactMatches.includes(show));
+      const broadenedShowsData = uniqueResults.filter((show) => 
+        !exactMatchesData.some(em => em.id === show.id)
+      );
 
-      setExactMatches(exactMatches);
-      setBroadenedShows(broadenedShows);
-      setFilteredBroadenedShows(broadenedShows);
+      setExactMatches(exactMatchesData);
+      setBroadenedShows(broadenedShowsData);
+      setFilteredBroadenedShows(broadenedShowsData);
     } catch (error) {
       console.error("Search failed:", error);
     } finally {
@@ -101,9 +102,15 @@ const TVShowSearchGrid = () => {
       });
 
       setCurrentPage(nextPage);
-      const newShows = [...broadenedShows, ...moreResults.data.results];
-      setBroadenedShows(newShows);
-      setFilteredBroadenedShows(newShows);
+      const newShowsToAdd = moreResults.data.results.filter(
+        newShow => 
+          !broadenedShows.find(bs => bs.id === newShow.id) &&
+          !exactMatches.find(em => em.id === newShow.id)
+      );
+      const updatedBroadenedShows = [...broadenedShows, ...newShowsToAdd];
+
+      setBroadenedShows(updatedBroadenedShows);
+      setFilteredBroadenedShows(updatedBroadenedShows); 
     } catch (error) {
       console.error("Failed to load more results:", error);
     }
@@ -125,11 +132,12 @@ const TVShowSearchGrid = () => {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut"} },
   };
 
-  const renderGrid = (shows) => (
+  const renderGrid = (shows, sectionKey) => (
     <motion.div
+      key={sectionKey}
       variants={containerVariants}
       initial="hidden"
       animate="show"
@@ -140,25 +148,30 @@ const TVShowSearchGrid = () => {
           key={show.id}
           variants={itemVariants}
           whileHover={{ scale: 1.05 }}
-          className="bg-[#2a2a2a] rounded-lg overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer"
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="bg-[#2a2a2a] rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-shadow duration-300 cursor-pointer flex flex-col"
           onClick={() => handleCardClick(show.id)}
         >
-          <div className="aspect-[2/3] w-full">
-            <img
-              src={
-                show.poster_path
-                  ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
-                  : "https://via.placeholder.com/500x750?text=No+Poster"
-              }
-              alt={show.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="p-3 sm:p-4">
-            <h3 className="text-base sm:text-lg text-[#f1f1f1] font-semibold line-clamp-1">
-              {show.name}
-            </h3>
-            <p className="text-gray-400 text-sm">{show.first_air_date}</p>
+          <img
+            src={
+              show.poster_path
+                ? `https://image.tmdb.org/t/p/w500${show.poster_path}`
+                : "https://via.placeholder.com/500x750?text=No+Poster"
+            }
+            alt={show.name}
+            className="w-full h-72 object-cover"
+          />
+          <div className="p-3 sm:p-4 flex-grow flex flex-col justify-between">
+            <div>
+              <h3 className="text-base sm:text-lg text-[#f1f1f1] font-semibold line-clamp-1">
+                {show.name}
+              </h3>
+              {show.first_air_date && (
+                  <p className="text-gray-400 text-sm">
+                      {new Date(show.first_air_date).getFullYear()}
+                  </p>
+              )}
+            </div>
             <p className="text-gray-300 text-xs sm:text-sm mt-2 line-clamp-3">
               {show.overview || "No description available."}
             </p>
@@ -204,26 +217,26 @@ const TVShowSearchGrid = () => {
               >
                 Exact Matches
               </motion.h2>
-              {renderGrid(exactMatches)}
+              {renderGrid(exactMatches, "exact-matches-grid")}
             </section>
           )}
 
           {filteredBroadenedShows.length > 0 && (
-            <section>
+            <section className={exactMatches.length > 0 ? "pt-4" : ""}>
               <motion.h2
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-2xl font-semibold text-[#f1f1f1] mb-6"
               >
-                Related Shows
+                {hasSearched && exactMatches.length > 0 ? "Other Results" : (hasSearched ? "Results" : "Trending This Week")}
               </motion.h2>
-              {renderGrid(filteredBroadenedShows)}
+              {renderGrid(filteredBroadenedShows, "related-shows-grid")}
 
-              {filteredBroadenedShows.length < totalResults && (
+              { hasSearched && (exactMatches.length + filteredBroadenedShows.length) < totalResults && !isSearching && (
                 <div className="flex justify-center mt-8 mb-12">
                   <button
                     onClick={loadMore}
-                    className="px-6 py-3 bg-[#1963da] text-white rounded-lg hover:bg-[#1652b5] transition-colors"
+                    className="px-6 py-3 bg-[#1963da] text-white rounded-xl hover:bg-[#1652b5] transition-colors"
                   >
                     Load More
                   </button>
@@ -231,8 +244,9 @@ const TVShowSearchGrid = () => {
               )}
             </section>
           )}
+          
 
-          {!isSearching && hasSearched && exactMatches.length === 0 && broadenedShows.length === 0 && (
+          {!isSearching && hasSearched && exactMatches.length === 0 && filteredBroadenedShows.length === 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-20">
               <p className="text-gray-300 text-xl">No results found for "{query}". Try a different search term.</p>
             </motion.div>

@@ -16,6 +16,7 @@ function WatchlistCarousel({
   const contentRef = useRef(null);
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
   const itemWidth = cardActualWidth;
+  const MIN_SHOWS_FOR_INFINITE_SCROLL = 6;
 
   useEffect(() => {
     if (!API_KEY || !user?.watchlist || user.watchlist.length === 0) {
@@ -54,6 +55,8 @@ function WatchlistCarousel({
   }, [user?.watchlist, API_KEY]);
 
   const handleScroll = useCallback(() => {
+    if (shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL) return;
+    
     const container = containerRef.current;
     if (!container || shows.length === 0 || itemWidth <= 0) return;
 
@@ -90,15 +93,21 @@ function WatchlistCarousel({
     }
 
     const contentWidth = shows.length * itemWidth;
-    content.style.width = `${contentWidth * 3}px`;
-    const initialScrollPosition = contentWidth;
+    
+    if (shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL) {
+      content.style.width = `${contentWidth}px`;
+      container.style.scrollBehavior = userScrollBehavior;
+    } else {
+      content.style.width = `${contentWidth * 3}px`;
+      const initialScrollPosition = contentWidth;
 
-    const originalBehavior = container.style.scrollBehavior;
-    container.style.scrollBehavior = "auto";
-    container.scrollLeft = initialScrollPosition;
-    container.style.scrollBehavior = userScrollBehavior;
+      const originalBehavior = container.style.scrollBehavior;
+      container.style.scrollBehavior = "auto";
+      container.scrollLeft = initialScrollPosition;
+      container.style.scrollBehavior = userScrollBehavior;
 
-    container.addEventListener("scroll", handleScroll, { passive: true });
+      container.addEventListener("scroll", handleScroll, { passive: true });
+    }
 
     return () => {
       container.removeEventListener("scroll", handleScroll);
@@ -188,19 +197,21 @@ function WatchlistCarousel({
     );
   }
 
-  const displayItems = [...shows, ...shows, ...shows];
+  const displayItems = shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL 
+    ? shows 
+    : [...shows, ...shows, ...shows];
 
   return (
-    <section className="relative my-8 pl-2 mr-2">
+    <section className="relative my-8 mr-2">
       <div className="flex justify-between items-center mb-4 px-4 md:px-0">
         <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">
           {title}
         </h3>
         <Link to="/view-all/watchlist" state={{ watchlist: user.watchlist }}>
-  <button className="text-sm text-white font-semibold hover:underline">
-    View All
-  </button>
-</Link>
+          <button className="text-sm text-blue-400 font-semibold hover:underline">
+            View All
+          </button>
+        </Link>
       </div>
 
       <div
@@ -211,7 +222,10 @@ function WatchlistCarousel({
           <AnimatePresence>
             {displayItems.map((show, index) => (
               <motion.div
-                key={`${show.id}-${index}`}
+                key={shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL 
+                  ? `${show.id}-${index}` 
+                  : `${show.id}-${index % shows.length}`
+                }
                 className="flex-shrink-0 mx-2 py-2"
                 style={{ width: `${itemWidth}px` }}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}

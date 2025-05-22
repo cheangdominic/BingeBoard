@@ -19,42 +19,45 @@ export default function BottomNavbar() {
     return localStorage.getItem('profileImage') || null;
   });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [user, setUser] = useState(null); // Added user state
   const navigate = useNavigate();
   const location = useLocation();
 
-  const fetchProfileImage = useCallback(async () => {
+  // Combined user data fetcher (profile + watchlist)
+  const fetchUserData = useCallback(async () => {
     try {
       const response = await axios.get("/api/getUserInfo", {
         withCredentials: true,
       });
-      if (response.data.success && response.data.profilePic) {
-        const imgUrl = response.data.profilePic;
-        localStorage.setItem('profileImage', imgUrl);
-        setProfileImage(imgUrl);
+      if (response.data.success) {
+        const { profilePic, watchlist } = response.data;
+        localStorage.setItem('profileImage', profilePic);
+        setProfileImage(profilePic);
+        setUser({ watchlist }); // Store watchlist
       }
     } catch (error) {
-      console.error("Failed to fetch profile image:", error);
+      console.error("Failed to fetch user data:", error);
     }
   }, []);
 
   useEffect(() => {
-    fetchProfileImage();
-  }, [fetchProfileImage]);
+    fetchUserData();
+  }, [fetchUserData]);
 
-  // ✅ Listen for the image update event
   useEffect(() => {
     const handleProfileUpdate = () => {
       localStorage.removeItem('profileImage');
       setImageLoaded(false);
-      fetchProfileImage();
+      fetchUserData();
     };
 
     window.addEventListener('profileImageUpdated', handleProfileUpdate);
     return () => window.removeEventListener('profileImageUpdated', handleProfileUpdate);
-  }, [fetchProfileImage]);
+  }, [fetchUserData]);
 
+  // Navigation buttons
   const arcButtons = [
-    { icon: <BiShow size={20} />, label: "Watchlist", path: "/watchlist" },
+    { icon: <BiShow size={20} />, label: "Watchlist", path: "/view-all/watchlist" },
     { icon: <BiPencil size={20} />, label: "Log", path: "/log" },
     { icon: <BiTimeFive size={20} />, label: "Activity", path: "/activity" },
   ];
@@ -70,7 +73,7 @@ export default function BottomNavbar() {
             {profileImage ? (
               <motion.img
                 key="profile-image"
-                src={`${profileImage}?${new Date().getTime()}`} // Force refresh
+                src={`${profileImage}?${new Date().getTime()}`}
                 alt="Profile"
                 className="w-full h-full object-cover"
                 initial={{ opacity: 0 }}
@@ -101,8 +104,17 @@ export default function BottomNavbar() {
 
   const radius = 100;
 
+  // Updated click handler with watchlist support
   const handleButtonClick = (path) => {
-    navigate(path);
+    if (path === "/view-all/watchlist") {
+      navigate(path, { 
+        state: { 
+          watchlist: user?.watchlist || [] 
+        } 
+      });
+    } else {
+      navigate(path);
+    }
     setMenuOpen(false);
   };
 
@@ -110,15 +122,22 @@ export default function BottomNavbar() {
     <div className="pb-[15vh]">
       <header className="fixed bottom-0 w-full z-50 bg-[#1A1A1A]/95 backdrop-blur-sm shadow-2xl shadow-black/60 border-t border-gray-800">
         <nav aria-label="Global" className="flex items-center relative h-16">
+          {/* Left-side buttons (Home, Search) */}
           <div className="flex flex-1 h-full divide-x divide-gray-800 pr-8 md:pr-10 lg:pr-12">
             {navButtons.slice(0, 2).map((btn) => (
               <motion.button
                 key={btn.label}
                 whileHover={{ scale: 1.05 }}
-                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${location.pathname === btn.path ? "text-blue-400" : "text-gray-300"}`}
+                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${
+                  location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
+                }`}
                 onClick={() => navigate(btn.path)}
               >
-                <div className={`p-2 rounded-full transition-all ${location.pathname === btn.path ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" : "hover:bg-[#2E2E2E]/50"}`}>
+                <div className={`p-2 rounded-full transition-all ${
+                  location.pathname === btn.path 
+                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" 
+                    : "hover:bg-[#2E2E2E]/50"
+                }`}>
                   {btn.icon}
                 </div>
                 <span className="mt-1">{btn.label}</span>
@@ -126,15 +145,22 @@ export default function BottomNavbar() {
             ))}
           </div>
 
+          {/* Right-side buttons (Social, Profile) */}
           <div className="flex flex-1 h-full divide-x divide-gray-800 pl-8 md:pl-10 lg:pl-12">
             {navButtons.slice(2, 4).map((btn) => (
               <motion.button
                 key={btn.label}
                 whileHover={{ scale: 1.05 }}
-                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${location.pathname === btn.path ? "text-blue-400" : "text-gray-300"}`}
+                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${
+                  location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
+                }`}
                 onClick={() => navigate(btn.path)}
               >
-                <div className={`p-2 rounded-full transition-all ${location.pathname === btn.path ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" : "hover:bg-[#2E2E2E]/50"}`}>
+                <div className={`p-2 rounded-full transition-all ${
+                  location.pathname === btn.path 
+                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" 
+                    : "hover:bg-[#2E2E2E]/50"
+                }`}>
                   {btn.icon}
                 </div>
                 <span className="mt-1">{btn.label}</span>
@@ -142,6 +168,7 @@ export default function BottomNavbar() {
             ))}
           </div>
 
+          {/* Central "+" button with arc menu */}
           <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 z-50 flex flex-col items-center">
             <AnimatePresence>
               {menuOpen && (
