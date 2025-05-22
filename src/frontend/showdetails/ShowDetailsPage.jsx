@@ -104,7 +104,7 @@ const ShowDetailsPage = () => {
     seasonsData: tmdbData.seasons || [],
     reviews: [],
     backdropUrl: tmdbData.backdrop_path
-      ? `https://image.tmdb.org/t/p/w500${tmdbData.backdrop_path}`
+      ? `https://image.tmdb.org/t/p/w1280${tmdbData.backdrop_path}`
       : '/images/fallback.jpg',
   }), []);
 
