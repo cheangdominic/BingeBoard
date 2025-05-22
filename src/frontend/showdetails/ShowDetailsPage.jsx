@@ -22,7 +22,7 @@ const fadeInUp = {
     y: 0,
     transition: {
       duration: 0.8,
-      ease: [0.16, 1, 0.3, 1] 
+      ease: [0.16, 1, 0.3, 1]
     }
   }
 };
@@ -58,16 +58,17 @@ const ShowDetailsPage = () => {
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const { user } = useAuth();
-  const isAuthenticated = user;
   const episodesRef = useRef(null);
   const seasonViewRef = useRef(null);
   const reviewsRef = useRef(null);
 
   const scrollToRef = (ref) => {
-    window.scrollTo({
-      top: ref.current.offsetTop - 20,
-      behavior: 'smooth'
-    });
+    if (ref.current) {
+      window.scrollTo({
+        top: ref.current.offsetTop - 20,
+        behavior: 'smooth'
+      });
+    }
   };
 
   const formatCountdown = (airDate) => {
@@ -86,6 +87,7 @@ const ShowDetailsPage = () => {
   };
 
   const formatShowData = useCallback((tmdbData) => ({
+    id: tmdbData.id,
     title: tmdbData.name,
     releaseDate: tmdbData.first_air_date,
     description: tmdbData.overview,
@@ -94,18 +96,19 @@ const ShowDetailsPage = () => {
     rating: (tmdbData.content_ratings?.results.find(r => r.iso_3166_1 === 'US') || {}).rating || 'TV-MA',
     platforms: getPlatforms(tmdbData),
     seasons: tmdbData.seasons?.filter(s => s.season_number > 0).map(season => ({
+      id: season.id,
       number: season.season_number,
+      name: season.name,
       episodes: [],
       episodeCount: season.episode_count
     })) || [],
     nextEpisode: tmdbData.next_episode_to_air ? {
       countdown: formatCountdown(tmdbData.next_episode_to_air.air_date)
     } : null,
-    seasonsData: tmdbData.seasons || [],
-    reviews: [],
     backdropUrl: tmdbData.backdrop_path
       ? `https://image.tmdb.org/t/p/w1280${tmdbData.backdrop_path}`
       : '/images/fallback.jpg',
+    poster_path: tmdbData.poster_path
   }), []);
 
   useEffect(() => {
@@ -113,11 +116,15 @@ const ShowDetailsPage = () => {
       try {
         setError(null);
         setLoading(true);
-        const showData = await fetchTVShow(id);
-        setShow(formatShowData(showData));
-      } catch (error) {
+        const showDataFromTMDB = await fetchTVShow(id);
+        if (showDataFromTMDB) {
+          setShow(formatShowData(showDataFromTMDB));
+        } else {
+          setError('Show data not found.');
+        }
+      } catch (err) {
         setError('Failed to load show details');
-        console.error("API Error:", error);
+        console.error("API Error fetching show:", err);
       } finally {
         setLoading(false);
       }
@@ -129,15 +136,15 @@ const ShowDetailsPage = () => {
   }, [id, formatShowData]);
 
   if (loading) return <LoadingSpinner />;
-  
+
   if (error) return (
-    <motion.div 
+    <motion.div
       className="flex items-center justify-center h-screen bg-[#1e1e1e]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
     >
-      <motion.div 
+      <motion.div
         className="text-white text-lg font-medium p-8 bg-red-900/30 rounded-xl"
         initial={{ scale: 0.9 }}
         animate={{ scale: 1 }}
@@ -148,12 +155,12 @@ const ShowDetailsPage = () => {
   );
 
   if (!show) return (
-    <motion.div 
+    <motion.div
       className="flex items-center justify-center h-screen bg-[#1e1e1e]"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <motion.div 
+      <motion.div
         className="text-white text-lg font-medium"
         initial={{ y: 20 }}
         animate={{ y: 0 }}
@@ -163,6 +170,8 @@ const ShowDetailsPage = () => {
     </motion.div>
   );
 
+  const isAuthenticatedBool = !!user;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -170,7 +179,7 @@ const ShowDetailsPage = () => {
       transition={{ duration: 0.5 }}
       className="min-h-screen bg-[#1e1e1e] text-gray-100"
     >
-      {!isAuthenticated && <TopNavbar />}
+      {!isAuthenticatedBool && <TopNavbar />}
       <div className="p-6 max-w-8xl mx-auto space-y-8">
         <AnimatePresence mode="wait">
           <motion.div
@@ -184,7 +193,7 @@ const ShowDetailsPage = () => {
           </motion.div>
         </AnimatePresence>
 
-        <motion.div 
+        <motion.div
           className="flex flex-wrap justify-center gap-4 my-8"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -193,7 +202,7 @@ const ShowDetailsPage = () => {
           <motion.button
             onClick={() => scrollToRef(episodesRef)}
             className="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] rounded-full shadow-lg hover:shadow-xl transition-all"
-            whileHover={{ 
+            whileHover={{
               scale: 1.05,
               boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)"
             }}
@@ -204,7 +213,7 @@ const ShowDetailsPage = () => {
           <motion.button
             onClick={() => scrollToRef(seasonViewRef)}
             className="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] rounded-full shadow-lg hover:shadow-xl transition-all"
-            whileHover={{ 
+            whileHover={{
               scale: 1.05,
               boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)"
             }}
@@ -215,7 +224,7 @@ const ShowDetailsPage = () => {
           <motion.button
             onClick={() => scrollToRef(reviewsRef)}
             className="flex items-center gap-2 px-4 py-2 bg-[#2a2a2a] rounded-full shadow-lg hover:shadow-xl transition-all"
-            whileHover={{ 
+            whileHover={{
               scale: 1.05,
               boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)"
             }}
@@ -240,7 +249,7 @@ const ShowDetailsPage = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              {isAuthenticated && <AddToWatchlistButton showId={id} />}
+              {isAuthenticatedBool && <AddToWatchlistButton showId={id} />}
             </motion.div>
           </motion.div>
 
@@ -249,7 +258,7 @@ const ShowDetailsPage = () => {
             className="lg:col-span-1"
           >
             <div className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
-              <motion.h3 
+              <motion.h3
                 className="text-xl font-bold mb-4"
                 whileHover={{ x: 5 }}
               >
@@ -261,7 +270,7 @@ const ShowDetailsPage = () => {
                   { label: 'Creator', value: show.creator },
                   { label: 'First Aired', value: show.releaseDate },
                   { label: 'Rating', value: show.rating },
-                  { label: 'Available On', value: show.platforms.join(', ') },
+                  { label: 'Available On', value: show.platforms.join(', ') || 'N/A' },
                   ...(show.nextEpisode ? [{ label: 'Next Episode', value: show.nextEpisode.countdown }] : [])
                 ].map((item, index) => (
                   <motion.div
@@ -287,13 +296,21 @@ const ShowDetailsPage = () => {
           transition={{ delay: 0.6 }}
           className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
         >
-          <motion.h2 
+          <motion.h2
             className="text-2xl font-bold mb-6"
             whileHover={{ scale: 1.01 }}
           >
-            Episodes
+            Log Episodes
           </motion.h2>
-          <EpisodeList seasons={show.seasons} showId={id} isAuthenticated={isAuthenticated} />
+          {show && show.seasons && (
+            <EpisodeList
+              seasons={show.seasons}
+              showId={id}
+              isAuthenticated={isAuthenticatedBool}
+              showName={show.title || "Unknown Show"}
+              posterPath={show.poster_path || null}
+            />
+          )}
         </motion.div>
 
         <motion.div
@@ -304,13 +321,15 @@ const ShowDetailsPage = () => {
           transition={{ delay: 0.7 }}
           className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
         >
-          <motion.h2 
+          <motion.h2
             className="text-2xl font-bold mb-6"
             whileHover={{ scale: 1.01 }}
           >
             Episodes by Season
           </motion.h2>
-          <EpisodeListView seasons={show.seasons} showId={id} />
+          {show && show.seasons && (
+            <EpisodeListView seasons={show.seasons} showId={id} showName={show.title} posterPath={show.poster_path} />
+          )}
         </motion.div>
 
         <motion.div
@@ -330,8 +349,8 @@ const ShowDetailsPage = () => {
             isLoading={reviewsLoading}
           />
         </motion.div>
-        {isAuthenticated && <BottomNavbar />}
-        {!isAuthenticated && <Footer />}
+        {isAuthenticatedBool && <BottomNavbar />}
+        {!isAuthenticatedBool && <Footer />}
       </div>
     </motion.div>
   );

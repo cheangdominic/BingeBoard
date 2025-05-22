@@ -23,10 +23,10 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3001;
 
-console.log("--- SERVER.JS IS RUNNING (Version Timestamp: " + new Date().toISOString() + ") ---"); 
+console.log("--- SERVER.JS IS RUNNING (Version Timestamp: " + new Date().toISOString() + ") ---");
 
 const saltRounds = 12;
-const expireTime = 24 * 60 * 60 * 1000; 
+const expireTime = 24 * 60 * 60 * 1000;
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -67,7 +67,7 @@ const mongodb_database = process.env.MONGODB_DATABASE;
 const mongodb_session_secret = process.env.MONGODB_SESSION_SECRET;
 const node_session_secret = process.env.NODE_SESSION_SECRET;
 
-const tmdbApiKey = process.env.VITE_TMDB_API_KEY; 
+const tmdbApiKey = process.env.VITE_TMDB_API_KEY;
 const tmdbBaseUrl = process.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3';
 
 console.log(`TMDB API Key Loaded: ${tmdbApiKey ? 'Yes (first few chars: ' + String(tmdbApiKey).substring(0,5) + '...)' : 'NO!!! KEY IS MISSING!'}`);
@@ -76,10 +76,10 @@ console.log(`TMDB Base URL: ${tmdbBaseUrl}`);
 
 const mongooseURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`;
 
-let database; 
-let userCollection; 
+let database;
+let userCollection;
 
-async function connectToNativeDriver() { 
+async function connectToNativeDriver() {
   try {
     const client = new MongoClient(mongooseURI);
     await client.connect();
@@ -88,7 +88,7 @@ async function connectToNativeDriver() {
     console.log('Connected to MongoDB via Native Driver (MongoClient)');
   } catch (error) {
     console.error('Native MongoDB Driver connection error:', error);
-    process.exit(1); 
+    process.exit(1);
   }
 }
 
@@ -97,7 +97,7 @@ mongoose.connect(mongooseURI, {
   socketTimeoutMS: 45000,
 }).then(() => {
   console.log('Mongoose connected to DB cluster');
-  connectToNativeDriver(); 
+  connectToNativeDriver();
 }).catch(err => {
   console.error('Mongoose connection error:', err);
   process.exit(1);
@@ -115,11 +115,11 @@ app.use(session({
   secret: node_session_secret,
   store: mongoStore,
   saveUninitialized: false,
-  resave: false, 
+  resave: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    httpOnly: true, 
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     maxAge: expireTime
   }
 }));
@@ -161,11 +161,11 @@ const authenticate = async (req, res, next) => {
       return res.status(401).json({ error: 'Unauthorized: User session invalid. Please log in again.' });
     }
 
-    req.currentUser = userDoc; 
-    req.currentUserId = userDoc._id; 
+    req.currentUser = userDoc;
+    req.currentUserId = userDoc._id;
 
     console.log(`[AUTH MIDDLEWARE] User ${userDoc.username} (ID: ${userDoc._id}) authenticated for path ${req.path}. Proceeding...`);
-    next(); 
+    next();
   } catch (error) {
     console.error('[AUTH MIDDLEWARE] Unexpected error during user lookup:', error);
     return res.status(500).json({ error: 'Internal server error during authentication process.' });
@@ -179,7 +179,7 @@ async function fetchShowDetailsFromTMDB(showIdInput) {
     console.warn('[FETCH_TMDB] Attempted to fetch show details with invalid or empty ID:', showIdInput);
     return { name: `Unknown Show (ID: ${showIdInput})`, poster_path: null };
   }
-  
+
   if (!tmdbApiKey) {
     console.error('[FETCH_TMDB] CRITICAL: TMDB_API_KEY is missing in environment variables!');
     return { name: `Show #${showId} (API Key Missing)`, poster_path: null };
@@ -196,7 +196,7 @@ async function fetchShowDetailsFromTMDB(showIdInput) {
   try {
     console.log(`[FETCH_TMDB] Requesting URL: ${requestUrl} with key: ${tmdbApiKey.substring(0,5)}...`);
     const tvRes = await axios.get(requestUrl, axiosConfig);
-    
+
     if (tvRes.data && (tvRes.data.name || tvRes.data.original_name)) {
       console.log(`[FETCH_TMDB] Success for ID ${showId}: ${tvRes.data.name || tvRes.data.original_name}`);
       return {
@@ -254,7 +254,7 @@ app.post('/api/signup', async (req, res) => {
   if (!userCollection) return res.status(500).json({ success: false, message: 'Database not connected' });
   const { username, email, password } = req.body;
   if (!username || !email || !password) return res.status(400).json({ success: false, message: 'All fields are required' });
-  
+
   const schema = Joi.object({
     username: Joi.string().alphanum().min(3).max(20).required(),
     email: Joi.string().email().required(),
@@ -266,7 +266,7 @@ app.post('/api/signup', async (req, res) => {
   try {
     const existingUser = await userCollection.findOne({ $or: [{ username }, { email }] });
     if (existingUser) return res.status(400).json({ success: false, message: 'Username or email already exists' });
-    
+
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     const newUserDocument = {
       username, email, password: hashedPassword,
@@ -274,7 +274,7 @@ app.post('/api/signup', async (req, res) => {
       createdAt: new Date(), updatedAt: new Date()
     };
     const insertResult = await userCollection.insertOne(newUserDocument);
-    
+
     if (insertResult.insertedId) {
         await logActivity(insertResult.insertedId, 'account_creation');
         return res.status(201).json({ success: true, message: "Account created successfully" });
@@ -324,7 +324,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/logout', authenticate, (req, res) => {
-    const userIdToLog = req.currentUserId; 
+    const userIdToLog = req.currentUserId;
     req.session.destroy(async (err) => {
       if (err) {
         console.error("Session destruction error:", err);
@@ -337,7 +337,7 @@ app.post('/api/logout', authenticate, (req, res) => {
           console.error("Error logging logout activity:", logErr);
         }
       }
-      res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' }); 
+      res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
       return res.json({ success: true, message: 'Logged out successfully' });
     });
 });
@@ -369,9 +369,9 @@ app.get('/api/reviews', async (req, res) => {
     if (userId) query.userId = new ObjectId(userId);
 
     let sortOptions = { createdAt: -1 };
-    if (sort === 'popular') sortOptions = { likesCount: -1, createdAt: -1 }; 
+    if (sort === 'popular') sortOptions = { likesCount: -1, createdAt: -1 };
     if (sort === 'relevant') sortOptions = { rating: -1, createdAt: -1 };
-    
+
     const reviews = await Review.find(query)
       .sort(sortOptions).skip(skip).limit(limitNum)
       .populate('userId', 'username profilePic').lean();
@@ -424,7 +424,7 @@ app.post('/api/reviews', authenticate, async (req, res) => {
 app.put('/api/reviews/:id', authenticate, async (req, res) => {
   try {
     const reviewId = req.params.id;
-    const { action } = req.body; 
+    const { action } = req.body;
     const loggedInUserId = req.currentUserId;
 
     if (!mongoose.Types.ObjectId.isValid(reviewId)) return res.status(400).json({ error: 'Invalid review ID format' });
@@ -459,7 +459,7 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
     }
     const updatedReview = await Review.findByIdAndUpdate(reviewId, update, { new: true }).populate('userId', 'username profilePic').lean();
     await logActivity(loggedInUserId, logActionType, review.showId, { reviewId });
-    
+
     const responseReview = {
       ...updatedReview, id: updatedReview._id.toString(), _id: updatedReview._id.toString(),
       username: updatedReview.userId?.username || "Anonymous", userProfilePic: updatedReview.userId?.profilePic,
@@ -485,12 +485,12 @@ app.get('/api/user/reviews', authenticate, async (req, res) => {
     const userReviews = await Review.find({ userId: userId })
       .sort({ createdAt: -1 })
       .lean();
-    
+
     console.log(`[USER_REVIEWS_ROUTE] Found ${userReviews.length} raw reviews for user ${userId}`);
     if (userReviews.length > 0) {
         console.log("[USER_REVIEWS_ROUTE] First raw review (check showId type):", JSON.stringify(userReviews[0], null, 2));
     }
-    
+
     const reviewsWithShowDetails = await Promise.all(
       userReviews.map(async (review) => {
         let showIdToUse = review.showId || review.tmdbId || review.show_id;
@@ -506,16 +506,16 @@ app.get('/api/user/reviews', authenticate, async (req, res) => {
 
         return {
           ...review,
-          id: review._id.toString(), 
+          id: review._id.toString(),
           _id: review._id.toString(),
-          showName: showData.name, 
+          showName: showData.name,
           posterPath: showData.poster_path,
           likes: Array.isArray(review.likes) ? review.likes.map(id => id.toString()) : [],
           dislikes: Array.isArray(review.dislikes) ? review.dislikes.map(id => id.toString()) : [],
         };
       })
     );
-    
+
     console.log(`[USER_REVIEWS_ROUTE] Returning ${reviewsWithShowDetails.length} reviews with details for ${req.currentUser?.username}.`);
     res.json(reviewsWithShowDetails);
   } catch (error) {
@@ -525,13 +525,22 @@ app.get('/api/user/reviews', authenticate, async (req, res) => {
 });
 
 app.post('/api/users/mark-watched', authenticate, async (req, res) => {
+    console.log(`[MARK_WATCHED] Received request body:`, JSON.stringify(req.body, null, 2));
     console.log(`[MARK_WATCHED] Request for user: ${req.currentUser?.username} (ID: ${req.currentUserId})`);
     const { showId, showName, posterPath, seasonNumber, episodes } = req.body;
     const userId = req.currentUserId;
 
-    if (!showId || !showName || posterPath === undefined || !episodes || !Array.isArray(episodes)) {
-        console.warn("[MARK_WATCHED] Missing required fields:", {showId, showName, posterPath, seasonNumber, episodes});
-        return res.status(400).json({ message: 'Missing required fields for marking watched.' });
+    if (!showId || !showName || posterPath === undefined || !episodes || !Array.isArray(episodes) || episodes.length === 0) {
+        console.warn("[MARK_WATCHED] Missing required fields or empty episodes array:", {
+            showIdExists: !!showId,
+            showNameExists: !!showName,
+            posterPathDefined: posterPath !== undefined,
+            posterPathValue: posterPath,
+            episodesIsArray: Array.isArray(episodes),
+            episodesCount: Array.isArray(episodes) ? episodes.length : 'N/A',
+            seasonNumber
+        });
+        return res.status(400).json({ message: 'Missing required fields or no episodes selected for marking watched.' });
     }
 
     try {
@@ -542,13 +551,23 @@ app.post('/api/users/mark-watched', authenticate, async (req, res) => {
 
         if (showIndex > -1) {
             watchedHistory[showIndex].lastWatchedAt = newWatchedAt;
-            const existingShowEpisodes = new Set(watchedHistory[showIndex].episodes.map(ep => ep.id.toString()));
+            const existingShowEpisodesById = new Map(watchedHistory[showIndex].episodes.map(ep => [ep.id.toString(), ep]));
+
             episodes.forEach(newEp => {
-                if (!existingShowEpisodes.has(newEp.id.toString())) {
-                    watchedHistory[showIndex].episodes.push({ ...newEp, seasonNumber, watchedAt: newWatchedAt });
+                const episodeToAddOrUpdate = {
+                    id: newEp.id,
+                    number: newEp.number,
+                    name: newEp.name,
+                    seasonNumber: seasonNumber,
+                    watchedAt: newWatchedAt
+                };
+
+                if (existingShowEpisodesById.has(newEp.id.toString())) {
+                    const epToUpdate = existingShowEpisodesById.get(newEp.id.toString());
+                    epToUpdate.watchedAt = newWatchedAt;
+                    if (epToUpdate.seasonNumber !== seasonNumber) epToUpdate.seasonNumber = seasonNumber;
                 } else {
-                    const epToUpdate = watchedHistory[showIndex].episodes.find(e => e.id.toString() === newEp.id.toString());
-                    if (epToUpdate) epToUpdate.watchedAt = newWatchedAt;
+                    watchedHistory[showIndex].episodes.push(episodeToAddOrUpdate);
                 }
             });
         } else {
@@ -557,22 +576,32 @@ app.post('/api/users/mark-watched', authenticate, async (req, res) => {
                 showName,
                 posterPath,
                 lastWatchedAt: newWatchedAt,
-                episodes: episodes.map(ep => ({ ...ep, seasonNumber, watchedAt: newWatchedAt }))
+                episodes: episodes.map(ep => ({
+                    id: ep.id,
+                    number: ep.number,
+                    name: ep.name,
+                    seasonNumber: seasonNumber,
+                    watchedAt: newWatchedAt
+                }))
             });
         }
 
         watchedHistory.sort((a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt));
-        if (watchedHistory.length > 50) { 
+
+        if (watchedHistory.length > 50) {
             watchedHistory = watchedHistory.slice(0, 50);
         }
 
-        await userCollection.updateOne({ _id: userId }, { $set: { watchedHistory: watchedHistory, updatedAt: new Date() } });
-        
-        await logActivity(userId, 'mark_watched', showId.toString(), { 
-            episodeCount: episodes.length, 
-            season: seasonNumber 
+        await userCollection.updateOne(
+          { _id: userId },
+          { $set: { watchedHistory: watchedHistory, updatedAt: new Date() } }
+        );
+
+        await logActivity(userId, 'mark_watched', showId.toString(), {
+            episodeCount: episodes.length,
+            season: seasonNumber
         });
-        
+
         console.log(`[MARK_WATCHED] Successfully updated watched history for user ${userId}, show ${showId}`);
         res.status(200).json({ message: 'Watched status updated successfully.' });
     } catch (error) {
@@ -584,8 +613,8 @@ app.post('/api/users/mark-watched', authenticate, async (req, res) => {
 app.get('/api/users/recently-watched', authenticate, async (req, res) => {
   console.log(`[RECENTLY_WATCHED] Handler invoked for user: ${req.currentUser?.username} (ID: ${req.currentUserId})`);
   try {
-    const userRecord = req.currentUser; 
-    
+    const userRecord = req.currentUser;
+
     if (!userRecord.watchedHistory || userRecord.watchedHistory.length === 0) {
         console.log(`[RECENTLY_WATCHED] No watched history for user ${userRecord?.username}`);
         return res.json([]);
@@ -596,14 +625,14 @@ app.get('/api/users/recently-watched', authenticate, async (req, res) => {
       const dateB = b.lastWatchedAt ? new Date(b.lastWatchedAt) : new Date(0);
       return dateB - dateA;
     });
-    
+
     const recentlyWatched = sortedWatchedHistory.slice(0, 10).map(item => ({
         showId: item.showId,
         showName: item.showName,
         posterPath: item.posterPath,
         lastWatchedAt: item.lastWatchedAt,
     }));
-    
+
     console.log(`[RECENTLY_WATCHED] Sending ${recentlyWatched.length} shows for ${userRecord?.username}.`);
     res.json(recentlyWatched);
   } catch (error) {
@@ -617,7 +646,7 @@ app.get('/api/users/:username', async (req, res) => {
   try {
     const user = await userCollection.findOne(
       { username },
-      { projection: { username: 1, email: 1, profilePic: 1, createdAt: 1, _id: 1, watchedHistory: 1, watchlist: 1 } } 
+      { projection: { username: 1, email: 1, profilePic: 1, createdAt: 1, _id: 1, watchedHistory: 1, watchlist: 1 } }
     );
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
@@ -674,7 +703,7 @@ app.get('/api/users/:username/activities', async (req, res) => {
     const { username } = req.params;
     const user = await userCollection.findOne({ username }, { projection: { _id: 1 } });
     if (!user) return res.status(404).json({ error: 'User not found' });
-    
+
     const activities = await Activity.find({ userId: user._id })
       .sort({ createdAt: -1 }).limit(50).lean();
     res.json(activities);
@@ -752,10 +781,35 @@ app.post('/api/watchlist/remove', authenticate, async (req, res) => {
   }
 });
 
+app.get('/api/watchlist', authenticate, async (req, res) => {
+    try {
+        const user = req.currentUser;
+        if (!user.watchlist || user.watchlist.length === 0) return res.json([]);
 
-app.post('/api/chat', async (req, res) => {
-  console.log('Received chat request with body:', req.body);
+        const watchlistDetails = await Promise.all(
+            user.watchlist.map(async (showId) => {
+                try {
+                    const tmdbUrl = `${tmdbBaseUrl}/tv/${showId}`;
+                    const response = await axios.get(tmdbUrl, { params: { api_key: tmdbApiKey }, timeout: 5000 });
+                    return {
+                        id: response.data.id, name: response.data.name, poster_path: response.data.poster_path,
+                        vote_average: response.data.vote_average, vote_count: response.data.vote_count,
+                        first_air_date: response.data.first_air_date
+                    };
+                } catch (error) {
+                    console.warn(`TMDB fetch failed for watchlist item ${showId}:`, error.message);
+                    return { id: showId, name: `Show ID: ${showId} (Fetch Error)`, poster_path: null };
+                }
+            })
+        );
+        res.json(watchlistDetails.filter(Boolean));
+    } catch (error) {
+        console.error("Error fetching watchlist:", error);
+        res.status(500).json({ error: "Failed to fetch watchlist", details: error.message });
+    }
+});
 
+app.post('/api/chat', authenticate, async (req, res) => {
   try {
     if (!req.body || !req.body.messages || !Array.isArray(req.body.messages)) {
       console.error('Invalid request format');
@@ -789,106 +843,18 @@ app.get('/api/average-rating', async (req, res) => {
   try {
     const { showId } = req.query;
     if (!showId) return res.status(400).json({ error: 'Show ID is required' });
-    
+
     const result = await Review.aggregate([
       { $match: { showId: showId.toString() } },
       { $group: { _id: '$showId', averageRating: { $avg: '$rating' }, totalReviews: { $sum: 1 } } }
     ]);
     if (result.length === 0) return res.json({ averageRating: null, totalReviews: 0 });
-    
+
     const { averageRating, totalReviews } = result[0];
     res.json({ averageRating: parseFloat(averageRating.toFixed(2)), totalReviews });
   } catch (error) {
     console.error('Error calculating average rating:', error);
     res.status(500).json({ error: 'Failed to calculate average rating', details: error.message });
-  }
-});
-
-app.post('/api/users/mark-watched', authenticate, async (req, res) => {
-    console.log(`[MARK_WATCHED] Request for user: ${req.currentUser?.username} (ID: ${req.currentUserId})`);
-    const { showId, showName, posterPath, seasonNumber, episodes } = req.body;
-    const userId = req.currentUserId;
-
-    if (!showId || !showName || posterPath === undefined || !episodes || !Array.isArray(episodes)) {
-        console.warn("[MARK_WATCHED] Missing required fields:", {showId, showName, posterPath, seasonNumber, episodes});
-        return res.status(400).json({ message: 'Missing required fields for marking watched.' });
-    }
-
-    try {
-        let userRecord = req.currentUser;
-        let watchedHistory = userRecord.watchedHistory || [];
-        const showIndex = watchedHistory.findIndex(item => item.showId === showId.toString());
-        const newWatchedAt = new Date();
-
-        if (showIndex > -1) {
-            watchedHistory[showIndex].lastWatchedAt = newWatchedAt;
-            const existingShowEpisodes = new Set(watchedHistory[showIndex].episodes.map(ep => ep.id.toString()));
-            episodes.forEach(newEp => {
-                if (!existingShowEpisodes.has(newEp.id.toString())) {
-                    watchedHistory[showIndex].episodes.push({ ...newEp, seasonNumber, watchedAt: newWatchedAt });
-                } else {
-                    const epToUpdate = watchedHistory[showIndex].episodes.find(e => e.id.toString() === newEp.id.toString());
-                    if (epToUpdate) epToUpdate.watchedAt = newWatchedAt;
-                }
-            });
-        } else {
-            watchedHistory.push({
-                showId: showId.toString(),
-                showName,
-                posterPath,
-                lastWatchedAt: newWatchedAt,
-                episodes: episodes.map(ep => ({ ...ep, seasonNumber, watchedAt: newWatchedAt }))
-            });
-        }
-
-        watchedHistory.sort((a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt));
-        if (watchedHistory.length > 50) { 
-            watchedHistory = watchedHistory.slice(0, 50);
-        }
-
-        await userCollection.updateOne({ _id: userId }, { $set: { watchedHistory: watchedHistory, updatedAt: new Date() } });
-        
-        await logActivity(userId, 'mark_watched', showId.toString(), { 
-            episodeCount: episodes.length, 
-            season: seasonNumber 
-        });
-        
-        console.log(`[MARK_WATCHED] Successfully updated watched history for user ${userId}, show ${showId}`);
-        res.status(200).json({ message: 'Watched status updated successfully.' });
-    } catch (error) {
-        console.error('[MARK_WATCHED] Error:', error);
-        res.status(500).json({ message: 'Server error while updating watched status.', details: error.message });
-    }
-});
-
-app.get('/api/users/recently-watched', authenticate, async (req, res) => {
-  console.log(`[RECENTLY_WATCHED] Handler invoked for user: ${req.currentUser?.username} (ID: ${req.currentUserId})`);
-  try {
-    const userRecord = req.currentUser; 
-    
-    if (!userRecord.watchedHistory || userRecord.watchedHistory.length === 0) {
-        console.log(`[RECENTLY_WATCHED] No watched history for user ${userRecord?.username}`);
-        return res.json([]);
-    }
-
-    const sortedWatchedHistory = [...userRecord.watchedHistory].sort((a, b) => {
-      const dateA = a.lastWatchedAt ? new Date(a.lastWatchedAt) : new Date(0);
-      const dateB = b.lastWatchedAt ? new Date(b.lastWatchedAt) : new Date(0);
-      return dateB - dateA;
-    });
-    
-    const recentlyWatched = sortedWatchedHistory.slice(0, 10).map(item => ({
-        showId: item.showId,
-        showName: item.showName,
-        posterPath: item.posterPath,
-        lastWatchedAt: item.lastWatchedAt,
-    }));
-    
-    console.log(`[RECENTLY_WATCHED] Sending ${recentlyWatched.length} shows for ${userRecord?.username}.`);
-    res.json(recentlyWatched);
-  } catch (error) {
-    console.error('[RECENTLY_WATCHED] Error processing request:', error);
-    res.status(500).json({ error: 'Failed to fetch recently watched shows', details: error.message });
   }
 });
 
