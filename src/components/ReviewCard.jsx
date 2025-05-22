@@ -64,7 +64,9 @@ export default function ReviewCard({
     } else if (action === 'dislike') {
       if (wasDisliked) {
         setLocalDislikes(prev => prev.filter(id => id !== currentUserId));
-        setUserDisliked(false);
+        setLocalLikes(prev => prev.filter(id => id !== currentUserId));
+        setUserDisliked(true);
+        setUserLiked(false);
       } else {
         setLocalDislikes(prev => [...prev.filter(id => id !== currentUserId), currentUserId]);
         setLocalLikes(prev => prev.filter(id => id !== currentUserId));
@@ -132,7 +134,8 @@ export default function ReviewCard({
       </div>
 
       {/* Spoiler warning - Optional section */}
-      <div className="h-8 flex items center">
+      {/* Reduced height from h-8 to h-6 and removed mb-1 */}
+      <div className="h-6 flex items-center">
         {containsSpoiler && (
           <div className="bg-yellow-900 text-yellow-200 text-xs px-2 py-1 rounded self-start">
             Contains Spoilers
@@ -141,30 +144,34 @@ export default function ReviewCard({
       </div>
 
       {/* Rating */}
-      <div className="h-8 my-1 flex items-center">
+      {/* Reduced height from h-8 to h-6 and removed my-1 */}
+      <div className="h-6 flex items-center">
         {renderAppleRating(rating)}
       </div>
 
       {/* Review text */}
-      <div className="h-16 overflow-y-auto mb-2">
+      {/* Reduced height from h-16 to h-12 and mb-2 to mb-1 */}
+      <div className="h-12 overflow-y-auto mb-1">
         <p className="text-gray-300 text-sm leading-relaxed">
           {reviewText}
         </p>
       </div>
 
       {/* Show info */}
-      <div className="h-6 mb-2">
+      {/* Reduced height from h-6 to h-5 and mb-2 to mb-1 */}
+      <div className="h-5 mb-1">
         {showName && (
           <p className="text-white font-medium text-sm truncate">{showName}</p>
         )}
       </div>
 
       {/* Show image */}
+      {/* Reduced height from h-48 to h-40 */}
       <div className="flex-grow mt-auto overflow-hidden rounded-lg">
         <img
           src={imageUrl}
           alt={showName || "Show poster"}
-          className="w-full h-48 object-cover rounded-lg"
+          className="w-full h-40 object-cover rounded-lg"
         />
       </div>
 
