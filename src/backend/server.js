@@ -420,7 +420,7 @@ app.get('/api/reviews', async (req, res) => {
   }
 });
 
-app.post('/api/reviews', authenticate, async (req, res) => {
+app.post('/api/reviews', async (req, res) => {
   try {
     console.log('Creating new review, mongoose connection state:', mongoose.connection.readyState);
 
