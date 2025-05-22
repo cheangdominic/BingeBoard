@@ -12,12 +12,13 @@ export default function ViewAllWatchlist() {
   const [shows, setShows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [watchlist, setWatchlist] = useState(state?.watchlist || []);
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWatchlistShows = async () => {
-      if (!API_KEY || !state?.watchlist || state.watchlist.length === 0) {
+      if (!API_KEY || !watchlist || watchlist.length === 0) {
         setIsLoading(false);
         setShows([]);
         return;
@@ -25,7 +26,7 @@ export default function ViewAllWatchlist() {
 
       try {
         setIsLoading(true);
-        const showPromises = state.watchlist.map((id) =>
+        const showPromises = watchlist.map((id) =>
           axios.get(
             `https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}&language=en-US`
           )
@@ -46,40 +47,30 @@ export default function ViewAllWatchlist() {
     };
 
     fetchWatchlistShows();
-  }, [API_KEY, state?.watchlist]);
+  }, [API_KEY, watchlist]);
+
+  const handleRemoveFromWatchlist = async (showId) => {
+    try {
+      const response = await axios.post(
+        "/api/watchlist/remove",
+        { showId: String(showId) },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        setShows((prev) => prev.filter((s) => s.id !== showId));
+        setWatchlist((prev) => prev.filter((id) => id != showId));
+        toast.success("Show removed from your watchlist");
+      } else {
+        toast.error(response.data.message || "Failed to remove show");
+      }
+    } catch (error) {
+      console.error("Remove error:", error);
+      toast.error(error.response?.data?.message || "Error removing show");
+    }
+  };
 
   const displayedShows = shows.slice(0, page * FILMS_PER_PAGE);
-
-  if (isLoading) {
-    return (
-      <div className="px-6 py-8 bg-[#1e1e1e] min-h-screen text-white">
-        <h1 className="text-4xl font-semibold mb-8">Your Watchlist</h1>
-        <div className="flex flex-wrap gap-4">
-          {Array.from({ length: FILMS_PER_PAGE }).map((_, index) => (
-            <div
-              key={index}
-              className="h-[195px] w-[130px] bg-gray-700 rounded-lg animate-pulse"
-            />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!shows.length) {
-    return (
-      <div className="px-6 py-8 bg-[#1e1e1e] min-h-screen text-white">
-        <button
-          onClick={() => navigate(-1)}
-          className="mb-6 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition"
-        >
-          ← Back
-        </button>
-        <h1 className="text-4xl font-semibold mb-8">Your Watchlist</h1>
-        <p>Your watchlist is empty. Add some shows!</p>
-      </div>
-    );
-  }
 
   return (
     <motion.div
@@ -100,7 +91,7 @@ export default function ViewAllWatchlist() {
         {displayedShows.map((show, index) => (
           <motion.div
             key={show.id}
-            className="flex-shrink-0"
+            className="relative flex-shrink-0"
             style={{ width: `${CARD_WIDTH}px` }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -118,6 +109,12 @@ export default function ViewAllWatchlist() {
                 cardWidth={CARD_WIDTH}
               />
             </Link>
+            <button
+              onClick={() => handleRemoveFromWatchlist(show.id)}
+              className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-xs text-white px-2 py-1 rounded z-10"
+            >
+              Remove
+            </button>
           </motion.div>
         ))}
       </div>
