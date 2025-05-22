@@ -113,10 +113,10 @@ app.use(session({
   store: mongoStore,
   saveUninitialized: false,
   resave: true,
-  cookie: {
-    secure: true,
+cookie: {
+    secure: process.env.NODE_ENV === 'production', 
     maxAge: expireTime,
-    sameSite: 'none'
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
   }
 }));
 
