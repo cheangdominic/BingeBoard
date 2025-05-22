@@ -3,7 +3,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "../search/SearchBar.jsx";
 import TVShowFilters from "../search/TVShowFilters";
-import { X, CheckCircle } from "lucide-react";
+import { X, CheckCircle, Eye as EyeIcon } from "lucide-react";
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import AppleRatingDisplay from '../../components/AppleRatingDisplay';
@@ -38,19 +38,28 @@ const formatEpisodeNumber = (num) => {
   return parseInt(cleanNum, 10) || 0;
 };
 
-const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
+const EpisodeList = ({ 
+    seasons, 
+    showId, 
+    isAuthenticated, 
+    showName, 
+    posterPath, 
+    setShowWatchedToast,
+    setWatchedToastMessage
+}) => {
   const [selectedSeason, setSelectedSeason] = useState(seasons[0]?.number || 1);
   const [episodesBySeason, setEpisodesBySeason] = useState({});
-  const [selectedEpisodes, setSelectedEpisodes] = useState([]);
+  const [selectedEpisodesInfo, setSelectedEpisodesInfo] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [viewAll, setViewAll] = useState(false);
   const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
+  const [isMarkingWatched, setIsMarkingWatched] = useState(false);
 
   const EPISODES_LIMIT = 20;
 
   useEffect(() => {
     setEpisodesBySeason({});
-    setSelectedEpisodes([]);
+    setSelectedEpisodesInfo([]);
     setViewAll(false);
     setIsLoadingEpisodes(false);
     if (seasons && seasons.length > 0) {
@@ -69,17 +78,12 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
   useEffect(() => {
     const loadEpisodes = async () => {
       if (!selectedSeason) return;
-
       if (!episodesBySeason[selectedSeason]) {
         setIsLoadingEpisodes(true);
         try {
-          const episodes = await fetchSeasonEpisodes(showId, selectedSeason);
-          setEpisodesBySeason(prev => ({
-            ...prev,
-            [selectedSeason]: episodes
-          }));
+          const fetchedEpisodes = await fetchSeasonEpisodes(showId, selectedSeason);
+          setEpisodesBySeason(prev => ({ ...prev, [selectedSeason]: fetchedEpisodes }));
         } catch (err) {
-          console.error(`Failed to load episodes for season ${selectedSeason}:`, err.message);
           setEpisodesBySeason(prev => ({ ...prev, [selectedSeason]: [] }));
         } finally {
           setIsLoadingEpisodes(false);
@@ -87,23 +91,51 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
       }
     };
     loadEpisodes();
-  }, [selectedSeason, showId, episodesBySeason]);
+  }, [selectedSeason, showId]);
 
   useEffect(() => {
     setViewAll(false);
-    setSelectedEpisodes([]);
+    setSelectedEpisodesInfo([]);
   }, [selectedSeason]);
 
   const episodes = episodesBySeason[selectedSeason] || [];
   const displayedEpisodes = viewAll ? episodes : episodes.slice(0, EPISODES_LIMIT);
   const hasMoreEpisodes = episodes.length > EPISODES_LIMIT;
 
-  const handleEpisodeClick = (episodeId) => {
-    setSelectedEpisodes(prev =>
-      prev.includes(episodeId)
-        ? prev.filter(id => id !== episodeId)
-        : [...prev, episodeId]
-    );
+  const handleEpisodeClick = (episode) => {
+    setSelectedEpisodesInfo(prev => {
+      const isSelected = prev.find(epInfo => epInfo.id === episode.id);
+      if (isSelected) {
+        return prev.filter(epInfo => epInfo.id !== episode.id);
+      } else {
+        return [...prev, { id: episode.id, number: episode.number, name: episode.name }];
+      }
+    });
+  };
+  
+  const handleMarkAsWatched = async () => {
+    if (!isAuthenticated || selectedEpisodesInfo.length === 0) return;
+    setIsMarkingWatched(true);
+
+    const watchedData = {
+      showId: showId.toString(),
+      showName: showName, 
+      posterPath: posterPath, 
+      seasonNumber: selectedSeason,
+      episodes: selectedEpisodesInfo,
+    };
+
+    try {
+      await axios.post('/api/users/mark-watched', watchedData, { withCredentials: true });
+      setWatchedToastMessage(`${selectedEpisodesInfo.length} episode(s) from ${showName} marked as watched!`);
+      setShowWatchedToast(true);
+      setSelectedEpisodesInfo([]);
+    } catch (error) {
+      console.error("Failed to mark episodes as watched:", error.response?.data || error.message);
+      alert(`Error: ${error.response?.data?.message || "Could not mark episodes as watched."}`);
+    } finally {
+      setIsMarkingWatched(false);
+    }
   };
 
   const handleDragStart = () => setIsDragging(true);
@@ -134,7 +166,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
         </div>
         <div className="flex items-center space-x-2 sm:space-x-3">
           <span className="text-xs sm:text-sm text-gray-400">
-            {selectedEpisodes.length} selected
+            {selectedEpisodesInfo.length} selected
           </span>
           <button
             className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-white text-xs sm:text-sm font-medium transition-colors"
@@ -167,7 +199,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
       ) : (
         <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 gap-2 sm:gap-3 mb-6">
           {displayedEpisodes.map(ep => {
-            const isSelected = selectedEpisodes.includes(ep.id);
+            const isCurrentlySelected = selectedEpisodesInfo.some(selEp => selEp.id === ep.id);
             const canSelect = isAuthenticated;
             const ratingValue = typeof ep.rating === 'number' ? ep.rating : parseFloat(ep.rating);
             const displayRating = !isNaN(ratingValue) ? ratingValue.toFixed(1) : 'N/A';
@@ -175,13 +207,13 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
             return (
               <div
                 key={ep.id}
-                onClick={canSelect ? () => handleEpisodeClick(ep.id) : undefined}
+                onClick={canSelect ? () => handleEpisodeClick(ep) : undefined}
                 onMouseDown={canSelect ? handleDragStart : undefined}
                 onMouseUp={canSelect ? handleDragEnd : undefined}
-                onMouseEnter={canSelect && isDragging ? () => handleEpisodeClick(ep.id) : undefined}
+                onMouseEnter={canSelect && isDragging ? () => handleEpisodeClick(ep) : undefined}
                 className={`aspect-square rounded-md sm:rounded-lg flex items-center justify-center relative transition-all cursor-pointer
                   ${canSelect
-                    ? isSelected
+                    ? isCurrentlySelected
                       ? 'bg-blue-600 border-2 border-blue-400 shadow-md shadow-blue-500/20'
                       : 'bg-[#343444] hover:bg-[#3f3f52] border border-[#4a4a5a]'
                     : 'bg-[#343444] border border-[#4a4a5a] cursor-not-allowed'
@@ -216,17 +248,18 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
 
       {isAuthenticated && (
         <button
-          disabled={selectedEpisodes.length === 0}
-          className={`w-full py-2.5 sm:py-3.5 rounded-lg font-medium flex items-center justify-center space-x-2 sm:space-x-3 transition-colors text-xs sm:text-sm md:text-md lg:text-lg ${selectedEpisodes.length > 0
+          onClick={handleMarkAsWatched}
+          disabled={selectedEpisodesInfo.length === 0 || isMarkingWatched}
+          className={`w-full py-2.5 sm:py-3.5 rounded-lg font-medium flex items-center justify-center space-x-2 sm:space-x-3 transition-colors text-xs sm:text-sm md:text-md lg:text-lg ${selectedEpisodesInfo.length > 0 && !isMarkingWatched
               ? 'bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white shadow-md shadow-green-500/20'
               : 'bg-[#343444] text-gray-400 cursor-not-allowed'
             }`}
         >
           <FaEye className="text-base" />
-          <span>Mark Selected as Watched</span>
-          {selectedEpisodes.length > 0 && (
+          <span>{isMarkingWatched ? "Marking..." : "Mark Selected as Watched"}</span>
+          {selectedEpisodesInfo.length > 0 && !isMarkingWatched && (
             <span className="bg-white/20 px-2 py-0.5 sm:px-2.5 rounded-full text-xs sm:text-sm">
-              {selectedEpisodes.length}
+              {selectedEpisodesInfo.length}
             </span>
           )}
         </button>
@@ -247,6 +280,7 @@ const ShowGrid = () => {
   const [totalResults, setTotalResults] = useState(0);
 
   const [selectedShow, setSelectedShow] = useState(null);
+  const [selectedShowDetails, setSelectedShowDetails] = useState(null);
   const [formattedShowSeasons, setFormattedShowSeasons] = useState([]);
   const [isLoadingShowDetails, setIsLoadingShowDetails] = useState(false);
   
@@ -259,7 +293,11 @@ const ShowGrid = () => {
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
   const [reviewError, setReviewError] = useState(null);
-  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  
+  const [showSuccessReviewToast, setShowSuccessReviewToast] = useState(false);
+  const [showWatchedToast, setShowWatchedToast] = useState(false);
+  const [watchedToastMessage, setWatchedToastMessage] = useState("");
+  
   const [modalCanClose, setModalCanClose] = useState(true);
 
   useEffect(() => {
@@ -319,6 +357,7 @@ const ShowGrid = () => {
     const fetchShowDetailsForModal = async () => {
       if (!selectedShow) {
         setFormattedShowSeasons([]);
+        setSelectedShowDetails(null);
         return;
       }
       setIsLoadingShowDetails(true);
@@ -329,6 +368,7 @@ const ShowGrid = () => {
             language: "en-US",
           },
         });
+        setSelectedShowDetails(response.data); 
         const adaptedSeasons = response.data.seasons
           ?.filter(s => s.season_number > 0 )
           .map(s => ({
@@ -341,6 +381,7 @@ const ShowGrid = () => {
       } catch (error) {
         console.error("Failed to fetch show details for seasons:", error);
         setFormattedShowSeasons([]);
+        setSelectedShowDetails(null);
       } finally {
         setIsLoadingShowDetails(false);
       }
@@ -424,7 +465,8 @@ const ShowGrid = () => {
       setContainsSpoilers(false);
       setIsSubmittingReview(false);
       setReviewError(null);
-      setShowSuccessToast(false);
+      setShowSuccessReviewToast(false);
+      setShowWatchedToast(false);
       setModalCanClose(true); 
   };
 
@@ -436,8 +478,8 @@ const ShowGrid = () => {
 
   const handleReviewSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedShow) {
-        setReviewError("No show selected to review.");
+    if (!selectedShowDetails) {
+        setReviewError("Show details not loaded yet.");
         return;
     }
     if (!user) { 
@@ -447,38 +489,36 @@ const ShowGrid = () => {
 
     setIsSubmittingReview(true);
     setReviewError(null);
-    setShowSuccessToast(false); 
+    setShowSuccessReviewToast(false); 
     setModalCanClose(false); 
 
     const reviewData = {
-      showId: selectedShow.id.toString(),
+      showId: selectedShowDetails.id.toString(),
       rating: ratingWhole + (Number(ratingDecimal) || 0) / 100,
       content: reviewText,
       containsSpoiler: containsSpoilers,
     };
 
     try {
-      console.log("Submitting review to /api/reviews:", reviewData);
-      
       const response = await axios.post('/api/reviews', reviewData, { withCredentials: true });
 
       if (response.data) { 
-        console.log("Review submitted successfully to backend:", response.data);
-        
         setReviewText("");
         setRatingWhole(0);
         setRatingDecimal(0);
         setContainsSpoilers(false);
         
-        setShowSuccessToast(true); 
-        setSelectedShow(null); 
+        setShowSuccessReviewToast(true); 
+        setTimeout(() => {
+          setSelectedShow(null); 
+        }, 1800);
+
 
       } else {
         throw new Error("API did not return a successful response or data.");
       }
 
     } catch (err) {
-      console.error("Error submitting review to backend:", err);
       const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || "Failed to submit review. Please try again.";
       setReviewError(errorMessage);
       setModalCanClose(true); 
@@ -488,16 +528,28 @@ const ShowGrid = () => {
   };
 
   useEffect(() => {
-    let toastTimerId;
-    if (showSuccessToast) {
+    let reviewToastTimer;
+    if (showSuccessReviewToast) {
       setModalCanClose(false); 
-      toastTimerId = setTimeout(() => {
-        setShowSuccessToast(false);
-        setModalCanClose(true); 
+      reviewToastTimer = setTimeout(() => {
+        setShowSuccessReviewToast(false);
+        if (!selectedShow) setModalCanClose(true);
       }, 2500); 
     }
-    return () => clearTimeout(toastTimerId);
-  }, [showSuccessToast]);
+    return () => clearTimeout(reviewToastTimer);
+  }, [showSuccessReviewToast, selectedShow]);
+
+  useEffect(() => {
+    let watchedToastTimer;
+    if (showWatchedToast) {
+        setModalCanClose(false);
+        watchedToastTimer = setTimeout(() => {
+            setShowWatchedToast(false);
+            setModalCanClose(true); 
+        }, 2500);
+    }
+    return () => clearTimeout(watchedToastTimer);
+  }, [showWatchedToast]);
 
 
   const fadeInUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
@@ -592,7 +644,7 @@ const ShowGrid = () => {
       </motion.div>
 
       <AnimatePresence>
-        {selectedShow && (
+        {selectedShow && selectedShowDetails && (
           <motion.div 
             className="fixed inset-0 bg-black bg-opacity-75 flex items-start justify-center z-50 p-4 pt-6 sm:pt-8 md:pt-10" 
             initial="hidden" 
@@ -620,13 +672,13 @@ const ShowGrid = () => {
               <div className="p-4 space-y-3">
                 <div className="relative w-full rounded-lg overflow-hidden mb-4">
                   <img
-                    src={selectedShow.backdrop_path ? BACKDROP_BASE_URL + selectedShow.backdrop_path : (selectedShow.poster_path ? IMAGE_BASE_URL + selectedShow.poster_path : "https://via.placeholder.com/1280x720?text=No+Image&fontsize=50")}
-                    alt={selectedShow.name}
+                    src={selectedShowDetails.backdrop_path ? BACKDROP_BASE_URL + selectedShowDetails.backdrop_path : (selectedShowDetails.poster_path ? IMAGE_BASE_URL + selectedShowDetails.poster_path : "https://via.placeholder.com/1280x720?text=No+Image&fontsize=50")}
+                    alt={selectedShowDetails.name}
                     className="w-full h-auto object-cover max-h-[50vh] block"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4">
                     <h2 className="text-3xl sm:text-5xl font-bold text-white text-center shadow-lg mb-[1vh] sm:mb-[2vh] lg:mb-[4vh]">
-                      {selectedShow.name}
+                      {selectedShowDetails.name}
                     </h2>
                   </div>
                 </div>
@@ -634,8 +686,16 @@ const ShowGrid = () => {
                 <div className="mt-8">
                   {isLoadingShowDetails ? (
                     <div className="text-center py-4 text-gray-400">Loading season information...</div>
-                  ) : formattedShowSeasons && formattedShowSeasons.length > 0 && selectedShow ? (
-                    <EpisodeList seasons={formattedShowSeasons} showId={selectedShow.id} isAuthenticated={isAuthenticatedForReview} />
+                  ) : formattedShowSeasons && formattedShowSeasons.length > 0 && selectedShowDetails ? (
+                    <EpisodeList 
+                        seasons={formattedShowSeasons} 
+                        showId={selectedShowDetails.id} 
+                        isAuthenticated={isAuthenticatedForReview}
+                        showName={selectedShowDetails.name}
+                        posterPath={selectedShowDetails.poster_path}
+                        setShowWatchedToast={setShowWatchedToast}
+                        setWatchedToastMessage={setWatchedToastMessage}
+                    />
                   ) : (
                     !isLoadingShowDetails && <div className="text-center py-3 text-gray-400">No season information available for this show.</div>
                   )}
@@ -644,7 +704,7 @@ const ShowGrid = () => {
                 <div className="space-y-3 pt-2">
                   <form onSubmit={handleReviewSubmit} className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg">
                     <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">
-                      Review for "{selectedShow.name}"
+                      Review for "{selectedShowDetails.name}"
                     </h3>
 
                     <div className="mb-6">
@@ -671,7 +731,7 @@ const ShowGrid = () => {
                             className="bg-zinc-800 border-2 border-black rounded-md p-2 w-full text-gray-200 text-md focus:ring-1 focus:ring-[#1963da] outline-none resize-none"
                             rows={5}
                             maxLength={2000}
-                            placeholder={`Share your thoughts about ${selectedShow.name}...`}
+                            placeholder={`Share your thoughts about ${selectedShowDetails.name}...`}
                         />
                         <div className="flex items-center gap-2 mt-3"> 
                             <input
@@ -721,9 +781,9 @@ const ShowGrid = () => {
       </AnimatePresence>
 
       <AnimatePresence>
-        {showSuccessToast && (
+        {showSuccessReviewToast && (
             <motion.div
-                key="success-toast"
+                key="review-success-toast"
                 variants={toastVariants}
                 initial="hidden"
                 animate="visible"
@@ -732,6 +792,22 @@ const ShowGrid = () => {
             >
                 <CheckCircle size={24} />
                 <span>Review Submitted!</span>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showWatchedToast && (
+            <motion.div
+                key="watched-success-toast"
+                variants={toastVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="fixed top-10 inset-x-0 mx-auto w-fit z-[100] bg-zinc-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3"
+            >
+                <EyeIcon size={24} /> 
+                <span>{watchedToastMessage}</span>
             </motion.div>
         )}
       </AnimatePresence>
