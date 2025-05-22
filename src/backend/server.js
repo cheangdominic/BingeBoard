@@ -30,7 +30,11 @@ const expireTime = 24 * 60 * 60 * 1000;
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin || origin.startsWith('http://localhost:')) {
+    if (
+      !origin ||
+      origin === 'https://two800-202510-bby12.onrender.com' ||
+      origin.startsWith('http://localhost:')
+    ) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
