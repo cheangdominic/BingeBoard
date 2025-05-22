@@ -10,7 +10,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { connectToDatabase, userCollection } from './databaseConnection.js';
+import { connectToDatabase, userCollection, database } from './databaseConnection.js';
 import { Review } from './utils.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
