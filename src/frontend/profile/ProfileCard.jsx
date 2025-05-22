@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import LocationInfo from '../../components/LocationInfo.jsx';
 import ProfileImage from '../../components/ProfileImage.jsx';
-import LogoutButton from "./LogoutButton.jsx";
 
 export default function ProfileCard({ user, profilePic, isOwnProfile }) {
   const { user: currentUser, refreshUser } = useAuth();

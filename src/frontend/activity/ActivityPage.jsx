@@ -141,12 +141,12 @@ function ActivityPage() {
   return (
     <>
       <section
-        className="min-h-screen flex flex-col items-center pt-4 pb-24 px-4 sm:px-8"
+        className="min-h-screen flex flex-col items-center pt-4 pb-24"
         style={{ backgroundColor: '#1e1e1e', color: '#ECE6DD' }}
       >
         <ActivityPageHeader />
 
-        <div className="flex gap-2 sm:gap-4 mt-6 flex-wrap justify-center">
+        <div className="flex gap-2 sm:gap-4 mt-6 flex-wrap justify-center px-4 sm:px-8">
           {[
             { label: 'All', value: 'all' },
             { label: 'Login', value: 'login' },
@@ -169,7 +169,7 @@ function ActivityPage() {
           ))}
         </div>
 
-        <div className="w-full max-w-2xl mt-6 space-y-10">
+        <div className="w-full mt-6 space-y-10 px-4 sm:px-8">
           {sortedMonthYears.length === 0 && !loading && (
             <motion.div
               className="text-center py-20 select-none"
