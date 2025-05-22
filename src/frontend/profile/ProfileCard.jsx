@@ -1,6 +1,5 @@
 import LocationInfo from '../../components/LocationInfo.jsx';
 import ProfileImage from '../../components/ProfileImage.jsx';
-import LogoutButton from "./LogoutButton.jsx";
 
 function ProfileCard({ user, profilePic, isOwnProfile }) {
   if (!user) return null;

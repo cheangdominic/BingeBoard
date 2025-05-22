@@ -94,7 +94,6 @@ const mongoStore = MongoStore.create({
   }
 });
 
-// Mongoose connection
 await mongoose.connect(mongooseURI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000
@@ -117,18 +116,16 @@ app.use(session({
 
 async function logActivity(userId, action, targetId = null, details = {}) {
   try {
-    // For actions that involve shows
     if (['review_create', 'review_like', 'review_dislike', 'watchlist_add', 'watchlist_remove'].includes(action)) {
       if (targetId) {
         try {
-          // Use environment variables instead of VITE_* variables
           const tmdbUrl = `${process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3'}/tv/${targetId}`;
           
           const response = await axios.get(tmdbUrl, {
             params: {
               api_key: process.env.TMDB_API_KEY
             },
-            timeout: 5000 // 5 second timeout
+            timeout: 5000
             
           });
 
@@ -149,6 +146,7 @@ async function logActivity(userId, action, targetId = null, details = {}) {
             action,
             response: apiError.response?.data
           });
+          details.showName = `Show ID: ${targetId}`;
           details.showImage = "https://via.placeholder.com/300x450";
         }
       } else {
@@ -156,8 +154,6 @@ async function logActivity(userId, action, targetId = null, details = {}) {
       }
     }
     
-
-    // For profile updates
     if (action === 'profile_update') {
       const user = await userCollection.findOne({ _id: userId });
       if (user) {
@@ -220,16 +216,32 @@ app.post('/api/signup', async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    await userCollection.insertOne({
+    const insertResult = await userCollection.insertOne({
       username: username,
       email: email,
       password: hashedPassword,
       watchlist: [],
       profilePic: '',
     });
-    await logActivity(insertResult.insertedId, 'account_creation');
 
-    return res.json({ success: true });
+    if (insertResult.insertedId) {
+      await logActivity(insertResult.insertedId, 'account_creation');
+
+      req.session.authenticated = true;
+      req.session.email = email;
+      req.session.userId = insertResult.insertedId.toString();
+      req.session.username = username;
+      req.session.cookie.maxAge = expireTime;
+
+      return res.json({
+        success: true,
+        message: 'Signup successful! Welcome.',
+      });
+    } else {
+      console.error("Error inserting user: No insertedId returned");
+      return res.status(500).json({ success: false, message: 'Error creating user account details' });
+    }
+
   } catch (error) {
     console.error("Error inserting user:", error);
     return res.status(500).json({ success: false, message: 'Error creating user' });
@@ -250,7 +262,7 @@ app.post('/api/login', async (req, res) => {
   }
 
   try {
-    const result = await userCollection.find({ email: email }).project({ email: 1, password: 1, _id: 1 }).toArray();
+    const result = await userCollection.find({ email: email }).project({ email: 1, password: 1, _id: 1, username: 1 }).toArray();
 
     if (result.length != 1) {
       return res.status(401).json({ success: false, message: 'User not found' });
@@ -259,17 +271,19 @@ app.post('/api/login', async (req, res) => {
     if (await bcrypt.compare(password, result[0].password)) {
       req.session.authenticated = true;
       req.session.email = email;
+      req.session.userId = result[0]._id.toString();
+      req.session.username = result[0].username;
       req.session.cookie.maxAge = expireTime;
 
       await database.collection('userSessions').insertOne({
         email,
         loginTime: new Date(),
-        sessionData: req.session,
+        sessionData: { userId: result[0]._id.toString(), email: result[0].email },
       });
 
       await logActivity(result[0]._id, 'login');
 
-      return res.json({ success: true });
+      return res.json({ success: true, user: { username: result[0].username, email: result[0].email } });
     } else {
       return res.status(401).json({ success: false, message: 'Incorrect password' });
     }
@@ -329,6 +343,8 @@ const authenticate = (req, res, next) => {
   }
   req.user = {
     email: req.session.email,
+    userId: req.session.userId,
+    username: req.session.username
   };
 
   next();
@@ -437,7 +453,7 @@ app.post('/api/reviews', authenticate, async (req, res) => {
       });
     }
 
-    const user = await userCollection.findOne({ email: req.session.email });
+    const user = await userCollection.findOne({ email: req.user.email });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -500,7 +516,7 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
       return res.status(404).json({ error: 'Review not found' });
     }
 
-    const user = await userCollection.findOne({ email: req.session.email });
+    const user = await userCollection.findOne({ email: req.user.email });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -519,22 +535,20 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
     const alreadyLiked = review.likes.some(id => id && id.toString() === userIdStr);
     const alreadyDisliked = review.dislikes.some(id => id && id.toString() === userIdStr);
 
-    // Log activity
     if (action === 'like') {
       if (alreadyLiked) {
-        await logActivity(userId, 'review_unlike', reviewId);
+        await logActivity(userId, 'review_unlike', review.showId, { reviewId });
       } else {
-        await logActivity(userId, 'review_like', reviewId);
+        await logActivity(userId, 'review_like', review.showId, { reviewId });
       }
     } else if (action === 'dislike') {
       if (alreadyDisliked) {
-        await logActivity(userId, 'review_undislike', reviewId);
+        await logActivity(userId, 'review_undislike', review.showId, { reviewId });
       } else {
-        await logActivity(userId, 'review_dislike', reviewId);
+        await logActivity(userId, 'review_dislike', review.showId, { reviewId });
       }
     }
 
-    // Modify review votes
     if (action === 'like') {
       if (alreadyLiked) {
         review.likes = review.likes.filter(id => id && id.toString() !== userIdStr);
@@ -573,7 +587,7 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
 app.get('/api/user', authenticate, async (req, res) => {
   try {
     const user = await userCollection.findOne(
-      { email: req.session.email },
+      { email: req.user.email },
       { projection: { password: 0 } }
     );
 
@@ -589,7 +603,7 @@ app.get('/api/user', authenticate, async (req, res) => {
 
 app.get('/api/user/reviews', authenticate, async (req, res) => {
   try {
-    const user = await userCollection.findOne({ email: req.session.email });
+    const user = await userCollection.findOne({ email: req.user.email });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -637,7 +651,6 @@ app.get('/api/user/reviews', authenticate, async (req, res) => {
   }
 });
 
-// SPA Fallback Route - MUST BE LAST
 app.get('/api/users/:username', async (req, res) => {
   const { username } = req.params;
 
@@ -659,14 +672,10 @@ app.get('/api/users/:username', async (req, res) => {
 });
 
 
-app.get('/api/getUserInfo', async (req, res) => {
-  if (!req.session.authenticated || !req.session.email) {
-    return res.status(401).json({ success: false, message: 'Not logged in' });
-  }
-
+app.get('/api/getUserInfo', authenticate, async (req, res) => {
   try {
     const user = await userCollection.findOne(
-      { email: req.session.email },
+      { email: req.user.email },
       { projection: { username: 1, profilePic: 1, watchlist: 1, _id: 0 } }
     );
 
@@ -686,17 +695,13 @@ app.get('/api/getUserInfo', async (req, res) => {
   }
 });
 
-app.post('/api/upload-profile-image', upload.single('profileImage'), async (req, res) => {
+app.post('/api/upload-profile-image', authenticate, upload.single('profileImage'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
-    if (!req.session.email) {
-      return res.status(401).json({ success: false, message: 'Not authenticated' });
-    }
-
-    const user = await userCollection.findOne({ email: req.session.email });
+    const user = await userCollection.findOne({ email: req.user.email });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
@@ -704,7 +709,7 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
     const imageUrl = req.file.secure_url || req.file.url || req.file.path;
 
     const updatedUser = await userCollection.updateOne(
-      { email: req.session.email },
+      { email: req.user.email },
       { $set: { profilePic: imageUrl } }
     );
 
@@ -730,7 +735,7 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
 
 app.get('/api/activities', authenticate, async (req, res) => {
   try {
-    const user = await userCollection.findOne({ email: req.session.email });
+    const user = await userCollection.findOne({ email: req.user.email });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -765,67 +770,43 @@ app.get('/api/users/:username/activities', async (req, res) => {
   }
 });
 
-app.post('/api/logout', async (req, res) => {
-  if (req.session && req.session.authenticated) {
-    const userIdToLog = req.session.userId;
-    const userEmailForLog = req.session.email;
-
+app.post('/api/logout', authenticate, async (req, res) => {
     req.session.destroy(async (err) => {
       if (err) {
         console.error("Session destruction error:", err);
         return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
       }
-
-      if (userIdToLog) {
-        try {
-          await logActivity(new mongoose.Types.ObjectId(userIdToLog), 'logout');
-        } catch (logErr) {
-          console.error("Error logging logout activity for userId:", userIdToLog, logErr);
+      
+      try {
+        if(req.user && req.user.userId) {
+          await logActivity(new mongoose.Types.ObjectId(req.user.userId), 'logout');
+        } else {
+           console.warn("Logout occurred, but userId not in req.user for activity logging.");
         }
-      } else if (userEmailForLog) {
-        console.warn(`Logout for ${userEmailForLog}, but userId not in session for direct logging. Attempting lookup.`);
-        try {
-          const user = await userCollection.findOne({email: userEmailForLog}, {projection: {_id: 1}});
-          if (user) {
-            await logActivity(user._id, 'logout');
-          } else {
-            console.warn(`User with email ${userEmailForLog} not found for logout logging.`);
-          }
-        } catch (lookupErr) {
-          console.error("Error fetching user by email for logout log:", lookupErr);
-        }
-      } else {
-        console.warn("Logout occurred, but no user identifier in session for activity logging.");
+      } catch (logErr) {
+        console.error("Error logging logout activity:", logErr);
       }
       
       res.clearCookie('connect.sid', { path: '/' });
       return res.json({ success: true, message: 'Logged out successfully' });
     });
-  } else {
-    res.clearCookie('connect.sid', { path: '/' });
-    return res.json({ success: true, message: 'No active session to log out from or already logged out' });
-  }
 });
 
 
-app.post('/api/watchlist/add', async (req, res) => {
-  if (!req.session || !req.session.email) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
-
+app.post('/api/watchlist/add', authenticate, async (req, res) => {
   const { showId } = req.body;
   if (!showId) {
     return res.status(400).json({ success: false, message: 'Missing show ID' });
   }
 
   try {
-    const user = await userCollection.findOne({ email: req.session.email });
+    const user = await userCollection.findOne({ email: req.user.email });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     const result = await userCollection.updateOne(
-      { email: req.session.email },
+      { email: req.user.email },
       { $addToSet: { watchlist: showId } }
     );
 
@@ -841,24 +822,20 @@ app.post('/api/watchlist/add', async (req, res) => {
   }
 });
 
-app.post('/api/watchlist/remove', async (req, res) => {
-  if (!req.session || !req.session.email) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
-
+app.post('/api/watchlist/remove', authenticate, async (req, res) => {
   const { showId } = req.body;
   if (!showId) {
     return res.status(400).json({ success: false, message: 'Missing show ID' });
   }
 
   try {
-    const user = await userCollection.findOne({ email: req.session.email });
+    const user = await userCollection.findOne({ email: req.user.email });
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     await userCollection.updateOne(
-      { email: req.session.email },
+      { email: req.user.email },
       { $pull: { watchlist: showId } }
     );
 
@@ -874,7 +851,6 @@ app.post('/api/chat', async (req, res) => {
   console.log('Received chat request with body:', req.body);
 
   try {
-    // Validate input
     if (!req.body || !req.body.messages || !Array.isArray(req.body.messages)) {
       console.error('Invalid request format');
       return res.status(400).json({
@@ -883,7 +859,6 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    // Check API key
     if (!process.env.OPENAI_API_KEY) {
       console.error('OPENAI_API_KEY is not configured');
       return res.status(500).json({
@@ -892,7 +867,6 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    // Prepare messages - ensure they have the required structure
     const messages = req.body.messages.map(msg => ({
       role: msg.role || 'user',
       content: msg.content || ''
@@ -900,7 +874,6 @@ app.post('/api/chat', async (req, res) => {
 
     console.log('Sending to OpenAI:', messages);
 
-    // Make API call to OpenAI
     const response = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
@@ -918,7 +891,6 @@ app.post('/api/chat', async (req, res) => {
       }
     );
 
-    // Validate OpenAI response
     if (!response.data?.choices?.[0]?.message?.content) {
       console.error('Unexpected OpenAI response:', response.data);
       return res.status(500).json({
@@ -927,7 +899,6 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    // Return successful response
     return res.json({
       success: true,
       reply: response.data.choices[0].message.content
@@ -940,7 +911,6 @@ app.post('/api/chat', async (req, res) => {
       response: error.response?.data
     });
 
-    // Handle different error types
     if (error.response) {
       return res.status(502).json({
         success: false,
