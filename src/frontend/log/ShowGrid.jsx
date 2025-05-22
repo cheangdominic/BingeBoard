@@ -3,7 +3,7 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "../search/SearchBar.jsx";
 import TVShowFilters from "../search/TVShowFilters";
-import { X, CheckCircle, Eye as EyeIcon } from "lucide-react"; // Eye imported as EyeIcon
+import { X, CheckCircle, Eye as EyeIcon } from "lucide-react";
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
 import AppleRatingDisplay from '../../components/AppleRatingDisplay';
@@ -27,7 +27,6 @@ const fetchSeasonEpisodes = async (showId, seasonNumber) => {
       rating: ep.vote_average,
     }));
   } catch (error) {
-    // console.error(`Error fetching episodes for show ${showId}, season ${seasonNumber}:`, error);
     return [];
   }
 };
@@ -84,7 +83,6 @@ const EpisodeList = ({
           const fetchedEpisodes = await fetchSeasonEpisodes(showId, selectedSeason);
           setEpisodesBySeason(prev => ({ ...prev, [selectedSeason]: fetchedEpisodes }));
         } catch (err) {
-          // console.error(`Failed to load episodes for season ${selectedSeason}:`, err.message);
           setEpisodesBySeason(prev => ({ ...prev, [selectedSeason]: [] }));
         } finally {
           setIsLoadingEpisodes(false);
@@ -133,9 +131,8 @@ const EpisodeList = ({
       setSelectedEpisodesInfo([]);
     } catch (error) {
       console.error("Failed to mark episodes as watched:", error.response?.data || error.message);
-      // alert(`Error: ${error.response?.data?.message || "Could not mark episodes as watched."}`);
-      setWatchedToastMessage(`Error: ${error.response?.data?.message || "Could not mark episodes as watched."}`); // Show error in toast
-      setShowWatchedToast(true); // Or use a different toast for errors
+      setWatchedToastMessage(`Error: ${error.response?.data?.message || "Could not mark episodes as watched."}`);
+      setShowWatchedToast(true);
     } finally {
       setIsMarkingWatched(false);
     }
