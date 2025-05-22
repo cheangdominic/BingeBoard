@@ -724,7 +724,7 @@ app.post('/api/upload-profile-image', upload.single('profileImage'), async (req,
   }
 });
 
-app.get('/api/activities', authenticate, async (req, res) => {
+app.get('/api/activities', async (req, res) => {
   try {
     const user = await userCollection.findOne({ email: req.session.email });
     if (!user) {
