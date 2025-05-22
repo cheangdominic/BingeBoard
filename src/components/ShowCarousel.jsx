@@ -16,61 +16,50 @@ function ShowCarousel({
   const contentRef = useRef(null);
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
   const itemWidth = cardActualWidth;
+  const [hoveredShowId, setHoveredShowId] = useState(null);
+  const [hoveredRating, setHoveredRating] = useState(null);
 
   useEffect(() => {
     const fetchShows = async () => {
       if (!API_KEY) {
-        console.error("TMDB API Key is missing.");
         setShows([]);
         setIsLoading(false);
         return;
       }
-
       try {
         setIsLoading(true);
         const res = await axios.get(
           `https://api.themoviedb.org/3/${tmdbEndpoint}?api_key=${API_KEY}&language=en-US&page=1`
         );
-
         const tmdbResults = res.data.results || [];
-
-        const enrichedShows = await Promise.all(
-          tmdbResults.map(async (show) => {
-            try {
-              const ratingRes = await axios.get(
-                `/api/average-rating?showId=${show.id}`,
-                { withCredentials: true }
-              );
-              return {
-                ...show,
-                averageRating: ratingRes.data.averageRating,
-              };
-            } catch (ratingError) {
-              console.warn(`Rating fetch failed for show ${show.id}:`, ratingError);
-              return {
-                ...show,
-                averageRating: null,
-              };
-            }
-          })
-        );
-
-        setShows(enrichedShows);
-      } catch (error) {
-        console.error(`Failed to fetch "${tmdbEndpoint}":`, error);
+        const showsWithoutRatings = tmdbResults.map((show) => ({
+          ...show,
+          averageRating: null,
+        }));
+        setShows(showsWithoutRatings);
+      } catch {
         setShows([]);
       } finally {
         setIsLoading(false);
       }
     };
-
     fetchShows();
   }, [tmdbEndpoint, API_KEY]);
+
+  const fetchHoverRating = async (showId) => {
+    try {
+      const ratingRes = await axios.get(`/api/average-rating?showId=${showId}`, {
+        withCredentials: true,
+      });
+      setHoveredRating(ratingRes.data.averageRating);
+    } catch {
+      setHoveredRating(null);
+    }
+  };
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current;
     if (!container || !shows.length || itemWidth <= 0) return;
-
     const contentWidthPerClone = shows.length * itemWidth;
     const currentPos = container.scrollLeft;
     let newScrollLeft = currentPos;
@@ -95,24 +84,19 @@ function ShowCarousel({
   useEffect(() => {
     const container = containerRef.current;
     const content = contentRef.current;
-
     if (!container || !content || !shows.length || itemWidth <= 0) {
       if (content) content.style.width = "0px";
       return;
     }
-
     const numItems = shows.length;
     const contentWidthPerClone = numItems * itemWidth;
     content.style.width = `${contentWidthPerClone * 3}px`;
     const initialScrollPosition = contentWidthPerClone;
-
     const originalBehavior = container.style.scrollBehavior;
     container.style.scrollBehavior = "auto";
     container.scrollLeft = initialScrollPosition;
     container.style.scrollBehavior = userScrollBehavior;
-
     container.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => {
       container.removeEventListener("scroll", handleScroll);
     };
@@ -190,6 +174,14 @@ function ShowCarousel({
                     boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.3)",
                   }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
+                  onMouseEnter={() => {
+                    setHoveredShowId(show.id);
+                    fetchHoverRating(show.id);
+                  }}
+                  onMouseLeave={() => {
+                    setHoveredShowId(null);
+                    setHoveredRating(null);
+                  }}
                 >
                   <Link to={`/show/${show.id}`}>
                     <TVShowCard
@@ -200,7 +192,7 @@ function ShowCarousel({
                       }
                       title={show.name || show.title}
                       cardWidth={cardActualWidth}
-                      averageRating={show.averageRating}
+                      averageRating={hoveredShowId === show.id ? hoveredRating : show.averageRating}
                     />
                   </Link>
                 </motion.div>
