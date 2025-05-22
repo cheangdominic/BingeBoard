@@ -116,7 +116,7 @@ app.use(session({
 cookie: {
     secure: true,
     maxAge: expireTime,
-    sameSite: none
+    sameSite: 'none'
   }
 }));
 
