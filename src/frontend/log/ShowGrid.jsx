@@ -3,8 +3,9 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "../search/SearchBar.jsx";
 import TVShowFilters from "../search/TVShowFilters";
-import { Apple, X } from "lucide-react";
+import { Apple, X, CheckCircle } from "lucide-react";
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { useAuth } from '../../context/AuthContext';
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
@@ -22,11 +23,11 @@ const fetchSeasonEpisodes = async (showId, seasonNumber) => {
       id: ep.id,
       number: ep.episode_number,
       name: ep.name,
-      rating: ep.vote_average, 
+      rating: ep.vote_average,
     }));
   } catch (error) {
     console.error(`Error fetching episodes for show ${showId}, season ${seasonNumber}:`, error);
-    return []; 
+    return [];
   }
 };
 
@@ -42,7 +43,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
   const [selectedEpisodes, setSelectedEpisodes] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
   const [viewAll, setViewAll] = useState(false);
-  const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false); 
+  const [isLoadingEpisodes, setIsLoadingEpisodes] = useState(false);
 
   const EPISODES_LIMIT = 20;
 
@@ -50,7 +51,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
     setEpisodesBySeason({});
     setSelectedEpisodes([]);
     setViewAll(false);
-    setIsLoadingEpisodes(false); 
+    setIsLoadingEpisodes(false);
     if (seasons && seasons.length > 0) {
       const currentSeasonStillValid = seasons.find(s => s.number === selectedSeason);
       if (currentSeasonStillValid) {
@@ -59,14 +60,14 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
         setSelectedSeason(seasons[0]?.number || 1);
       }
     } else {
-      setSelectedSeason(1); 
+      setSelectedSeason(1);
     }
   }, [seasons, showId]);
 
 
   useEffect(() => {
     const loadEpisodes = async () => {
-      if (!selectedSeason) return; 
+      if (!selectedSeason) return;
 
       if (!episodesBySeason[selectedSeason]) {
         setIsLoadingEpisodes(true);
@@ -85,7 +86,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
       }
     };
     loadEpisodes();
-  }, [selectedSeason, showId, episodesBySeason]); 
+  }, [selectedSeason, showId, episodesBySeason]);
 
   useEffect(() => {
     setViewAll(false);
@@ -107,7 +108,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
   const handleDragStart = () => setIsDragging(true);
   const handleDragEnd = () => setIsDragging(false);
 
-  useEffect(() => { 
+  useEffect(() => {
     const endDragGlobal = () => setIsDragging(false);
     window.addEventListener('mouseup', endDragGlobal);
     return () => window.removeEventListener('mouseup', endDragGlobal);
@@ -157,7 +158,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
           </button>
         ))}
       </div>
-      
+
       {isLoadingEpisodes ? (
          <div className="text-center py-8 text-gray-400">Loading episodes...</div>
       ) : episodes.length === 0 ? (
@@ -177,7 +178,7 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
                 onMouseDown={canSelect ? handleDragStart : undefined}
                 onMouseUp={canSelect ? handleDragEnd : undefined}
                 onMouseEnter={canSelect && isDragging ? () => handleEpisodeClick(ep.id) : undefined}
-                className={`aspect-square rounded-md sm:rounded-lg flex items-center justify-center relative transition-all cursor-pointer 
+                className={`aspect-square rounded-md sm:rounded-lg flex items-center justify-center relative transition-all cursor-pointer
                   ${canSelect
                     ? isSelected
                       ? 'bg-blue-600 border-2 border-blue-400 shadow-md shadow-blue-500/20'
@@ -297,17 +298,22 @@ const ShowGrid = () => {
   const [hasSearched, setHasSearched] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
-  
+
   const [selectedShow, setSelectedShow] = useState(null);
-  const [formattedShowSeasons, setFormattedShowSeasons] = useState([]); 
-  const [isLoadingShowDetails, setIsLoadingShowDetails] = useState(false); 
-  const [isAuthenticated, setIsAuthenticated] = useState(true); 
+  const [formattedShowSeasons, setFormattedShowSeasons] = useState([]);
+  const [isLoadingShowDetails, setIsLoadingShowDetails] = useState(false);
+  
+  const { user } = useAuth();
+  const isAuthenticatedForReview = !!user; 
 
   const [reviewText, setReviewText] = useState("");
   const [ratingWhole, setRatingWhole] = useState(0);
   const [ratingDecimal, setRatingDecimal] = useState(0);
   const [containsSpoilers, setContainsSpoilers] = useState(false);
-  const [tagsInput, setTagsInput] = useState("");
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [reviewError, setReviewError] = useState(null);
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
+  const [modalCanClose, setModalCanClose] = useState(true);
 
   useEffect(() => {
     if (ratingWhole >= 5) {
@@ -355,6 +361,7 @@ const ShowGrid = () => {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
+      setModalCanClose(true); 
     }
     return () => {
       document.body.style.overflow = 'unset';
@@ -364,7 +371,7 @@ const ShowGrid = () => {
   useEffect(() => {
     const fetchShowDetailsForModal = async () => {
       if (!selectedShow) {
-        setFormattedShowSeasons([]); 
+        setFormattedShowSeasons([]);
         return;
       }
       setIsLoadingShowDetails(true);
@@ -376,17 +383,17 @@ const ShowGrid = () => {
           },
         });
         const adaptedSeasons = response.data.seasons
-          ?.filter(s => s.season_number > 0 ) 
+          ?.filter(s => s.season_number > 0 )
           .map(s => ({
-            id: s.id,                 
-            number: s.season_number,  
-            name: s.name,             
-            episode_count: s.episode_count 
+            id: s.id,
+            number: s.season_number,
+            name: s.name,
+            episode_count: s.episode_count
           })) || [];
         setFormattedShowSeasons(adaptedSeasons);
       } catch (error) {
         console.error("Failed to fetch show details for seasons:", error);
-        setFormattedShowSeasons([]); 
+        setFormattedShowSeasons([]);
       } finally {
         setIsLoadingShowDetails(false);
       }
@@ -450,34 +457,121 @@ const ShowGrid = () => {
       });
       setCurrentPage(nextPage);
       const newShowsToAdd = moreResults.data.results.filter(
-        newShow => 
+        newShow =>
           !broadenedShows.find(bs => bs.id === newShow.id) &&
           !exactMatches.find(em => em.id === newShow.id)
       );
       const updatedBroadenedShows = [...broadenedShows, ...newShowsToAdd];
       setBroadenedShows(updatedBroadenedShows);
-      setFilteredBroadenedShows(updatedBroadenedShows); 
+      setFilteredBroadenedShows(updatedBroadenedShows);
     } catch (error) {
       console.error("Failed to load more results:", error);
     }
   };
 
   const handleCardClick = (show) => {
-      setSelectedShow(show); 
+      setSelectedShow(show);
       setReviewText("");
       setRatingWhole(0);
       setRatingDecimal(0);
       setContainsSpoilers(false);
-      setTagsInput("");
+      setIsSubmittingReview(false);
+      setReviewError(null);
+      setShowSuccessToast(false);
+      setModalCanClose(true); 
   };
 
+  const closeModal = () => {
+    if (modalCanClose) {
+        setSelectedShow(null);
+    }
+  };
+
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!selectedShow) {
+        setReviewError("No show selected to review.");
+        return;
+    }
+    if (!user) { 
+      setReviewError("You must be logged in to submit a review.");
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    setReviewError(null);
+    setShowSuccessToast(false); 
+    setModalCanClose(false); 
+
+    const reviewData = {
+      showId: selectedShow.id.toString(),
+      rating: ratingWhole + (Number(ratingDecimal) || 0) / 100,
+      content: reviewText,
+      containsSpoiler: containsSpoilers,
+    };
+
+    try {
+      console.log("Submitting review to /api/reviews:", reviewData);
+      
+      const response = await axios.post('/api/reviews', reviewData, { withCredentials: true });
+
+      if (response.data) { 
+        console.log("Review submitted successfully to backend:", response.data);
+        
+        setReviewText("");
+        setRatingWhole(0);
+        setRatingDecimal(0);
+        setContainsSpoilers(false);
+        
+        setShowSuccessToast(true); 
+        setSelectedShow(null); // Start modal closing animation
+
+      } else {
+        throw new Error("API did not return a successful response or data.");
+      }
+
+    } catch (err) {
+      console.error("Error submitting review to backend:", err);
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || err.message || "Failed to submit review. Please try again.";
+      setReviewError(errorMessage);
+      setModalCanClose(true); 
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
+  useEffect(() => {
+    let toastTimerId;
+    if (showSuccessToast) {
+      setModalCanClose(false); // Disable closing while toast is visible
+      toastTimerId = setTimeout(() => {
+        setShowSuccessToast(false);
+        setModalCanClose(true); // Re-enable closing after toast fades
+      }, 2500); // Toast visible for 2.5 seconds
+    }
+    return () => clearTimeout(toastTimerId);
+  }, [showSuccessToast]);
+
+
   const fadeInUp = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
+  
   const modalVariants = {
     hidden: { opacity: 0, y: -50, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1 },
-    exit: { opacity: 0, y: -30, scale: 0.95, transition: { duration: 0.2 } }
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.25, ease: "easeOut" } }, // Faster enter
+    exit: { opacity: 0, y: 50, scale: 0.9, transition: { duration: 0.25, ease: "easeIn" } } // Faster exit
   };
-  const overlayVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0, transition: { duration: 0.2 } } };
+
+  const overlayVariants = { 
+    hidden: { opacity: 0 }, 
+    visible: { opacity: 1 }, 
+    exit: { opacity: 0, transition: { duration: 0.25 } } // Faster overlay exit
+  };
+
+  const toastVariants = {
+    hidden: { opacity: 0, y: -50, scale: 0.9 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: "spring", stiffness: 300, damping: 25, duration: 0.3 } },
+    exit: { opacity: 0, y: 50, scale: 0.9, transition: { duration: 0.3 } }
+  };
 
   let listTitle = "";
   if (hasSearched) {
@@ -540,14 +634,35 @@ const ShowGrid = () => {
 
       <AnimatePresence>
         {selectedShow && (
-          <motion.div className="fixed inset-0 bg-black bg-opacity-75 flex items-start justify-center z-50 p-4 pt-6 sm:pt-8 md:pt-10" initial="hidden" animate="visible" exit="exit" variants={overlayVariants} onClick={() => setSelectedShow(null)}>
-            <motion.div className="bg-zinc-900 rounded-xl shadow-xl text-white w-full max-w-5xl max-h-[80vh] overflow-y-auto relative" variants={modalVariants} onClick={(e) => e.stopPropagation()}>
-              <button onClick={() => setSelectedShow(null)} className="absolute top-6 right-6 text-gray-400 hover:text-white z-20" aria-label="Close review modal"><X size={28} /></button>
+          <motion.div 
+            className="fixed inset-0 bg-black bg-opacity-75 flex items-start justify-center z-50 p-4 pt-6 sm:pt-8 md:pt-10" 
+            initial="hidden" 
+            animate="visible" 
+            exit="exit" 
+            variants={overlayVariants} 
+            onClick={closeModal}
+          >
+            <motion.div 
+                className="bg-zinc-900 rounded-xl shadow-xl text-white w-full max-w-5xl max-h-[80vh] overflow-y-auto relative scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-800" 
+                variants={modalVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={closeModal} 
+                className="absolute top-6 right-6 text-gray-400 hover:text-white z-20" 
+                aria-label="Close review modal"
+                disabled={!modalCanClose} // Disable if modalCanClose is false
+              >
+                <X size={28} />
+              </button>
               <div className="p-4 space-y-3">
                 <div className="relative w-full rounded-lg overflow-hidden mb-4">
-                  <img 
-                    src={selectedShow.backdrop_path ? BACKDROP_BASE_URL + selectedShow.backdrop_path : (selectedShow.poster_path ? IMAGE_BASE_URL + selectedShow.poster_path : "https://via.placeholder.com/1280x720?text=No+Image&fontsize=50")} 
-                    alt={selectedShow.name} 
+                  <img
+                    src={selectedShow.backdrop_path ? BACKDROP_BASE_URL + selectedShow.backdrop_path : (selectedShow.poster_path ? IMAGE_BASE_URL + selectedShow.poster_path : "https://via.placeholder.com/1280x720?text=No+Image&fontsize=50")}
+                    alt={selectedShow.name}
                     className="w-full h-auto object-cover max-h-[50vh] block"
                   />
                   <div className="absolute inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4">
@@ -556,49 +671,103 @@ const ShowGrid = () => {
                     </h2>
                   </div>
                 </div>
-                
+
                 <div className="mt-8">
                   {isLoadingShowDetails ? (
                     <div className="text-center py-4 text-gray-400">Loading season information...</div>
                   ) : formattedShowSeasons && formattedShowSeasons.length > 0 && selectedShow ? (
-                    <EpisodeList seasons={formattedShowSeasons} showId={selectedShow.id} isAuthenticated={isAuthenticated} />
+                    <EpisodeList seasons={formattedShowSeasons} showId={selectedShow.id} isAuthenticated={isAuthenticatedForReview} />
                   ) : (
                     !isLoadingShowDetails && <div className="text-center py-3 text-gray-400">No season information available for this show.</div>
                   )}
                 </div>
 
                 <div className="space-y-3 pt-2">
-                  <div className="bg-[#2a2a2a] rounded-xl p-6">
-                  <div>
-                    <label htmlFor="review-text-modal" className="block mb-3 font-semibold text-xl">Review</label>
-                    <textarea id="review-text-modal" value={reviewText} onChange={(e) => setReviewText(e.target.value)} className="bg-zinc-800 border-2 border-black rounded-md p-2 w-full text-gray-200 text-md focus:ring-1 focus:ring-[#1963da] outline-none resize-none" rows={3} placeholder="Write your thoughts..."/>
-                    <div className="flex items-center gap-2 mt-1 mb-5">
-                      <input type="checkbox" id="spoiler-checkbox-modal" checked={containsSpoilers} onChange={(e) => setContainsSpoilers(e.target.checked)} className="form-checkbox h-6 w-6 text-yellow-500 bg-zinc-800 border-zinc-600 rounded focus:ring-yellow-500 focus:ring-offset-0"/>
-                      <label htmlFor="spoiler-checkbox-modal" className="text-lg text-gray-300 select-none font-semibold">Contains Spoilers</label>
+                  <form onSubmit={handleReviewSubmit} className="bg-[#2a2a2a] rounded-xl p-6 shadow-lg">
+                    <h3 className="text-xl sm:text-2xl font-bold text-white mb-4">
+                      Review for "{selectedShow.name}"
+                    </h3>
+
+                    <div className="mb-6">
+                        <label className="block text-gray-300 mb-2 font-semibold text-lg">Rating</label>
+                        <AppleRating rating={ratingWhole + (Number(ratingDecimal) || 0) / 100} onClickApple={handleAppleClick}/>
+                        <div className="flex items-center gap-1.5 mt-1">
+                        <input type="number" min={0} max={5} value={ratingWhole} aria-label="Rating whole number" onFocus={(e) => {if (e.target.value === "0") setRatingWhole("");}} onChange={(e) => {const v=e.target.value;if(v==="")setRatingWhole("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=5)setRatingWhole(n);}}} onBlur={(e) => {if(e.target.value===""||e.target.value===null)setRatingWhole(0);}} className="bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none"/>
+                        <span className="text-gray-200 text-lg font-bold select-none">.</span>
+                        <input type="number" min={0} max={99} aria-label="Rating decimal part" value={ratingDecimal} onFocus={(e)=>{if(e.target.value==="0"||e.target.value==="00")setRatingDecimal("");}} onChange={(e)=>{const v=e.target.value;if(v==="")setRatingDecimal("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=99&&v.length<=2)setRatingDecimal(v);}}} onBlur={(e)=>{let s=e.target.value;if(s==="")setRatingDecimal(0);else{let n=Number(s);if(s.length===1&&n<10)setRatingDecimal("0"+n);else setRatingDecimal(s);}}} disabled={ratingWhole>=5} className={`bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none ${ratingWhole>=5?"opacity-50 cursor-not-allowed":""}`}/>
+                        </div>
                     </div>
-                  </div>
-                  <div className="flex flex-col">
-                    <label className="block mb-3 font-semibold text-xl">Rating</label>
-                    <AppleRating rating={ratingWhole + (Number(ratingDecimal) || 0) / 100} onClickApple={handleAppleClick}/>
-                    <div className="flex items-center gap-1.5 mt-1 mb-5">
-                      <input type="number" min={0} max={5} value={ratingWhole} aria-label="Rating whole number" onFocus={(e) => {if (e.target.value === "0") setRatingWhole("");}} onChange={(e) => {const v=e.target.value;if(v==="")setRatingWhole("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=5)setRatingWhole(n);}}} onBlur={(e) => {if(e.target.value===""||e.target.value===null)setRatingWhole(0);}} className="bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none"/>
-                      <span className="text-gray-200 text-lg font-bold select-none">.</span>
-                      <input type="number" min={0} max={99} aria-label="Rating decimal part" value={ratingDecimal} onFocus={(e)=>{if(e.target.value==="0"||e.target.value==="00")setRatingDecimal("");}} onChange={(e)=>{const v=e.target.value;if(v==="")setRatingDecimal("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=99&&v.length<=2)setRatingDecimal(v);}}} onBlur={(e)=>{let s=e.target.value;if(s==="")setRatingDecimal(0);else{let n=Number(s);if(s.length===1&&n<10)setRatingDecimal("0"+n);else setRatingDecimal(s);}}} disabled={ratingWhole>=5} className={`bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none ${ratingWhole>=5?"opacity-50 cursor-not-allowed":""}`}/>
+
+                    <div className="mb-6">
+                        <label htmlFor="review-text-modal" className="block text-gray-300 mb-2 font-semibold text-lg">Your Review</label>
+                        <textarea
+                            id="review-text-modal"
+                            value={reviewText}
+                            onChange={(e) => setReviewText(e.target.value)}
+                            className="bg-zinc-800 border-2 border-black rounded-md p-2 w-full text-gray-200 text-md focus:ring-1 focus:ring-[#1963da] outline-none resize-none"
+                            rows={5}
+                            maxLength={2000}
+                            placeholder={`Share your thoughts about ${selectedShow.name}...`}
+                        />
+                        <div className="flex items-center gap-2 mt-3"> 
+                            <input
+                                type="checkbox"
+                                id="spoiler-checkbox-modal"
+                                checked={containsSpoilers}
+                                onChange={(e) => setContainsSpoilers(e.target.checked)}
+                                className="form-checkbox h-5 w-5 text-yellow-500 bg-zinc-700 border-zinc-600 rounded focus:ring-yellow-500 focus:ring-offset-zinc-800 cursor-pointer"
+                            />
+                            <label htmlFor="spoiler-checkbox-modal" className="text-md text-gray-300 select-none font-medium cursor-pointer">
+                                Contains Spoilers
+                            </label>
+                        </div>
                     </div>
-                  </div>
-                  <div>
-                    <label htmlFor="tags-input-modal" className="block mb-3 font-semibold text-xl">Tags</label>
-                    <input id="tags-input-modal" type="text" value={tagsInput} onChange={(e) => setTagsInput(e.target.value)} className="bg-zinc-800 rounded-md p-2 w-full text-gray-200 text-md focus:ring-1 focus:ring-[#1963da] outline-none border-2 border-black" placeholder="e.g., Comedy, Drama"/>
-                  </div>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-3 pt-2 pb-1">
-                    <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}} className="w-full py-1.5 sm:py-2 lg:py-2.5 bg-[#1963da] text-white rounded-lg hover:bg-[#1652b5] transition-colors text-sm font-semibold">Submit</motion.button>
-                    <motion.button whileHover={{scale:1.02}} whileTap={{scale:0.98}} onClick={()=>setSelectedShow(null)} className="w-full py-1.5 sm:py-2  lg:py-2.5 bg-yellow-500 text-black rounded-lg hover:bg-yellow-400 transition-colors text-sm font-semibold">Cancel</motion.button>
-                  </div>
+
+                    {reviewError && (
+                      <div className="mb-4 p-3 bg-red-900/30 border border-red-700 text-red-400 text-sm rounded-md">
+                        {reviewError}
+                      </div>
+                    )}
+
+                    <div className="flex flex-col sm:flex-row gap-3 pt-4"> 
+                      <motion.button
+                        type="button"
+                        onClick={closeModal} 
+                        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                        className="w-full py-2.5 sm:py-3 bg-zinc-700 text-gray-300 rounded-lg hover:bg-zinc-600 transition-colors text-sm font-semibold"
+                        disabled={!modalCanClose || isSubmittingReview}
+                      >
+                        Cancel
+                      </motion.button>
+                      <motion.button
+                        type="submit"
+                        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                        disabled={!isAuthenticatedForReview || isSubmittingReview || ((ratingWhole === 0 && Number(ratingDecimal) === 0) || !reviewText.trim())}
+                        className="w-full py-2.5 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmittingReview ? 'Submitting...' : (isAuthenticatedForReview ? 'Submit Review' : 'Login to Review')}
+                      </motion.button>
+                    </div>
+                  </form>
                 </div>
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showSuccessToast && (
+            <motion.div
+                variants={toastVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                className="fixed top-10 inset-x-0 mx-auto w-fit z-[100] bg-zinc-800 text-white px-6 py-3 rounded-lg shadow-xl flex items-center gap-3"
+            >
+                <CheckCircle size={24} />
+                <span>Review Submitted!</span>
+            </motion.div>
         )}
       </AnimatePresence>
     </div>
