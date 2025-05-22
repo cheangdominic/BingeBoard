@@ -663,7 +663,7 @@ const ShowGrid = () => {
             >
               <button 
                 onClick={closeModal} 
-                className="absolute top-6 right-6 text-gray-400 hover:text-white z-20" 
+                className="fixed top-[5.5vh] right-[17.5vw] text-gray-400 hover:text-white z-20" 
                 aria-label="Close review modal"
                 disabled={!modalCanClose} 
               >
