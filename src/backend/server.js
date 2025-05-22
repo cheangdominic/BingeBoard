@@ -330,17 +330,6 @@ app.get('/api/users', async (req, res) => {
   }
 });
 
-const authenticate = (req, res, next) => {
-  if (!req.session.authenticated || !req.session.email) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-  req.user = {
-    email: req.session.email,
-  };
-
-  next();
-};
-
 async function fetchShowDetailsFromTMDB(showId) {
   if (!showId) {
     console.warn('Attempted to fetch show details with empty ID');
