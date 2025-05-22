@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import LocationInfo from '../../components/LocationInfo.jsx';
-import ProfileImage  from '../../components/ProfileImage.jsx';
-import LogoutButton from './LogoutButton.jsx';
+import ProfileImage from '../../components/ProfileImage.jsx';
+import LogoutButton from "./LogoutButton.jsx";
 
 export default function ProfileCard({ user, profilePic, isOwnProfile }) {
   const { user: currentUser, refreshUser } = useAuth();
@@ -46,15 +46,12 @@ export default function ProfileCard({ user, profilePic, isOwnProfile }) {
 
       {/* ── RIGHT‑HAND BUTTONS ───────────────────────────────────────────────── */}
       {isOwnProfile ? (
-        <>
-          <LogoutButton />
-
-          <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+        <div className="flex items-center space-x-4 justify-end flex-1">
+          <button className="bg-blue-500 hover:bg-amber-400 hover:text-black text-white font-bold py-2 px-4 rounded">
             Settings
           </button>
-
           <LocationInfo />
-        </>
+        </div>
       ) : isFriend ? (
         <button
           className="bg-gray-500 text-white font-bold py-2 px-4 rounded"

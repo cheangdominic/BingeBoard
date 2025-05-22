@@ -26,96 +26,69 @@ export default function TopNavbar() {
     {
       question: "What is BingeBoard?",
       answer:
-        "BingeBoard is an app that helps users track their favorite TV shows and stay organized. It also makes watching TV more social by connecting users with others to share their experiences.",
+        "BingeBoard is a social platform for TV lovers. You can log the shows you watch, rate them, leave reviews, and discover what others are watching. It's like Letterboxd, but for TV.",
+    },
+    {
+      question: "Is BingeBoard free to use?",
+      answer:
+        "Yes! BingeBoard is completely free to use. Optional premium features may be introduced in the future.",
     },
     {
       question: "How do I create an account?",
       answer:
-        "Click on the create account button located in the top navigation bar and enter the required information in the input boxes.",
+        "Click the 'Create Account' button in the top navigation bar and fill in the required details like email, username, and password.",
     },
     {
       question: "How do I reset my password?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        'Go to the login page and click on "Forgot Password?" above the password input. We’ll send you a reset link via email.',
     },
     {
-      question: "How do I reset my password?",
+      question: "Is there a mobile app?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "A mobile version is in development! In the meantime, BingeBoard works great on mobile browsers.",
     },
     {
-      question: "How do I reset my password?",
+      question: "How do I find new shows to watch?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "You can browse trending shows, explore curated lists, or see what your friends are watching and recommending.",
     },
     {
-      question: "How do I reset my password?",
+      question: "Can I track which episodes I've watched?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "Absolutely! You can mark episodes as watched, track your progress through seasons, and get notified when new episodes air.",
     },
     {
-      question: "How do I reset my password?",
+      question: "Can I track which episode I'm on for each show?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "Yes! Each show's page includes a progress tracker where you can mark off episodes as you watch them.",
     },
     {
-      question: "How do I reset my password?",
+      question: "Can I write reviews and rate shows?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "Yes! You can rate shows and seasons, and write short or long-form reviews to share your thoughts with the community.",
     },
     {
-      question: "How do I reset my password?",
+      question: "How are show ratings calculated?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "Ratings are based on user submissions. We use an average of all ratings, weighted slightly to reduce spam or manipulation.",
     },
     {
-      question: "How do I reset my password?",
+      question: "Can I share my profile with friends?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "Of course! Every user has a public profile link you can share. Friends can see your reviews, watch history, and lists.",
     },
     {
-      question: "How do I reset my password?",
+      question: "Can I see release dates for upcoming episodes?",
       answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
+        "Yes! Show pages include episode guides with air dates, including upcoming episodes so you can plan your binge.",
     },
-    {
-      question: "How do I reset my password?",
-      answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
-    },
-    {
-      question: "How do I reset my password?",
-      answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
-    },
-    {
-      question: "How do I reset my password?",
-      answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
-    },
-    {
-      question: "How do I reset my password?",
-      answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
-    },
-    {
-      question: "How do I reset my password?",
-      answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
-    },
-    {
-      question: "How do I reset my password?",
-      answer:
-        'In the login page, click on the "Forget Password" button located above the password box.',
-    },
-    
   ];
 
   return (
     <header
-      className={`bg-[#1A1A1A] sticky top-0 shadow-2xl shadow-black/60 ${
-        mobileMenuOpen ? "z-40" : "z-50"
-      }`}
+      className={`bg-[#1A1A1A] sticky top-0 shadow-2xl shadow-black/60 ${mobileMenuOpen ? "z-40" : "z-50"
+        }`}
     >
       <nav
         aria-label="Global"
@@ -170,9 +143,8 @@ export default function TopNavbar() {
           </button>
 
           <div
-            className={`fixed mt-14 left-0 z-50 w-80 transform bg-[#1e1e1e] shadow-xl transition-transform duration-300 ease-in-out ${
-              infoPanelOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
+            className={`fixed mt-14 left-0 z-50 w-80 transform bg-[#1e1e1e] shadow-xl transition-transform duration-300 ease-in-out ${infoPanelOpen ? "translate-x-0" : "-translate-x-full"
+              }`}
             style={{
               overflowY: "auto",
               maxHeight: "44.5rem",
@@ -196,9 +168,8 @@ export default function TopNavbar() {
                       <DisclosureButton className="w-full flex justify-between items-center rounded bg-[#2e2e2e] px-4 py-2 text-left hover:bg-[#3a3a3a] transition">
                         <span>{faq.question}</span>
                         <ChevronDownIcon
-                          className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${
-                            open ? "rotate-180" : ""
-                          }`}
+                          className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""
+                            }`}
                         />
                       </DisclosureButton>
                       <DisclosurePanel className="px-4 py-2 text-gray-300 bg-[#1a1a1a]">
@@ -284,9 +255,8 @@ export default function TopNavbar() {
                 </button>
 
                 <div
-                  className={`fixed top-0 left-0 z-50 w-full bg-[#1e1e1e] shadow-xl transition-transform duration-300 ease-in-out ${
-                    infoPanelOpen ? "translate-x-0" : "-translate-x-full"
-                  }`}
+                  className={`fixed top-0 left-0 z-50 w-full bg-[#1e1e1e] shadow-xl transition-transform duration-300 ease-in-out ${infoPanelOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
                   style={{
                     height: "100vh",
                     overflowY: "auto",
@@ -329,9 +299,8 @@ export default function TopNavbar() {
                             <DisclosureButton className="w-full flex justify-between items-center rounded bg-[#2e2e2e] px-4 py-2 text-left hover:bg-[#3a3a3a] transition">
                               <span>{faq.question}</span>
                               <ChevronDownIcon
-                                className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${
-                                  open ? "rotate-180" : ""
-                                }`}
+                                className={`h-5 w-5 text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""
+                                  }`}
                               />
                             </DisclosureButton>
                             <DisclosurePanel className="px-4 py-2 text-gray-300 bg-[#1a1a1a]">
