@@ -1,4 +1,3 @@
-// server.js
 import dotenv from 'dotenv';
 dotenv.config();
 import express from 'express';
@@ -680,9 +679,27 @@ app.get('/api/users/:username/activities', async (req, res) => {
       .sort({ createdAt: -1 }).limit(50).lean();
     res.json(activities);
   } catch (error) {
-    console.error(`Error fetching activities for ${req.params.username}:`, error);
-    res.status(500).json({ error: 'Failed to fetch user activities', details: error.message });
+    res.status(500).json({ error: error.message });
   }
+});
+
+app.post('/api/logout', authenticate, (req, res) => {
+    const userIdToLog = req.currentUserId;
+    req.session.destroy(async (err) => {
+      if (err) {
+        console.error("Session destruction error:", err);
+        return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
+      }
+      if (userIdToLog) {
+        try {
+          await logActivity(userIdToLog, 'logout');
+        } catch (logErr) {
+          console.error("Error logging logout activity:", logErr);
+        }
+      }
+      res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
+      return res.json({ success: true, message: 'Logged out successfully' });
+    });
 });
 
 app.post('/api/watchlist/add', authenticate, async (req, res) => {
@@ -707,49 +724,45 @@ app.post('/api/watchlist/add', authenticate, async (req, res) => {
 app.post('/api/watchlist/remove', authenticate, async (req, res) => {
   const { showId } = req.body;
   const userId = req.currentUserId;
-  if (!showId) return res.status(400).json({ success: false, message: 'Missing show ID' });
+
+  if (!showId) {
+    return res.status(400).json({ success: false, message: 'Missing show ID' });
+  }
+
   try {
-    await userCollection.updateOne({ _id: userId }, { $pull: { watchlist: showId.toString() } });
+    const result = await userCollection.updateOne(
+      { _id: userId },
+      { $pull: { watchlist: showId } }
+    );
+
+    if (result.matchedCount === 0) {
+        console.warn(`[WATCHLIST_REMOVE] User not found with ID: ${userId}, though authenticate passed.`);
+        return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    if (result.modifiedCount === 0) {
+      return res.status(200).json({ success: true, message: 'Show was not in watchlist or already removed.' });
+    }
+
     await logActivity(userId, 'watchlist_remove', showId.toString());
     res.json({ success: true, message: 'Removed from watchlist' });
   } catch (err) {
     console.error("Error removing from watchlist:", err);
-    res.status(500).json({ success: false, message: 'Server error removing from watchlist' });
+    res.status(500).json({ success: false, message: 'Server error while removing from watchlist' });
   }
 });
 
-app.get('/api/watchlist', authenticate, async (req, res) => {
-    try {
-        const user = req.currentUser;
-        if (!user.watchlist || user.watchlist.length === 0) return res.json([]);
-        
-        const watchlistDetails = await Promise.all(
-            user.watchlist.map(async (showId) => {
-                try {
-                    const tmdbUrl = `${tmdbBaseUrl}/tv/${showId}`;
-                    const response = await axios.get(tmdbUrl, { params: { api_key: tmdbApiKey }, timeout: 5000 });
-                    return {
-                        id: response.data.id, name: response.data.name, poster_path: response.data.poster_path,
-                        vote_average: response.data.vote_average, vote_count: response.data.vote_count,
-                        first_air_date: response.data.first_air_date
-                    };
-                } catch (error) {
-                    console.warn(`TMDB fetch failed for watchlist item ${showId}:`, error.message);
-                    return { id: showId, name: `Show ID: ${showId} (Fetch Error)`, poster_path: null };
-                }
-            })
-        );
-        res.json(watchlistDetails.filter(Boolean));
-    } catch (error) {
-        console.error("Error fetching watchlist:", error);
-        res.status(500).json({ error: "Failed to fetch watchlist", details: error.message });
-    }
-});
 
-app.post('/api/chat', authenticate, async (req, res) => {
+app.post('/api/chat', async (req, res) => {
+  console.log('Received chat request with body:', req.body);
+
   try {
     if (!req.body || !req.body.messages || !Array.isArray(req.body.messages)) {
-      return res.status(400).json({ success: false, error: 'Invalid request format.' });
+      console.error('Invalid request format');
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid request format. Expected { messages: [] }'
+      });
     }
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ success: false, error: 'Server AI configuration error.' });
