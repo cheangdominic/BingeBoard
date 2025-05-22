@@ -582,7 +582,73 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
   }
 });
 
+app.get('/api/reviews/most-liked', async (req, res) => {
+  try {
+    const { limit = 8 } = req.query;
 
+    const mostLikedReviews = await Review.aggregate([
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" }
+        }
+      },
+      { $sort: { likesCount: -1, createdAt: -1 } },
+      { $limit: parseInt(limit) },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      { $unwind: "$user" }
+    ]);
+
+    const formattedReviews = await Promise.all(
+      mostLikedReviews.map(async (review) => {
+        let showData = { name: 'Unknown Show', poster_path: null };
+        
+        if (review.showId) {
+          try {
+            const tmdbUrl = `${process.env.TMDB_BASE_URL || 'https://api.themoviedb.org/3'}/tv/${review.showId}`;
+            
+            const response = await axios.get(tmdbUrl, {
+              params: {
+                api_key: process.env.VITE_TMDB_API_KEY
+              },
+              timeout: 5000
+            });
+
+            if (response.data) {
+              showData.name = response.data.name || response.data.original_name || 'Unknown Show';
+              showData.poster_path = response.data.poster_path;
+            }
+          } catch (apiError) {
+            console.error('Failed to fetch show details:', apiError.message);
+            showData.name = `Show ID: ${review.showId}`;
+          }
+        }
+
+        return {
+          ...review,
+          id: review._id.toString(),
+          userProfilePic: review.user.profilePic || "/profilePhotos/generic_profile_picture.jpg",
+          username: review.user.username,
+          showName: showData.name,
+          showImage: showData.poster_path 
+            ? `https://image.tmdb.org/t/p/w500${showData.poster_path}`
+            : "https://via.placeholder.com/300x450"
+        };
+      })
+    );
+
+    res.json(formattedReviews);
+  } catch (error) {
+    console.error('Error fetching most liked reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch most liked reviews' });
+  }
+});
 
 app.get('/api/user', authenticate, async (req, res) => {
   try {
