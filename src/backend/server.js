@@ -114,8 +114,9 @@ app.use(session({
   saveUninitialized: false,
   resave: true,
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: expireTime
+    secure: true,
+    maxAge: expireTime,
+    sameSite: 'none'
   }
 }));
 
