@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import TVShowCard from "../../components/TVShowCard";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext.jsx";
 
@@ -12,33 +12,48 @@ function RecentlyWatched({
 }) {
   const [shows, setShows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const { user: authUser } = useAuth();
+  const { username } = useParams();
   const itemWidth = cardActualWidth;
 
   useEffect(() => {
     const fetchRecentlyWatchedData = async () => {
-      if (!authUser) {
-        setIsLoading(false);
-        setShows([]);
-        return;
-      }
       setIsLoading(true);
+      setError(null);
       try {
-        const response = await fetch('/api/users/recently-watched', {
+        const endpoint = username 
+          ? `/api/users/${username}`
+          : '/api/getUserInfo';
+
+        const response = await fetch(endpoint, {
           credentials: "include"
         });
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ message: `HTTP error! status: ${response.status}` }));
-          throw new Error(errorData.error || errorData.message || `HTTP error! status: ${response.status}`);
+          throw new Error(`Failed to fetch user data: ${response.status}`);
         }
 
         const data = await response.json();
-        setShows(data.map(s => ({ ...s, id: s.showId, name: s.showName, poster_path: s.posterPath })));
+
+        const watchedHistory = data.user?.watchedHistory || data.watchedHistory || [];
+
+        const transformedShows = watchedHistory
+          .sort((a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt))
+          .slice(0, 10)
+          .map(item => ({
+            id: item.showId,
+            name: item.showName,
+            poster_path: item.posterPath?.replace('/w500', '/w300') || null,
+            lastWatchedAt: item.lastWatchedAt
+          }));
+
+        setShows(transformedShows);
       } catch (error) {
         console.error("Error fetching recently watched shows:", error);
+        setError(error.message);
         setShows([]);
       } finally {
         setIsLoading(false);
@@ -46,7 +61,7 @@ function RecentlyWatched({
     };
 
     fetchRecentlyWatchedData();
-  }, [authUser]);
+  }, [authUser, username]);
 
   const handleScroll = useCallback(() => {
     const container = containerRef.current;

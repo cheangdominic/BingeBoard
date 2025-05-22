@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useParams } from 'react-router-dom';
 import ProfileCard from "./ProfileCard.jsx";
 import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
@@ -20,6 +21,7 @@ const fadeInUp = {
 };
 
 function ProfilePage() {
+  const { username } = useParams();
   const [user, setUser] = useState(null);
   const { user: authUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -31,25 +33,25 @@ function ProfilePage() {
   }, [authUser, authLoading, navigate]);
 
   useEffect(() => {
-    if (!authLoading && authUser) {
-      window.scrollTo(0, 0);
-      fetch("/api/getUserInfo", { credentials: "include" })
-        .then(res => {
-          if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
-          }
-          return res.json();
-        })
-        .then(data => {
-          console.log("Logged-in user data:", data);
-          setUser(data);
-        })
-        .catch(err => {
-          console.error("Error loading user data:", err);
-          setUser({ username: "error", error: true });
-        });
-    }
-  }, [authUser, authLoading]);
+  if (!authLoading && authUser) {
+    window.scrollTo(0, 0);
+    const endpoint = username ? `/api/users/${username}` : '/api/getUserInfo';
+    
+    fetch(endpoint, { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        console.log("User data:", data);
+        setUser(data.user || data);
+      })
+      .catch(err => {
+        console.error("Error loading user data:", err);
+        setUser({ username: "error", error: true });
+      });
+  }
+}, [authUser, authLoading, username]);
 
   if (authLoading) {
     return (

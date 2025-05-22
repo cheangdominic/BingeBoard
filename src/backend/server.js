@@ -11,11 +11,12 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { MongoClient, ObjectId } from 'mongodb';
-import { Review, Activity } from './utils.js';
+import { Review, Activity, User } from './utils.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import axios from 'axios';
+import { use } from 'react';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -30,7 +31,7 @@ const expireTime = 24 * 60 * 60 * 1000;
 
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001','http://localhost:3000', '/^https?://localhost(:\d+)?$/',process.env.FRONTEND_URL].filter(Boolean);
+    const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:3000', '/^https?://localhost(:\d+)?$/', process.env.FRONTEND_URL].filter(Boolean);
     if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
       callback(null, true);
     } else {
@@ -70,7 +71,7 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
 const tmdbApiKey = process.env.VITE_TMDB_API_KEY;
 const tmdbBaseUrl = process.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.org/3';
 
-console.log(`TMDB API Key Loaded: ${tmdbApiKey ? 'Yes (first few chars: ' + String(tmdbApiKey).substring(0,5) + '...)' : 'NO!!! KEY IS MISSING!'}`);
+console.log(`TMDB API Key Loaded: ${tmdbApiKey ? 'Yes (first few chars: ' + String(tmdbApiKey).substring(0, 5) + '...)' : 'NO!!! KEY IS MISSING!'}`);
 console.log(`TMDB Base URL: ${tmdbBaseUrl}`);
 
 
@@ -124,6 +125,39 @@ app.use(session({
   }
 }));
 
+app.get('/api/users', async (req, res) => {
+  const { search } = req.query;
+
+  if (!search) {
+    return res.status(400).json({ success: false, message: 'Search query is required' });
+  }
+
+  try {
+    const exactMatches = await userCollection.find({
+      $or: [
+        { username: search },
+        { email: search }
+      ]
+    }).toArray();
+
+    const similarMatches = await userCollection.find({
+      $or: [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ]
+    }).toArray();
+
+    const filteredSimilarMatches = similarMatches.filter(
+      (user) => !exactMatches.some((exactUser) => exactUser._id.toString() === user._id.toString())
+    );
+
+    res.json({ exactMatches, similarMatches: filteredSimilarMatches });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ success: false, message: 'Failed to fetch users' });
+  }
+});
+
 const authenticate = async (req, res, next) => {
   console.log(`[AUTH MIDDLEWARE] Path: ${req.path}, Method: ${req.method}`);
   console.log(`[AUTH MIDDLEWARE] Session ID: ${req.sessionID}, Authenticated: ${req.session.authenticated}, Email: ${req.session.email}, UserID: ${req.session.userId}`);
@@ -135,19 +169,19 @@ const authenticate = async (req, res, next) => {
 
   try {
     if (!userCollection) {
-        console.error("[AUTH MIDDLEWARE] CRITICAL: userCollection is not initialized!");
-        return res.status(500).json({ error: 'Server configuration error.' });
+      console.error("[AUTH MIDDLEWARE] CRITICAL: userCollection is not initialized!");
+      return res.status(500).json({ error: 'Server configuration error.' });
     }
     console.log(`[AUTH MIDDLEWARE] Attempting to find user with ID from session: ${req.session.userId}`);
     let userObjectId;
     try {
-        userObjectId = new ObjectId(req.session.userId);
+      userObjectId = new ObjectId(req.session.userId);
     } catch (idError) {
-        console.error("[AUTH MIDDLEWARE] Invalid session.userId format for ObjectId:", req.session.userId, idError);
-        req.session.destroy((destroyErr) => {
-          if(destroyErr) console.error("[AUTH MIDDLEWARE] Error destroying session on invalid userId:", destroyErr);
-        });
-        return res.status(401).json({ error: 'Unauthorized: Invalid session data. Please log in again.' });
+      console.error("[AUTH MIDDLEWARE] Invalid session.userId format for ObjectId:", req.session.userId, idError);
+      req.session.destroy((destroyErr) => {
+        if (destroyErr) console.error("[AUTH MIDDLEWARE] Error destroying session on invalid userId:", destroyErr);
+      });
+      return res.status(401).json({ error: 'Unauthorized: Invalid session data. Please log in again.' });
     }
 
     const userDoc = await userCollection.findOne({ _id: userObjectId });
@@ -194,7 +228,7 @@ async function fetchShowDetailsFromTMDB(showIdInput) {
   };
 
   try {
-    console.log(`[FETCH_TMDB] Requesting URL: ${requestUrl} with key: ${tmdbApiKey.substring(0,5)}...`);
+    console.log(`[FETCH_TMDB] Requesting URL: ${requestUrl} with key: ${tmdbApiKey.substring(0, 5)}...`);
     const tvRes = await axios.get(requestUrl, axiosConfig);
 
     if (tvRes.data && (tvRes.data.name || tvRes.data.original_name)) {
@@ -214,7 +248,7 @@ async function fetchShowDetailsFromTMDB(showIdInput) {
       responseData: tvErr.response?.data,
     });
     if (tvErr.response?.data?.status_message) {
-        console.error(`[FETCH_TMDB] TMDB Specific Error for ID ${showId}: ${tvErr.response.data.status_message}`);
+      console.error(`[FETCH_TMDB] TMDB Specific Error for ID ${showId}: ${tvErr.response.data.status_message}`);
     }
     return { name: `Show #${showId} (TMDB Fetch Error)`, poster_path: null };
   }
@@ -228,7 +262,7 @@ async function logActivity(userId, action, targetId = null, details = {}) {
         details.showName = showDetails.name;
         details.showImage = showDetails.poster_path ? `https://image.tmdb.org/t/p/w500${showDetails.poster_path}` : "https://via.placeholder.com/300x450";
       } else if (!['profile_update', 'login', 'logout', 'account_creation'].includes(action)) {
-         console.warn(`[LOG_ACTIVITY] Target ID missing for relevant action: ${action}`);
+        console.warn(`[LOG_ACTIVITY] Target ID missing for relevant action: ${action}`);
       }
     }
     if (action === 'profile_update') {
@@ -276,8 +310,8 @@ app.post('/api/signup', async (req, res) => {
     const insertResult = await userCollection.insertOne(newUserDocument);
 
     if (insertResult.insertedId) {
-        await logActivity(insertResult.insertedId, 'account_creation');
-        return res.status(201).json({ success: true, message: "Account created successfully" });
+      await logActivity(insertResult.insertedId, 'account_creation');
+      return res.status(201).json({ success: true, message: "Account created successfully" });
     }
     throw new Error("User insertion failed");
   } catch (error) {
@@ -307,9 +341,9 @@ app.post('/api/login', async (req, res) => {
           return res.status(500).json({ success: false, message: 'Login failed during session save' });
         }
         try {
-            await logActivity(user._id, 'login');
+          await logActivity(user._id, 'login');
         } catch (logError) {
-            console.error("Error logging login activity:", logError);
+          console.error("Error logging login activity:", logError);
         }
         console.log(`User ${user.username} logged in. Session ID: ${req.sessionID}`);
         return res.json({ success: true, message: "Logged in successfully", user: { _id: user._id.toString(), username: user.username, email: user.email, profilePic: user.profilePic } });
@@ -324,22 +358,22 @@ app.post('/api/login', async (req, res) => {
 });
 
 app.post('/api/logout', authenticate, (req, res) => {
-    const userIdToLog = req.currentUserId;
-    req.session.destroy(async (err) => {
-      if (err) {
-        console.error("Session destruction error:", err);
-        return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
+  const userIdToLog = req.currentUserId;
+  req.session.destroy(async (err) => {
+    if (err) {
+      console.error("Session destruction error:", err);
+      return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
+    }
+    if (userIdToLog) {
+      try {
+        await logActivity(userIdToLog, 'logout');
+      } catch (logErr) {
+        console.error("Error logging logout activity:", logErr);
       }
-      if (userIdToLog) {
-        try {
-          await logActivity(userIdToLog, 'logout');
-        } catch (logErr) {
-          console.error("Error logging logout activity:", logErr);
-        }
-      }
-      res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
-      return res.json({ success: true, message: 'Logged out successfully' });
-    });
+    }
+    res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
+    return res.json({ success: true, message: 'Logged out successfully' });
+  });
 });
 
 app.get('/api/user', authenticate, (req, res) => {
@@ -398,7 +432,7 @@ app.post('/api/reviews', authenticate, async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields: showId, content, and rating are required' });
     }
     if (typeof rating !== 'number' || rating < 0 || rating > 5) {
-        return res.status(400).json({ error: 'Invalid rating value. Must be between 0 and 5.' });
+      return res.status(400).json({ error: 'Invalid rating value. Must be between 0 and 5.' });
     }
     const reviewData = {
       showId: showId.toString(), userId: loggedInUser._id, username: loggedInUser.username,
@@ -420,6 +454,108 @@ app.post('/api/reviews', authenticate, async (req, res) => {
     return res.status(500).json({ error: 'Database operation failed creating review', details: error.message });
   }
 });
+
+app.get('/api/reviews/most-liked', async (req, res) => {
+  try {
+    // You already have tmdbApiKey and tmdbBaseUrl defined globally, use them.
+    if (!tmdbApiKey) {
+      console.error('TMDB API key is not configured in server.js global scope for /api/reviews/most-liked.');
+      return res.status(500).json({ error: 'TMDB API key not configured on server.' });
+    }
+
+    const { limit = 8 } = req.query; // Default to 8 reviews, or use the provided limit
+
+    const mostLikedReviews = await Review.aggregate([
+      {
+        $addFields: {
+          likesCount: { $size: "$likes" } // Calculate the size of the likes array
+        }
+      },
+      { $sort: { likesCount: -1, createdAt: -1 } }, // Sort by likesCount descending, then by creation date descending
+      { $limit: parseInt(limit) }, // Limit the number of results
+      {
+        $lookup: {
+          from: "users", // The collection name for users
+          localField: "userId",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      { $unwind: "$user" } // Deconstructs the user array field from the input documents to output a document for each element.
+    ]);
+
+    const formattedReviews = await Promise.all(
+      mostLikedReviews.map(async (review) => {
+        let showData = { name: 'Unknown Show', poster_path: null };
+
+        if (review.showId) {
+          try {
+            // Use the globally defined tmdbBaseUrl and tmdbApiKey
+            const tmdbUrl = `${tmdbBaseUrl}/tv/${review.showId}`;
+
+            const response = await axios.get(tmdbUrl, {
+              params: {
+                api_key: tmdbApiKey // Use tmdbApiKey here
+              },
+              timeout: 5000
+            });
+
+            if (response.data) {
+              showData.name = response.data.name || response.data.original_name || 'Unknown Show';
+              showData.poster_path = response.data.poster_path;
+            }
+          } catch (apiError) {
+            console.error(`Failed to fetch show details for ID ${review.showId}:`, apiError.message);
+            showData.name = `Show ID: ${review.showId} (Fetch Error)`;
+          }
+        }
+
+        return {
+          ...review,
+          id: review._id.toString(),
+          userProfilePic: review.user?.profilePic || "/img/profilePhotos/generic_profile_picture.jpg",
+          username: review.user?.username,
+          showName: showData.name,
+          posterPath: showData.poster_path, 
+          showImage: showData.poster_path
+            ? `https://image.tmdb.org/t/p/w500${showData.poster_path}`
+            : "https://via.placeholder.com/300x450",
+          likes: Array.isArray(review.likes) ? review.likes.map(id => id.toString()) : [],
+          dislikes: Array.isArray(review.dislikes) ? review.dislikes.map(id => id.toString()) : []
+        };
+      })
+    );
+
+    res.json({ reviews: formattedReviews });
+  } catch (error) {
+    console.error('Error fetching most liked reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch most liked reviews', details: error.message });
+  }
+});
+
+app.get('/api/show/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const TMDB_API_KEY = process.env.VITE_TMDB_API_KEY;
+    if (!TMDB_API_KEY) {
+      return res.status(500).json({ error: 'TMDB API key not configured.' });
+    }
+    const showType = req.query.type || 'tv'; // Default to tv, or allow 'movie'
+    const url = `https://api.themoviedb.org/3/${showType}/${id}?api_key=${TMDB_API_KEY}&append_to_response=credits,videos,external_ids`;
+    const response = await axios.get(url);
+    res.json(response.data);
+  } catch (error) {
+    console.error(`Error fetching show details for ID ${req.params.id}:`, error.message);
+    if (error.response) {
+      return res.status(error.response.status).json({
+        error: `Failed to fetch show details from TMDB: ${error.response.statusText}`,
+        details: error.response.data
+      });
+    }
+    res.status(500).json({ error: 'Failed to fetch show details', details: error.message });
+  }
+});
+
 
 app.put('/api/reviews/:id', authenticate, async (req, res) => {
   try {
@@ -473,13 +609,38 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
   }
 });
 
+app.get('/api/reviews/show/:showId', async (req, res) => {
+  try {
+    const { showId } = req.params;
+    const reviews = await Review.find({ showId: showId })
+      .populate('userId', 'username profilePic')
+      .sort({ createdAt: -1 })
+      .lean(); 
+
+    const formattedReviews = reviews.map(r => ({
+      ...r,
+      id: r._id.toString(), 
+      _id: r._id.toString(), 
+      username: r.userId?.username || "Anonymous",
+      userProfilePic: r.userId?.profilePic,
+      likes: Array.isArray(r.likes) ? r.likes.map(id => id.toString()) : [], 
+      dislikes: Array.isArray(r.dislikes) ? r.dislikes.map(id => id.toString()) : [], 
+    }));
+
+    res.json({ reviews: formattedReviews });
+  } catch (error) {
+    console.error(`Error fetching reviews for show ${req.params.showId}:`, error);
+    res.status(500).json({ error: 'Failed to fetch show reviews', details: error.message });
+  }
+});
+
 app.get('/api/user/reviews', authenticate, async (req, res) => {
   console.log(`[USER_REVIEWS_ROUTE] Request for user: ${req.currentUser?.username} (ID: ${req.currentUserId})`);
   try {
     const userId = req.currentUserId;
     if (!userId) {
-        console.error("[USER_REVIEWS_ROUTE] Critical: currentUserId not found on req object!");
-        return res.status(500).json({ error: 'User identification error.'});
+      console.error("[USER_REVIEWS_ROUTE] Critical: currentUserId not found on req object!");
+      return res.status(500).json({ error: 'User identification error.' });
     }
 
     const userReviews = await Review.find({ userId: userId })
@@ -488,7 +649,7 @@ app.get('/api/user/reviews', authenticate, async (req, res) => {
 
     console.log(`[USER_REVIEWS_ROUTE] Found ${userReviews.length} raw reviews for user ${userId}`);
     if (userReviews.length > 0) {
-        console.log("[USER_REVIEWS_ROUTE] First raw review (check showId type):", JSON.stringify(userReviews[0], null, 2));
+      console.log("[USER_REVIEWS_ROUTE] First raw review (check showId type):", JSON.stringify(userReviews[0], null, 2));
     }
 
     const reviewsWithShowDetails = await Promise.all(
@@ -525,89 +686,89 @@ app.get('/api/user/reviews', authenticate, async (req, res) => {
 });
 
 app.post('/api/users/mark-watched', authenticate, async (req, res) => {
-    console.log(`[MARK_WATCHED] Received request body:`, JSON.stringify(req.body, null, 2));
-    console.log(`[MARK_WATCHED] Request for user: ${req.currentUser?.username} (ID: ${req.currentUserId})`);
-    const { showId, showName, posterPath, seasonNumber, episodes } = req.body;
-    const userId = req.currentUserId;
+  console.log(`[MARK_WATCHED] Received request body:`, JSON.stringify(req.body, null, 2));
+  console.log(`[MARK_WATCHED] Request for user: ${req.currentUser?.username} (ID: ${req.currentUserId})`);
+  const { showId, showName, posterPath, seasonNumber, episodes } = req.body;
+  const userId = req.currentUserId;
 
-    if (!showId || !showName || posterPath === undefined || !episodes || !Array.isArray(episodes) || episodes.length === 0) {
-        console.warn("[MARK_WATCHED] Missing required fields or empty episodes array:", {
-            showIdExists: !!showId,
-            showNameExists: !!showName,
-            posterPathDefined: posterPath !== undefined,
-            posterPathValue: posterPath,
-            episodesIsArray: Array.isArray(episodes),
-            episodesCount: Array.isArray(episodes) ? episodes.length : 'N/A',
-            seasonNumber
-        });
-        return res.status(400).json({ message: 'Missing required fields or no episodes selected for marking watched.' });
-    }
+  if (!showId || !showName || posterPath === undefined || !episodes || !Array.isArray(episodes) || episodes.length === 0) {
+    console.warn("[MARK_WATCHED] Missing required fields or empty episodes array:", {
+      showIdExists: !!showId,
+      showNameExists: !!showName,
+      posterPathDefined: posterPath !== undefined,
+      posterPathValue: posterPath,
+      episodesIsArray: Array.isArray(episodes),
+      episodesCount: Array.isArray(episodes) ? episodes.length : 'N/A',
+      seasonNumber
+    });
+    return res.status(400).json({ message: 'Missing required fields or no episodes selected for marking watched.' });
+  }
 
-    try {
-        let userRecord = req.currentUser;
-        let watchedHistory = userRecord.watchedHistory || [];
-        const showIndex = watchedHistory.findIndex(item => item.showId === showId.toString());
-        const newWatchedAt = new Date();
+  try {
+    let userRecord = req.currentUser;
+    let watchedHistory = userRecord.watchedHistory || [];
+    const showIndex = watchedHistory.findIndex(item => item.showId === showId.toString());
+    const newWatchedAt = new Date();
 
-        if (showIndex > -1) {
-            watchedHistory[showIndex].lastWatchedAt = newWatchedAt;
-            const existingShowEpisodesById = new Map(watchedHistory[showIndex].episodes.map(ep => [ep.id.toString(), ep]));
+    if (showIndex > -1) {
+      watchedHistory[showIndex].lastWatchedAt = newWatchedAt;
+      const existingShowEpisodesById = new Map(watchedHistory[showIndex].episodes.map(ep => [ep.id.toString(), ep]));
 
-            episodes.forEach(newEp => {
-                const episodeToAddOrUpdate = {
-                    id: newEp.id,
-                    number: newEp.number,
-                    name: newEp.name,
-                    seasonNumber: seasonNumber,
-                    watchedAt: newWatchedAt
-                };
+      episodes.forEach(newEp => {
+        const episodeToAddOrUpdate = {
+          id: newEp.id,
+          number: newEp.number,
+          name: newEp.name,
+          seasonNumber: seasonNumber,
+          watchedAt: newWatchedAt
+        };
 
-                if (existingShowEpisodesById.has(newEp.id.toString())) {
-                    const epToUpdate = existingShowEpisodesById.get(newEp.id.toString());
-                    epToUpdate.watchedAt = newWatchedAt;
-                    if (epToUpdate.seasonNumber !== seasonNumber) epToUpdate.seasonNumber = seasonNumber;
-                } else {
-                    watchedHistory[showIndex].episodes.push(episodeToAddOrUpdate);
-                }
-            });
+        if (existingShowEpisodesById.has(newEp.id.toString())) {
+          const epToUpdate = existingShowEpisodesById.get(newEp.id.toString());
+          epToUpdate.watchedAt = newWatchedAt;
+          if (epToUpdate.seasonNumber !== seasonNumber) epToUpdate.seasonNumber = seasonNumber;
         } else {
-            watchedHistory.push({
-                showId: showId.toString(),
-                showName,
-                posterPath,
-                lastWatchedAt: newWatchedAt,
-                episodes: episodes.map(ep => ({
-                    id: ep.id,
-                    number: ep.number,
-                    name: ep.name,
-                    seasonNumber: seasonNumber,
-                    watchedAt: newWatchedAt
-                }))
-            });
+          watchedHistory[showIndex].episodes.push(episodeToAddOrUpdate);
         }
-
-        watchedHistory.sort((a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt));
-
-        if (watchedHistory.length > 50) {
-            watchedHistory = watchedHistory.slice(0, 50);
-        }
-
-        await userCollection.updateOne(
-          { _id: userId },
-          { $set: { watchedHistory: watchedHistory, updatedAt: new Date() } }
-        );
-
-        await logActivity(userId, 'mark_watched', showId.toString(), {
-            episodeCount: episodes.length,
-            season: seasonNumber
-        });
-
-        console.log(`[MARK_WATCHED] Successfully updated watched history for user ${userId}, show ${showId}`);
-        res.status(200).json({ message: 'Watched status updated successfully.' });
-    } catch (error) {
-        console.error('[MARK_WATCHED] Error:', error);
-        res.status(500).json({ message: 'Server error while updating watched status.', details: error.message });
+      });
+    } else {
+      watchedHistory.push({
+        showId: showId.toString(),
+        showName,
+        posterPath,
+        lastWatchedAt: newWatchedAt,
+        episodes: episodes.map(ep => ({
+          id: ep.id,
+          number: ep.number,
+          name: ep.name,
+          seasonNumber: seasonNumber,
+          watchedAt: newWatchedAt
+        }))
+      });
     }
+
+    watchedHistory.sort((a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt));
+
+    if (watchedHistory.length > 50) {
+      watchedHistory = watchedHistory.slice(0, 50);
+    }
+
+    await userCollection.updateOne(
+      { _id: userId },
+      { $set: { watchedHistory: watchedHistory, updatedAt: new Date() } }
+    );
+
+    await logActivity(userId, 'mark_watched', showId.toString(), {
+      episodeCount: episodes.length,
+      season: seasonNumber
+    });
+
+    console.log(`[MARK_WATCHED] Successfully updated watched history for user ${userId}, show ${showId}`);
+    res.status(200).json({ message: 'Watched status updated successfully.' });
+  } catch (error) {
+    console.error('[MARK_WATCHED] Error:', error);
+    res.status(500).json({ message: 'Server error while updating watched status.', details: error.message });
+  }
 });
 
 app.get('/api/users/recently-watched', authenticate, async (req, res) => {
@@ -616,8 +777,8 @@ app.get('/api/users/recently-watched', authenticate, async (req, res) => {
     const userRecord = req.currentUser;
 
     if (!userRecord.watchedHistory || userRecord.watchedHistory.length === 0) {
-        console.log(`[RECENTLY_WATCHED] No watched history for user ${userRecord?.username}`);
-        return res.json([]);
+      console.log(`[RECENTLY_WATCHED] No watched history for user ${userRecord?.username}`);
+      return res.json([]);
     }
 
     const sortedWatchedHistory = [...userRecord.watchedHistory].sort((a, b) => {
@@ -627,10 +788,10 @@ app.get('/api/users/recently-watched', authenticate, async (req, res) => {
     });
 
     const recentlyWatched = sortedWatchedHistory.slice(0, 10).map(item => ({
-        showId: item.showId,
-        showName: item.showName,
-        posterPath: item.posterPath,
-        lastWatchedAt: item.lastWatchedAt,
+      showId: item.showId,
+      showName: item.showName,
+      posterPath: item.posterPath,
+      lastWatchedAt: item.lastWatchedAt,
     }));
 
     console.log(`[RECENTLY_WATCHED] Sending ${recentlyWatched.length} shows for ${userRecord?.username}.`);
@@ -643,19 +804,32 @@ app.get('/api/users/recently-watched', authenticate, async (req, res) => {
 
 app.get('/api/users/:username', async (req, res) => {
   const { username } = req.params;
+
   try {
     const user = await userCollection.findOne(
       { username },
-      { projection: { username: 1, email: 1, profilePic: 1, createdAt: 1, _id: 1, watchedHistory: 1, watchlist: 1 } }
+      { projection: { username: 1, email: 1, profilePic: 1, createdAt: 1, watchedHistory: 1, watchlist: 1, _id: 1 } }
     );
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
-    const userToSend = { ...user, _id: user._id.toString() };
-    return res.json({ success: true, user: userToSend });
-  } catch (err) {
-    console.error("Error fetching user by username:", err);
-    return res.status(500).json({ success: false, message: 'Failed to fetch user' });
+    // ... (error handling if user not found) ...
+
+    const userActivities = await Activity.find({ userId: user._id })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .lean();
+
+    res.json({
+      success: true,
+      user: { ...user, _id: user._id.toString() }, // Ensure _id is a string
+      username: user.username,
+      profilePic: user.profilePic || null,
+      watchlist: user.watchlist || [],
+      activities: userActivities, // This data is what RecentlyWatched will use
+      _id: user._id.toString()
+    });
+
+  } catch (error) {
+    console.error("Error fetching other user's profile:", error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve user profile' });
   }
 });
 
@@ -674,9 +848,9 @@ app.post('/api/upload-profile-image', authenticate, upload.single('profileImage'
 
     if (result.modifiedCount === 1) {
       await logActivity(userId, 'profile_update', null, { field: 'profilePic' });
-      return res.json({ success: true, imageUrl, message: 'Profile picture updated successfully'});
+      return res.json({ success: true, imageUrl, message: 'Profile picture updated successfully' });
     } else if (result.matchedCount === 1 && result.modifiedCount === 0) {
-       return res.json({ success: true, imageUrl, message: 'Profile picture is already up to date.'});
+      return res.json({ success: true, imageUrl, message: 'Profile picture is already up to date.' });
     } else {
       return res.status(404).json({ success: false, message: 'User not found or failed to update profile.' });
     }
@@ -688,7 +862,10 @@ app.post('/api/upload-profile-image', authenticate, upload.single('profileImage'
 
 app.get('/api/activities', authenticate, async (req, res) => {
   try {
-    const userId = req.currentUserId;
+    const userId = req.currentUserId; 
+
+    const user = req.currentUser;
+
     const activities = await Activity.find({ userId: userId })
       .sort({ createdAt: -1 }).limit(50).lean();
     res.json(activities);
@@ -708,27 +885,174 @@ app.get('/api/users/:username/activities', async (req, res) => {
       .sort({ createdAt: -1 }).limit(50).lean();
     res.json(activities);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching user activities:', error);
+    res.status(500).json({ error: 'Failed to fetch activities', details: error.message });
+  }
+});
+
+app.get('/api/users/:username/reviews', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await userCollection.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userId = user._id;
+    console.log(`Fetching reviews for user: ${username} (${userId})`);
+
+    const userReviews = await Review.find({ userId: userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log(`Found ${userReviews.length} reviews for user ${username}`);
+
+    const reviewsWithShowDetails = await Promise.all(
+      userReviews.map(async (review) => {
+        let showIdToUse = null;
+
+        if (review.showId) showIdToUse = review.showId;
+        else if (review.tmdbId) showIdToUse = review.tmdbId;
+        else if (review.show_id) showIdToUse = review.show_id;
+
+        console.log(`Processing review ${review._id}, using show ID: ${showIdToUse}`);
+
+        let showData = { name: 'Unknown Show', poster_path: null };
+        if (showIdToUse) {
+          showData = await fetchShowDetailsFromTMDB(showIdToUse);
+        }
+
+        return {
+          ...review,
+          id: review._id.toString(),
+          showId: showIdToUse,
+          showName: showData.name,
+          posterPath: showData.poster_path,
+          likes: Array.isArray(review.likes) ? review.likes : [],
+          dislikes: Array.isArray(review.dislikes) ? review.dislikes : [],
+          username: user.username
+        };
+      })
+    );
+
+    res.json(reviewsWithShowDetails);
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+app.get('/api/users/:username/watchlist', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await userCollection.findOne(
+      { username },
+      { projection: { watchlist: 1 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ watchlist: user.watchlist || [] });
+  } catch (error) {
+    console.error('Error fetching user watchlist:', error);
+    res.status(500).json({ error: 'Failed to fetch watchlist' });
+  }
+});
+
+app.get('/api/users/:username/reviews', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await userCollection.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const userId = user._id;
+    console.log(`Fetching reviews for user: ${username} (${userId})`);
+
+    const userReviews = await Review.find({ userId: userId })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    console.log(`Found ${userReviews.length} reviews for user ${username}`);
+
+    const reviewsWithShowDetails = await Promise.all(
+      userReviews.map(async (review) => {
+        let showIdToUse = null;
+
+        if (review.showId) showIdToUse = review.showId;
+        else if (review.tmdbId) showIdToUse = review.tmdbId;
+        else if (review.show_id) showIdToUse = review.show_id;
+
+        console.log(`Processing review ${review._id}, using show ID: ${showIdToUse}`);
+
+        let showData = { name: 'Unknown Show', poster_path: null };
+        if (showIdToUse) {
+          showData = await fetchShowDetailsFromTMDB(showIdToUse);
+        }
+
+        return {
+          ...review,
+          id: review._id.toString(),
+          showId: showIdToUse,
+          showName: showData.name,
+          posterPath: showData.poster_path,
+          likes: Array.isArray(review.likes) ? review.likes : [],
+          dislikes: Array.isArray(review.dislikes) ? review.dislikes : [],
+          username: user.username
+        };
+      })
+    );
+
+    res.json(reviewsWithShowDetails);
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+app.get('/api/users/:username/watchlist', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    const user = await userCollection.findOne(
+      { username },
+      { projection: { watchlist: 1 } }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    res.json({ watchlist: user.watchlist || [] });
+  } catch (error) {
+    console.error('Error fetching user watchlist:', error);
+    res.status(500).json({ error: 'Failed to fetch watchlist' });
   }
 });
 
 app.post('/api/logout', authenticate, (req, res) => {
-    const userIdToLog = req.currentUserId;
-    req.session.destroy(async (err) => {
-      if (err) {
-        console.error("Session destruction error:", err);
-        return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
+  const userIdToLog = req.currentUserId;
+  req.session.destroy(async (err) => {
+    if (err) {
+      console.error("Session destruction error:", err);
+      return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
+    }
+    if (userIdToLog) {
+      try {
+        await logActivity(userIdToLog, 'logout');
+      } catch (logErr) {
+        console.error("Error logging logout activity:", logErr);
       }
-      if (userIdToLog) {
-        try {
-          await logActivity(userIdToLog, 'logout');
-        } catch (logErr) {
-          console.error("Error logging logout activity:", logErr);
-        }
-      }
-      res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
-      return res.json({ success: true, message: 'Logged out successfully' });
-    });
+    }
+    res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
+    return res.json({ success: true, message: 'Logged out successfully' });
+  });
 });
 
 app.post('/api/watchlist/add', authenticate, async (req, res) => {
@@ -740,8 +1064,8 @@ app.post('/api/watchlist/add', authenticate, async (req, res) => {
     if (result.modifiedCount === 0 && result.matchedCount === 1) {
       return res.status(200).json({ success: true, message: 'Already in watchlist' });
     } else if (result.modifiedCount === 1) {
-        await logActivity(userId, 'watchlist_add', showId.toString());
-        return res.json({ success: true, message: 'Added to watchlist' });
+      await logActivity(userId, 'watchlist_add', showId.toString());
+      return res.json({ success: true, message: 'Added to watchlist' });
     }
     return res.status(404).json({ success: false, message: 'User not found or watchlist update failed' });
   } catch (err) {
@@ -765,8 +1089,8 @@ app.post('/api/watchlist/remove', authenticate, async (req, res) => {
     );
 
     if (result.matchedCount === 0) {
-        console.warn(`[WATCHLIST_REMOVE] User not found with ID: ${userId}, though authenticate passed.`);
-        return res.status(404).json({ success: false, message: 'User not found.' });
+      console.warn(`[WATCHLIST_REMOVE] User not found with ID: ${userId}, though authenticate passed.`);
+      return res.status(404).json({ success: false, message: 'User not found.' });
     }
 
     if (result.modifiedCount === 0) {
@@ -782,31 +1106,31 @@ app.post('/api/watchlist/remove', authenticate, async (req, res) => {
 });
 
 app.get('/api/watchlist', authenticate, async (req, res) => {
-    try {
-        const user = req.currentUser;
-        if (!user.watchlist || user.watchlist.length === 0) return res.json([]);
+  try {
+    const user = req.currentUser;
+    if (!user.watchlist || user.watchlist.length === 0) return res.json([]);
 
-        const watchlistDetails = await Promise.all(
-            user.watchlist.map(async (showId) => {
-                try {
-                    const tmdbUrl = `${tmdbBaseUrl}/tv/${showId}`;
-                    const response = await axios.get(tmdbUrl, { params: { api_key: tmdbApiKey }, timeout: 5000 });
-                    return {
-                        id: response.data.id, name: response.data.name, poster_path: response.data.poster_path,
-                        vote_average: response.data.vote_average, vote_count: response.data.vote_count,
-                        first_air_date: response.data.first_air_date
-                    };
-                } catch (error) {
-                    console.warn(`TMDB fetch failed for watchlist item ${showId}:`, error.message);
-                    return { id: showId, name: `Show ID: ${showId} (Fetch Error)`, poster_path: null };
-                }
-            })
-        );
-        res.json(watchlistDetails.filter(Boolean));
-    } catch (error) {
-        console.error("Error fetching watchlist:", error);
-        res.status(500).json({ error: "Failed to fetch watchlist", details: error.message });
-    }
+    const watchlistDetails = await Promise.all(
+      user.watchlist.map(async (showId) => {
+        try {
+          const tmdbUrl = `${tmdbBaseUrl}/tv/${showId}`;
+          const response = await axios.get(tmdbUrl, { params: { api_key: tmdbApiKey }, timeout: 5000 });
+          return {
+            id: response.data.id, name: response.data.name, poster_path: response.data.poster_path,
+            vote_average: response.data.vote_average, vote_count: response.data.vote_count,
+            first_air_date: response.data.first_air_date
+          };
+        } catch (error) {
+          console.warn(`TMDB fetch failed for watchlist item ${showId}:`, error.message);
+          return { id: showId, name: `Show ID: ${showId} (Fetch Error)`, poster_path: null };
+        }
+      })
+    );
+    res.json(watchlistDetails.filter(Boolean));
+  } catch (error) {
+    console.error("Error fetching watchlist:", error);
+    res.status(500).json({ error: "Failed to fetch watchlist", details: error.message });
+  }
 });
 
 app.post('/api/chat', authenticate, async (req, res) => {
@@ -864,17 +1188,17 @@ app.get(/^(?!\/api).*/, (req, res) => {
 
 Promise.all([
 ]).then(() => {
-    if (userCollection) {
-        app.listen(port, () => {
-            console.log(`Server running on port ${port}`);
-        });
-    } else {
-        console.error("Native driver (userCollection) not initialized. Server not started for API routes needing it.");
-        app.listen(port, () => {
-            console.warn(`Server running on port ${port}, BUT NATIVE DB DRIVER (userCollection) MAY NOT BE READY.`);
-        });
-    }
+  if (userCollection) {
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  } else {
+    console.error("Native driver (userCollection) not initialized. Server not started for API routes needing it.");
+    app.listen(port, () => {
+      console.warn(`Server running on port ${port}, BUT NATIVE DB DRIVER (userCollection) MAY NOT BE READY.`);
+    });
+  }
 }).catch(err => {
-    console.error("Failed to initialize services or Mongoose not ready before starting server:", err);
-    process.exit(1);
+  console.error("Failed to initialize services or Mongoose not ready before starting server:", err);
+  process.exit(1);
 });

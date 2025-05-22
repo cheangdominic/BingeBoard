@@ -3,7 +3,6 @@ import axios from "axios";
 import ReviewCard from "../../components/ReviewCard";
 import { useAuth } from "../../context/AuthContext";
 import { motion } from "framer-motion";
-import defaultProfilePic from "../../../public/img/profilePhotos/generic_profile_picture.jpg";
 
 function RecentReviewsFiltered() {
   const { user } = useAuth();
@@ -12,6 +11,7 @@ function RecentReviewsFiltered() {
   const [error, setError] = useState(null);
   const [showSpoilers, setShowSpoilers] = useState(false);
   const [filterByFriends, setFilterByFriends] = useState(false);
+  const defaultProfilePic = "/img/profilePhotos/generic_profile_picture.jpg";
 
   useEffect(() => {
     fetchMostLikedReviews();
@@ -21,7 +21,7 @@ function RecentReviewsFiltered() {
     try {
       setLoading(true);
       const response = await axios.get('/api/reviews/most-liked');
-      setReviews(response.data);
+      setReviews(response.data.reviews);
     } catch (err) {
       setError("Failed to fetch reviews");
       console.error(err);
@@ -29,6 +29,8 @@ function RecentReviewsFiltered() {
       setLoading(false);
     }
   };
+
+
 
   const toggleSpoilers = () => {
     setShowSpoilers(!showSpoilers);
@@ -39,14 +41,14 @@ function RecentReviewsFiltered() {
     // TODO: Implement actual friends filter logic
   };
 
-  const filteredReviews = showSpoilers 
-    ? reviews 
+  const filteredReviews = showSpoilers
+    ? reviews
     : reviews.filter(review => !review.containsSpoiler);
 
   const handleVote = async (reviewId, action) => {
     try {
       const response = await axios.put(`/api/reviews/${reviewId}`, { action });
-      setReviews(prev => prev.map(review => 
+      setReviews(prev => prev.map(review =>
         review._id === reviewId ? { ...review, ...response.data } : review
       ));
     } catch (err) {
@@ -67,7 +69,11 @@ function RecentReviewsFiltered() {
       day: 'numeric'
     }),
     reviewText: review.content,
-    imageUrl: review.showImage || "https://via.placeholder.com/300x450",
+    imageUrl: review.posterPath
+      ? `https://image.tmdb.org/t/p/w500${review.posterPath}`
+      : "https://via.placeholder.com/300x450",
+    showName: review.showName,
+    showId: review.showId,
     reviewId: review._id,
   });
 
@@ -75,15 +81,14 @@ function RecentReviewsFiltered() {
     <section className="ml-3 mt-6 mb-8">
       <div className="flex justify-between items-center mb-6 px-2">
         <h3 className="text-xl text-white font-bold">Recent Reviews</h3>
-        
+
         <div className="flex items-center space-x-3">
           <button
             onClick={toggleFriendsFilter}
-            className={`group relative overflow-hidden px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${
-              filterByFriends
+            className={`group relative overflow-hidden px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${filterByFriends
                 ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-blue-500/25'
                 : 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-200 hover:from-gray-600 hover:to-gray-700 shadow-gray-900/25'
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-2">
               <span className="text-base">👥</span>
@@ -93,14 +98,13 @@ function RecentReviewsFiltered() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 animate-pulse" />
             )}
           </button>
-          
+
           <button
             onClick={toggleSpoilers}
-            className={`group relative overflow-hidden px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${
-              showSpoilers
+            className={`group relative overflow-hidden px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${showSpoilers
                 ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-amber-500/25'
                 : 'bg-gradient-to-r from-gray-700 to-gray-800 text-gray-200 hover:from-gray-600 hover:to-gray-700 shadow-gray-900/25'
-            }`}
+              }`}
           >
             <div className="flex items-center space-x-2">
               <span className="text-base">⚠️</span>
@@ -112,7 +116,7 @@ function RecentReviewsFiltered() {
           </button>
         </div>
       </div>
-      
+
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="flex flex-col items-center space-y-3">
@@ -135,7 +139,7 @@ function RecentReviewsFiltered() {
         </div>
       ) : (
         <div className="relative">
-          <div 
+          <div
             className="flex overflow-x-auto overflow-y-hidden no-scrollbar px-2 pb-4"
             style={{ scrollBehavior: 'smooth' }}
           >
@@ -145,8 +149,8 @@ function RecentReviewsFiltered() {
                   key={review._id}
                   initial={{ opacity: 0, x: 50 }}
                   animate={{ opacity: 1, x: 0 }}
-                  transition={{ 
-                    duration: 0.5, 
+                  transition={{
+                    duration: 0.5,
                     delay: index * 0.1,
                     ease: "easeOut"
                   }}
@@ -161,7 +165,7 @@ function RecentReviewsFiltered() {
               ))}
             </div>
           </div>
-          
+
           {/* Gradient fade on the right edge */}
           <div className="absolute top-0 right-0 h-full w-8 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none" />
         </div>

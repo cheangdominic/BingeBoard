@@ -1,4 +1,3 @@
-// Refactored ReviewSection.jsx with improved vote handling
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { Star, Filter, Flame, Clock } from "lucide-react";
@@ -15,37 +14,39 @@ export default function ReviewSection({ showId, showTitle, currentUserId }) {
   const [voteInProgress, setVoteInProgress] = useState(false);
 
   const fetchReviews = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  try {
+    setLoading(true);
+    setError(null);
 
-      const { data } = await axios.get(`/api/reviews`, {
-        params: {
-          showId: showId,
-          sort: sortMethod
-        }
-      });
-
-      if (!Array.isArray(data)) {
-        throw new Error("Invalid response format");
+    const response = await axios.get(`/api/reviews`, { 
+      params: {
+        showId: showId,
+        sort: sortMethod
       }
+    });
 
-      setReviews(data.map(review => ({
-        ...review,
-        _id: review._id || review.id, // Ensure we have both formats
-        id: review.id || review._id, // Ensure we have both formats
-        createdAt: review.createdAt || new Date().toISOString(),
-        likes: Array.isArray(review.likes) ? review.likes : [],
-        dislikes: Array.isArray(review.dislikes) ? review.dislikes : [],
-        rating: Math.min(5, Math.max(1, review.rating || 3))
-      })));
-    } catch (err) {
-      console.error("Failed to fetch reviews:", err);
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
+    const reviewsData = response.data.reviews; 
+
+    if (!Array.isArray(reviewsData)) { 
+      throw new Error("Invalid response format: reviews data is not an array");
     }
-  }, [showId, sortMethod]);
+
+    setReviews(reviewsData.map(review => ({
+      ...review,
+      _id: review._id || review.id,
+      id: review.id || review._id,
+      createdAt: review.createdAt || new Date().toISOString(),
+      likes: Array.isArray(review.likes) ? review.likes : [],
+      dislikes: Array.isArray(review.dislikes) ? review.dislikes : [],
+      rating: Math.min(5, Math.max(1, review.rating || 3))
+    })));
+  } catch (err) {
+    console.error("Failed to fetch reviews:", err);
+    setError(err.response?.data?.message || err.message);
+  } finally {
+    setLoading(false);
+  }
+}, [showId, sortMethod]);
 
   useEffect(() => {
     if (showId) {

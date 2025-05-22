@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 
-function RecentReviews({ userId }) {
+function RecentReviews({ userId, username, isOwnProfile }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,7 +15,15 @@ function RecentReviews({ userId }) {
     const fetchReviews = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/user/reviews', {
+        let url;
+        
+        if (isOwnProfile) {
+          url = '/api/user/reviews';
+        } else {
+          url = `/api/users/${username}/reviews`;
+        }
+        
+        const response = await fetch(url, {
           credentials: "include"
         });
 
@@ -34,8 +42,10 @@ function RecentReviews({ userId }) {
       }
     };
 
-    fetchReviews();
-  }, [userId]); 
+    if (username) {
+      fetchReviews();
+    }
+  }, [userId, username, isOwnProfile]); 
 
   if (loading) {
     return <LoadingSpinner small={true} />;
@@ -49,16 +59,23 @@ function RecentReviews({ userId }) {
     return (
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold">Recent Reviews</h3>
-          <button
-            onClick={() => navigate('/activity')}
-            className="text-sm text-blue-400 hover:underline"
-          >
-            View All
-          </button>
+          <h3 className="text-xl font-bold">
+            {isOwnProfile ? 'Recent Reviews' : `${username}'s Recent Reviews`}
+          </h3>
+          {isOwnProfile && (
+            <button
+              onClick={() => navigate('/activity')}
+              className="text-sm text-blue-400 hover:underline"
+            >
+              View All
+            </button>
+          )}
         </div>
         <div className="text-gray-400">
-          You haven't written any reviews yet.
+          {isOwnProfile 
+            ? "You haven't written any reviews yet." 
+            : `${username} hasn't written any reviews yet.`
+          }
         </div>
       </section>
     );
@@ -67,13 +84,17 @@ function RecentReviews({ userId }) {
   return (
     <section>
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold pl-4">Recent Reviews</h3>
-        <button
-          onClick={() => navigate('/activity')}
-          className="text-sm text-blue-400 hover:underline"
-        >
-          View All
-        </button>
+        <h3 className="text-xl font-bold">
+          {isOwnProfile ? 'Recent Reviews' : `${username}'s Recent Reviews`}
+        </h3>
+        {isOwnProfile && (
+          <button
+            onClick={() => navigate('/activity')}
+            className="text-sm text-blue-400 hover:underline"
+          >
+            View All
+          </button>
+        )}
       </div>
 
       <div className="flex overflow-x-auto space-x-4 pb-2 scroll-smooth">
@@ -81,8 +102,8 @@ function RecentReviews({ userId }) {
           <div key={review._id} className="flex-shrink-0 w-[300px]">
             <ReviewCard
               user={{
-                username: review.username || authUser?.username || "Anonymous",
-                profilePhoto: authUser?.profilePic || "/img/profilePhotos/generic_profile_picture.jpg",
+                username: review.username || username || "Anonymous",
+                profilePhoto: (isOwnProfile ? authUser?.profilePic : review.userProfilePic) || "/img/profilePhotos/generic_profile_picture.jpg",
               }}
               date={new Date(review.createdAt).toLocaleDateString('en-US', {
                 year: 'numeric',
