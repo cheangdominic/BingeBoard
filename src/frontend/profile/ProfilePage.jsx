@@ -86,14 +86,14 @@ function ProfilePage() {
       <div className="p-6 mx-auto font-coolvetica text-white space-y-6 bg-[#1e1e1e] min-h-screen pb-20">
         <ProfileCard user={user} profilePic={profilePic} isOwnProfile={true} />
 
-        {/*<motion.div
+        <motion.div
           initial="hidden"
           animate="visible"
           variants={fadeInUp}
           transition={{ delay: 0.2 }}
         >
           <RecentlyWatched userId={user._id} />
-        </motion.div> */}
+        </motion.div>
 
         <motion.div
           initial="hidden"
