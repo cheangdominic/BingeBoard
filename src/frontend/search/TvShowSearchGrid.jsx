@@ -16,25 +16,24 @@ const TVShowSearchGrid = () => {
   const [totalResults, setTotalResults] = useState(0);
   const navigate = useNavigate();
 
-  const fetchRandomShows = async () => {
+  const fetchTrendingShowsThisWeek = async () => {
     try {
-      const randomRes = await axios.get("https://api.themoviedb.org/3/discover/tv", {
+      const trendingRes = await axios.get("https://api.themoviedb.org/3/trending/tv/week", {
         params: {
           api_key: "325f0c86f4e9c504dac84ae3046cbee2",
-          sort_by: "popularity.desc",
-          page: 1,
         },
       });
-      setBroadenedShows(randomRes.data.results);
-      setFilteredBroadenedShows(randomRes.data.results);
+      setBroadenedShows(trendingRes.data.results);
+      setFilteredBroadenedShows(trendingRes.data.results);
     } catch (error) {
-      console.error("Failed to fetch random shows:", error);
+      console.error("Failed to fetch trending shows this week:", error);
     }
   };
 
+
   useEffect(() => {
     if (!query) {
-      fetchRandomShows();
+      fetchTrendingShowsThisWeek();
     }
   }, [query]);
 
