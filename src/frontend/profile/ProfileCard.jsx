@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import LocationInfo from '../../components/LocationInfo.jsx';
 import ProfileImage from '../../components/ProfileImage.jsx';
@@ -38,18 +39,32 @@ export default function ProfileCard({ user, profilePic, isOwnProfile }) {
         />
         <div>
           <h2 className="text-2xl font-bold">@{user.username}</h2>
-          <p className="text-gray-400 text-sm">12 Connections</p>
-          <p className="text-gray-400 text-sm">2 Groups</p>
+          <p className="text-gray-400 text-md">
+            {user.friends?.length || 0} {user.friends?.length === 1 ? 'Connection' : 'Connections'}
+          </p>
+          {/* <p className="text-gray-400 text-sm">2 Groups</p> */}
         </div>
       </div>
 
-      {/* ── RIGHT‑HAND BUTTONS ───────────────────────────────────────────────── */}
+      {/* ── RIGHT BUTTONS ───────────────────────────────────────────────── */}
       {isOwnProfile ? (
-        <div className="flex items-center space-x-4 justify-end flex-1">
-          <button className="bg-blue-500 hover:bg-amber-400 hover:text-black text-white font-bold py-2 px-4 rounded">
-            Settings
-          </button>
-          <LocationInfo />
+        <div className="flex justify-end items-center flex-1 space-x-6">
+          <div className='flex flex-col space-y-4'>
+            <Link to="/requests">
+              <button className="w-full bg-blue-500 hover:bg-blue-300 text-white font-bold py-2 px-3 rounded">
+                Friend Requests
+              </button>
+            </Link>
+
+            <Link to="/settings">
+              <button className="w-full bg-blue-500 hover:bg-amber-400 hover:text-black text-white font-bold py-2 px-3 rounded">
+                Settings
+              </button>
+            </Link>
+
+          </div>
+
+          <LocationInfo/>
         </div>
       ) : isFriend ? (
         <button

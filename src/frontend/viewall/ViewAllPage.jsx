@@ -3,6 +3,8 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import TVShowCard from "../../components/TVShowCard";
 import { motion } from "framer-motion";
 import axios from "axios";
+import BottomNavbar from "../../components/BottomNavbar.jsx";
+
 
 const FILMS_PER_PAGE = 12;
 const CARD_WIDTH = 130;
@@ -40,58 +42,61 @@ export default function ViewAllPage() {
   const displayedShows = shows.slice(0, page * FILMS_PER_PAGE);
 
   return (
-    <motion.div
-      className="px-6 py-8 bg-[#1e1e1e] min-h-screen text-white"
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition"
+    <>
+      <motion.div
+        className="px-6 py-8 bg-[#1e1e1e] min-h-screen text-white"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
       >
-        ← Back
-      </button>
+        <button
+          onClick={() => navigate(-1)}
+          className="mb-6 px-4 py-2 rounded-lg bg-gray-700 text-white hover:bg-gray-600 transition"
+        >
+          ← Back
+        </button>
 
-      <h1 className="text-4xl font-semibold mb-8 capitalize tracking-tight">
-        All {decodedEndpoint.replace(/_/g, " ")} Shows
-      </h1>
+        <h1 className="text-4xl font-semibold mb-8 capitalize tracking-tight">
+          All {decodedEndpoint.replace(/_/g, " ")} Shows
+        </h1>
 
-      <div className="flex flex-wrap gap-4">
-        {displayedShows.map((show, index) => (
-          <motion.div
-            key={show.id}
-            className="flex-shrink-0"
-            style={{ width: `${CARD_WIDTH}px` }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.03 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <Link to={`/show/${show.id}`}>
-              <TVShowCard
-                imageUrl={
-                  show.poster_path
-                    ? `https://image.tmdb.org/t/p/w300${show.poster_path}`
-                    : undefined
-                }
-                title={show.name || show.title}
-                cardWidth={CARD_WIDTH}
-              />
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-
-      {displayedShows.length < shows.length && (
-        <div className="mt-10 flex justify-center">
-          <button
-            onClick={() => setPage(page + 1)}
-            className="px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition hover:scale-105"
-          >
-            Load More
-          </button>
+        <div className="flex flex-wrap gap-4">
+          {displayedShows.map((show, index) => (
+            <motion.div
+              key={show.id}
+              className="flex-shrink-0"
+              style={{ width: `${CARD_WIDTH}px` }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.03 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <Link to={`/show/${show.id}`}>
+                <TVShowCard
+                  imageUrl={
+                    show.poster_path
+                      ? `https://image.tmdb.org/t/p/w300${show.poster_path}`
+                      : undefined
+                  }
+                  title={show.name || show.title}
+                  cardWidth={CARD_WIDTH}
+                />
+              </Link>
+            </motion.div>
+          ))}
         </div>
-      )}
-    </motion.div>
+
+        {displayedShows.length < shows.length && (
+          <div className="mt-10 flex justify-center">
+            <button
+              onClick={() => setPage(page + 1)}
+              className="px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium shadow-md hover:shadow-lg transition hover:scale-105"
+            >
+              Load More
+            </button>
+          </div>
+        )}
+      </motion.div>
+      <BottomNavbar />
+    </>
   );
 }

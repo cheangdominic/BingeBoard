@@ -206,6 +206,9 @@ app.post('/api/signup', async (req, res) => {
       password: hashedPassword,
       watchlist: [],
       profilePic: '',
+      friends: [],
+      friendRequestsSent: [],
+      friendRequestsRecieved: []
     });
 
     if (insertResult.insertedId) {

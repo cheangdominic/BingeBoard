@@ -37,4 +37,47 @@ router.post('/request/:targetId', async (req, res) => {
   res.json({ success: true });
 });
 
+router.post('/accept/:requesterId', async (req, res) => {
+  const userEmail = req.session.email;
+  if (!userEmail) return res.status(401).json({ success: false, message: 'Not logged in' });
+
+  const receiver = await userCollection.findOne({ email: userEmail });
+  const requesterId = req.params.requesterId;
+
+  if (!receiver || !receiver.friendRequestsRecieved.includes(requesterId)) {
+    return res.status(400).json({ success: false, message: 'No such request' });
+  }
+
+  // Remove users from friendRequestsSent/Recieved
+  await userCollection.updateOne(
+    { _id: new ObjectId(requesterId) },
+    { $pull: { friendRequestsSent: receiver._id.toString() }, $push: { friends: receiver._id.toString() } }
+  );
+
+  await userCollection.updateOne(
+    { _id: receiver._id },
+    { $pull: { friendRequestsRecieved: requesterId }, $push: { friends: requesterId } }
+  );
+
+  res.json({ success: true, message: 'Friend request accepted' });
+});
+
+router.get('/requests', async (req, res) => {
+  const userEmail = req.session.email;
+  if (!userEmail) return res.status(401).json({ success: false, message: 'Not logged in' });
+
+  const user = await userCollection.findOne({ email: userEmail });
+  if (!user || !Array.isArray(user.friendRequestsRecieved)) {
+    return res.json([]);
+  }
+
+  const requestIds = user.friendRequestsRecieved.map(id => new ObjectId(id));
+
+  const senders = await userCollection.find({
+    _id: { $in: requestIds }
+  }).project({ _id: 1, username: 1, profilePic: 1 }).toArray();
+
+  res.json(senders);
+});
+
 export default router;
