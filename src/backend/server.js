@@ -136,8 +136,7 @@ async function logActivity(userId, action, targetId = null, details = {}) {
          
             details.showName = response.data.name || 
                               response.data.original_name || 
-                              response.data.original_title || 
-                              "Unknown Show";
+                              response.data.original_title;
             
             details.showImage = response.data.poster_path
               ? `https://image.tmdb.org/t/p/w500${response.data.poster_path}`
@@ -150,7 +149,6 @@ async function logActivity(userId, action, targetId = null, details = {}) {
             action,
             response: apiError.response?.data
           });
-          details.showName = `Show ID: ${targetId}`; // More informative than "Unknown Show"
           details.showImage = "https://via.placeholder.com/300x450";
         }
       } else {
