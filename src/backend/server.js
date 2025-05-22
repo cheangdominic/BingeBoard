@@ -11,6 +11,7 @@ import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { MongoClient } from 'mongodb';
+import { ObjectId } from 'mongodb';
 import { Review } from './utils.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
@@ -718,22 +719,40 @@ app.get('/api/user/reviews', authenticate, async (req, res) => {
 });
 
 app.get('/api/users/:username', async (req, res) => {
-  const { username } = req.params;
-
   try {
+    const { username } = req.params;
+    
     const user = await userCollection.findOne(
-      { username },
-      { projection: { username: 1, email: 1, profilePic: 1 } }
+      { username: username },
+      { 
+        projection: { 
+          password: 0, 
+          email: 0,    
+        } 
+      }
     );
 
     if (!user) {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    return res.json({ success: true, user });
-  } catch (err) {
-    console.error("Error fetching user by username:", err);
-    return res.status(500).json({ success: false, message: 'Failed to fetch user' });
+    const userActivities = await Activity.find({ userId: new ObjectId(user._id) })
+                                        .sort({ createdAt: -1 })
+                                        .limit(5) 
+                                        .lean();
+
+    res.json({
+      success: true,
+      username: user.username,
+      profilePic: user.profilePic || null,
+      watchlist: user.watchlist || [], 
+      activities: userActivities, 
+      _id: user._id.toString() 
+    });
+
+  } catch (error) {
+    console.error("Error fetching other user's profile:", error);
+    res.status(500).json({ success: false, message: 'Failed to retrieve user profile' });
   }
 });
 
@@ -833,6 +852,79 @@ app.get('/api/users/:username/activities', async (req, res) => {
     res.json(activities);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/users/:username/reviews', async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    const user = await userCollection.findOne({ username });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const userId = user._id;
+    console.log(`Fetching reviews for user: ${username} (${userId})`);
+    
+    const userReviews = await Review.find({ userId: userId })
+      .sort({ createdAt: -1 })
+      .lean();
+    
+    console.log(`Found ${userReviews.length} reviews for user ${username}`);
+    
+    const reviewsWithShowDetails = await Promise.all(
+      userReviews.map(async (review) => {
+        let showIdToUse = null;
+
+        if (review.showId) showIdToUse = review.showId;
+        else if (review.tmdbId) showIdToUse = review.tmdbId;
+        else if (review.show_id) showIdToUse = review.show_id;
+        
+        console.log(`Processing review ${review._id}, using show ID: ${showIdToUse}`);
+
+        let showData = { name: 'Unknown Show', poster_path: null };
+        if (showIdToUse) {
+          showData = await fetchShowDetailsFromTMDB(showIdToUse);
+        }
+
+        return {
+          ...review,
+          id: review._id.toString(),
+          showId: showIdToUse,
+          showName: showData.name,
+          posterPath: showData.poster_path,
+          likes: Array.isArray(review.likes) ? review.likes : [],
+          dislikes: Array.isArray(review.dislikes) ? review.dislikes : [],
+          username: user.username 
+        };
+      })
+    );
+    
+    res.json(reviewsWithShowDetails);
+  } catch (error) {
+    console.error('Error fetching user reviews:', error);
+    res.status(500).json({ error: 'Failed to fetch reviews' });
+  }
+});
+
+app.get('/api/users/:username/watchlist', async (req, res) => {
+  try {
+    const { username } = req.params;
+    
+    const user = await userCollection.findOne(
+      { username },
+      { projection: { watchlist: 1 } }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    res.json({ watchlist: user.watchlist || [] });
+  } catch (error) {
+    console.error('Error fetching user watchlist:', error);
+    res.status(500).json({ error: 'Failed to fetch watchlist' });
   }
 });
 

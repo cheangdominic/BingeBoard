@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useParams } from 'react-router-dom';
 import ProfileCard from "./ProfileCard.jsx";
 import RecentlyWatched from "./RecentlyWatched.jsx";
 import RecentReviews from "./RecentReviews.jsx";
@@ -20,6 +21,7 @@ const fadeInUp = {
 };
 
 function ProfilePage() {
+  const { username } = useParams();
   const [user, setUser] = useState(null);
   const { user: authUser, loading: authLoading } = useAuth();
   const navigate = useNavigate();
