@@ -22,13 +22,13 @@ router.post('/request/:targetId', async (req, res) => {
     return res.status(400).json({ success: false, message: 'Already sent or already friends' });
   }
 
-  // 1) add to sender.friendRequestsSent
+  // add to sender.friendRequestsSent
   await userCollection.updateOne(
     { _id: sender._id },
     { $push: { friendRequestsSent: targetId } }
   );
 
-  // 2) add to target.friendRequestsRecieved
+  // add to target.friendRequestsRecieved
   await userCollection.updateOne(
     { _id: new ObjectId(targetId) },
     { $push: { friendRequestsRecieved: sender._id.toString() } }

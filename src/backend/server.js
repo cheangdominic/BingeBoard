@@ -10,7 +10,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { MongoClient } from 'mongodb';
+import { connectToDatabase, userCollection } from './databaseConnection.js';
 import { Review } from './utils.js';
 import { v2 as cloudinary } from 'cloudinary';
 import multer from 'multer';
@@ -67,25 +67,7 @@ const node_session_secret = process.env.NODE_SESSION_SECRET;
  const apiKey = process.env.VITE_TMDB_API_KEY;
  const baseUrl = process.env.VITE_TMDB_BASE_URL;
 
-const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
-const client = new MongoClient(atlasURI);
-
 const mongooseURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`;
-
-let database;
-let userCollection;
-
-async function connectToDatabase() {
-  try {
-    await client.connect();
-    database = client.db(mongodb_database);
-    userCollection = database.collection('users');
-    console.log('Connected to MongoDB');
-  } catch (error) {
-    console.error('MongoDB connection error:', error);
-    process.exit(1);
-  }
-}
 
 const mongoStore = MongoStore.create({
   mongoUrl: `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/sessions`,
