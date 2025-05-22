@@ -58,8 +58,8 @@ function PopularReviews() {
   return (
     <section>
       <div className="flex justify-between items-center mb-4 pl-4 mr-2">
-        <h3 className="text-xl font-bold text-white">Popular Reviews</h3>
-        <a href="/profile/recent-reviews" className="text-sm text-blue-400 hover:underline">
+        <h3 className="text-xl font-bold text-white pl-1">Popular Reviews</h3>
+        <a href="/profile/recent-reviews" className="text-sm text-blue-400 font-semibold hover:underline">
           View All
         </a>
       </div>
