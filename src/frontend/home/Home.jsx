@@ -49,10 +49,10 @@ function Home() {
         <TrendingCarousel tmdbEndpoint="tv/top_rated" />
         <ShowCarousel title="Trending Today" tmdbEndpoint="trending/tv/day" />
         <ShowCarousel title="Airing Today TV Shows" tmdbEndpoint="tv/airing_today" />
+        <RecentReviewsFiltered />
         <ShowCarousel title="Popular TV Shows" tmdbEndpoint="tv/popular" />
         <ShowCarousel title="Top Rated TV Shows" tmdbEndpoint="tv/top_rated" />
         <ShowCarousel title="On Air TV Shows" tmdbEndpoint="tv/on_the_air" />
-        <RecentReviewsFiltered />
       </motion.div>
       <BottomNavbar />
     </>

@@ -858,7 +858,6 @@ app.post('/api/logout', authenticate, async (req, res) => {
     });
 });
 
-
 app.post('/api/watchlist/add', authenticate, async (req, res) => {
   const { showId } = req.body;
   if (!showId) {
@@ -900,18 +899,23 @@ app.post('/api/watchlist/remove', authenticate, async (req, res) => {
       return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    await userCollection.updateOne(
+    const result = await userCollection.updateOne(
       { email: req.user.email },
       { $pull: { watchlist: showId } }
     );
 
+    if (result.modifiedCount === 0) {
+      return res.status(200).json({ success: true, message: 'Show was not in watchlist' });
+    }
+
     await logActivity(user._id, 'watchlist_remove', showId);
     res.json({ success: true, message: 'Removed from watchlist' });
   } catch (err) {
-    console.error(err);
+    console.error("Error removing from watchlist:", err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
+
 
 app.post('/api/chat', async (req, res) => {
   console.log('Received chat request with body:', req.body);

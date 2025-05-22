@@ -8,16 +8,19 @@ function WatchlistCarousel({
   user,
   title = "Your Watchlist",
   cardActualWidth = 130,
+  onWatchlistChange,
   userScrollBehavior = "smooth",
 }) {
   const [shows, setShows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hoveredShowId, setHoveredShowId] = useState(null);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
   const itemWidth = cardActualWidth;
   const MIN_SHOWS_FOR_INFINITE_SCROLL = 6;
 
+  // Fetch shows when user or watchlist changes
   useEffect(() => {
     if (!API_KEY || !user?.watchlist || user.watchlist.length === 0) {
       setIsLoading(false);
@@ -29,15 +32,14 @@ function WatchlistCarousel({
       setIsLoading(true);
       try {
         const showPromises = user.watchlist.map((id) =>
-          axios
-            .get(
-              `https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}&language=en-US`
-            )
-            .then((res) => res.data)
-            .catch((err) => {
-              console.error(`Failed to fetch show ${id}:`, err);
-              return null;
-            })
+          axios.get(
+            `https://api.themoviedb.org/3/tv/${id}?api_key=${API_KEY}&language=en-US`
+          )
+          .then((res) => res.data)
+          .catch((err) => {
+            console.error(`Failed to fetch show ${id}:`, err);
+            return null;
+          })
         );
 
         const showResults = await Promise.all(showPromises);
@@ -54,6 +56,7 @@ function WatchlistCarousel({
     fetchShowDetails();
   }, [user?.watchlist, API_KEY]);
 
+  // Handle scroll behavior
   const handleScroll = useCallback(() => {
     if (shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL) return;
     
@@ -97,13 +100,16 @@ function WatchlistCarousel({
     if (shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL) {
       content.style.width = `${contentWidth}px`;
       container.style.scrollBehavior = userScrollBehavior;
+      container.removeEventListener("scroll", handleScroll);
     } else {
       content.style.width = `${contentWidth * 3}px`;
       const initialScrollPosition = contentWidth;
 
       const originalBehavior = container.style.scrollBehavior;
       container.style.scrollBehavior = "auto";
-      container.scrollLeft = initialScrollPosition;
+      if (Math.abs(container.scrollLeft - initialScrollPosition) > 1) {
+        container.scrollLeft = initialScrollPosition;
+      }
       container.style.scrollBehavior = userScrollBehavior;
 
       container.addEventListener("scroll", handleScroll, { passive: true });
@@ -113,6 +119,36 @@ function WatchlistCarousel({
       container.removeEventListener("scroll", handleScroll);
     };
   }, [shows, itemWidth, handleScroll, userScrollBehavior]);
+
+  const handleRemoveFromWatchlist = async (showIdToRemove) => {
+    if (!user || !user.watchlist) {
+      toast.warning("You need to be logged in to modify your watchlist");
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        "/api/watchlist/remove",
+        { showId: String(showIdToRemove) }, // Ensure we send as string
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        setShows(prevShows => prevShows.filter(show => show.id !== showIdToRemove));
+        
+        if (onWatchlistChange) {
+          const updatedWatchlist = user.watchlist.filter(id => id != showIdToRemove); // != instead of !== to handle string/number
+          onWatchlistChange(updatedWatchlist);
+        }
+        toast.success("Show removed from your watchlist");
+      } else {
+        toast.error(response.data.message || "Failed to remove show");
+      }
+    } catch (error) {
+      console.error("Error removing show:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Error removing show");
+    }
+  };
 
   if (!API_KEY) {
     return (
@@ -124,7 +160,6 @@ function WatchlistCarousel({
   }
 
   if (isLoading) {
-    // Skeleton Card Component for loading state
     const SkeletonCard = () => (
       <motion.div
         className="flex-shrink-0 mx-2 py-2"
@@ -164,13 +199,12 @@ function WatchlistCarousel({
             {title}
           </h3>
         </div>
-
         <div
           ref={containerRef}
           className="relative w-full overflow-x-auto no-scrollbar px-4"
         >
           <div ref={contentRef} className="flex">
-            {Array.from({ length: 10 }).map((_, index) => (
+            {Array.from({ length: Math.min(user?.watchlist?.length || 5, 10) }).map((_, index) => (
               <SkeletonCard key={`skeleton-${index}`} />
             ))}
           </div>
@@ -179,7 +213,7 @@ function WatchlistCarousel({
     );
   }
 
-  if (!user?.watchlist || user.watchlist.length === 0) {
+  if (!isLoading && (!user?.watchlist || user.watchlist.length === 0)) {
     return (
       <section className="relative my-8">
         <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
@@ -187,8 +221,8 @@ function WatchlistCarousel({
       </section>
     );
   }
-
-  if (shows.length === 0) {
+  
+  if (!isLoading && shows.length === 0 && user?.watchlist && user.watchlist.length > 0) {
     return (
       <section className="relative my-8">
         <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
@@ -196,6 +230,7 @@ function WatchlistCarousel({
       </section>
     );
   }
+
 
   const displayItems = shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL 
     ? shows 
@@ -207,11 +242,13 @@ function WatchlistCarousel({
         <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">
           {title}
         </h3>
-        <Link to="/view-all/watchlist" state={{ watchlist: user.watchlist }}>
-          <button className="text-sm text-white font-semibold hover:underline">
-            View All
-          </button>
-        </Link>
+        {user?.watchlist && user.watchlist.length > 0 && (
+          <Link to="/view-all/watchlist" state={{ watchlist: user.watchlist }}>
+            <button className="text-sm text-white font-semibold hover:underline">
+              View All
+            </button>
+          </Link>
+        )}
       </div>
 
       <div
@@ -222,12 +259,11 @@ function WatchlistCarousel({
           <AnimatePresence>
             {displayItems.map((show, index) => (
               <motion.div
-                key={shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL 
-                  ? `${show.id}-${index}` 
-                  : `${show.id}-${index % shows.length}`
-                }
-                className="flex-shrink-0 mx-2 py-2"
+                key={`${show.id}-${index}`}
+                className="flex-shrink-0 mx-2 py-2 relative"
                 style={{ width: `${itemWidth}px` }}
+                onMouseEnter={() => setHoveredShowId(show.id)}
+                onMouseLeave={() => setHoveredShowId(null)}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{
                   opacity: 1,
@@ -244,10 +280,10 @@ function WatchlistCarousel({
                   scale: 1.05,
                   transition: { duration: 0.2 },
                 }}
-                exit={{ opacity: 0 }}
+                exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
               >
                 <Link to={`/show/${show.id}`}>
-                  <div className="transition-transform duration-300 ease-in-out hover:shadow-lg">
+                  <div className="transition-transform duration-300 ease-in-out">
                     <TVShowCard
                       imageUrl={
                         show.poster_path
@@ -259,6 +295,20 @@ function WatchlistCarousel({
                     />
                   </div>
                 </Link>
+                {hoveredShowId === show.id && (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleRemoveFromWatchlist(show.id);
+                    }}
+                    className="absolute right-1 bottom-[30%] transform translate-y-1/2 bg-black bg-opacity-75 text-white text-xs px-2 py-0.5 rounded hover:bg-red-600 hover:bg-opacity-100 z-20 transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500"
+                    aria-label={`Remove ${show.name || show.title} from watchlist`}
+                    title="Remove from watchlist"
+                  >
+                    Remove?
+                  </button>
+                )}
               </motion.div>
             ))}
           </AnimatePresence>
