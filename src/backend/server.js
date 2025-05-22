@@ -17,7 +17,7 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import axios from 'axios';
 import { Activity } from './utils.js';
-
+import friendsRouter from './friends.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,6 +114,8 @@ app.use(session({
     maxAge: expireTime
   }
 }));
+
+app.use('/api/friends', friendsRouter);
 
 async function logActivity(userId, action, targetId = null, details = {}) {
   try {

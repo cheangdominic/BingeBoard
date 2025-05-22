@@ -1,25 +1,30 @@
-import dotenv from 'dotenv';
-dotenv.config();
+// src/backend/databaseConnection.js
 
+import dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
 
-const mongodb_host = process.env.MONGODB_HOST;
-const mongodb_user = process.env.MONGODB_USER;
-const mongodb_password = process.env.MONGODB_PASSWORD;
+dotenv.config();
 
-const atlasURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true`;
+const {
+  MONGODB_HOST:     mongodb_host,
+  MONGODB_USER:     mongodb_user,
+  MONGODB_PASSWORD: mongodb_password,
+  MONGODB_DATABASE: mongodb_database,
+} = process.env;
 
-const database = new MongoClient(atlasURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-});
+const uri = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/?retryWrites=true&w=majority`;
 
-database.connect()
-  .then(() => {
-    console.log('Connected to the database');
-  })
-  .catch((error) => {
-    console.log('Not connected to the database', error);
+export let database;
+export let userCollection;
+
+export async function connectToDatabase() {
+  const client = new MongoClient(uri, {
+    useNewUrlParser:    true,
+    useUnifiedTopology: true,
   });
 
-export { database };
+  await client.connect();
+  database       = client.db(mongodb_database);
+  userCollection = database.collection('users');
+  console.log('✅ Connected to MongoDB');
+}
