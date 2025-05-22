@@ -3,9 +3,10 @@ import axios from "axios";
 import { motion, AnimatePresence } from "framer-motion";
 import SearchBar from "../search/SearchBar.jsx";
 import TVShowFilters from "../search/TVShowFilters";
-import { Apple, X, CheckCircle } from "lucide-react";
+import { X, CheckCircle } from "lucide-react";
 import { FaEye, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import { useAuth } from '../../context/AuthContext';
+import AppleRatingDisplay from '../../components/AppleRatingDisplay';
 
 const IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500";
 const BACKDROP_BASE_URL = "https://image.tmdb.org/t/p/w1280";
@@ -235,60 +236,6 @@ const EpisodeList = ({ seasons, showId, isAuthenticated }) => {
   );
 };
 
-
-const PartialApple = ({ fillPercent }) => (
-  <div className="relative w-8 h-8 inline-block group">
-    <Apple className="absolute top-0 left-0 w-8 h-8 text-gray-400" />
-    <div
-      className="absolute top-0 left-0 h-8 overflow-hidden"
-      style={{ width: `${fillPercent}%` }}
-    >
-      <motion.div whileHover={{ scale: 1.2 }} className="w-8 h-8">
-        <Apple className="w-8 h-8 text-yellow-500 fill-yellow-500" />
-      </motion.div>
-    </div>
-  </div>
-);
-
-function AppleRating({ rating = 0, onClickApple = null }) {
-  const fullApples = Math.floor(rating);
-  const partialFillPercent = (rating - fullApples) * 100;
-  const hasPartialApple = partialFillPercent > 0;
-  const emptyApples = 5 - fullApples - (hasPartialApple ? 1 : 0);
-
-  return (
-    <div className="flex gap-1 mb-2">
-      {Array.from({ length: fullApples }).map((_, idx) => (
-        <motion.div key={`full-${idx}`} whileHover={{ scale: 1.2 }}>
-          <Apple
-            className="w-8 h-8 text-yellow-500 fill-yellow-500 cursor-pointer"
-            onClick={() => onClickApple && onClickApple(idx + 1)}
-          />
-        </motion.div>
-      ))}
-      {hasPartialApple && (
-        <motion.div
-          onClick={() => onClickApple && onClickApple(fullApples + 1)}
-          whileHover={{ scale: 1.2 }}
-        >
-          <PartialApple fillPercent={partialFillPercent} />
-        </motion.div>
-      )}
-      {Array.from({ length: emptyApples }).map((_, idx) => (
-        <motion.div key={`empty-${idx}`} whileHover={{ scale: 1.2 }}>
-          <Apple
-            className="w-8 h-8 text-gray-400 cursor-pointer"
-            onClick={() =>
-              onClickApple &&
-              onClickApple(fullApples + (hasPartialApple ? 1 : 0) + idx + 1)
-            }
-          />
-        </motion.div>
-      ))}
-    </div>
-  );
-}
-
 const ShowGrid = () => {
   const [query, setQuery] = useState("");
   const [exactMatches, setExactMatches] = useState([]);
@@ -321,7 +268,7 @@ const ShowGrid = () => {
     }
   }, [ratingWhole]);
 
-  const handleAppleClick = (appleNumber) => {
+  const handleInteractiveAppleClick = (appleNumber) => {
     setRatingWhole(appleNumber);
     if (appleNumber >= 5) {
       setRatingDecimal(0);
@@ -524,7 +471,7 @@ const ShowGrid = () => {
         setContainsSpoilers(false);
         
         setShowSuccessToast(true); 
-        setSelectedShow(null); // Start modal closing animation
+        setSelectedShow(null); 
 
       } else {
         throw new Error("API did not return a successful response or data.");
@@ -543,11 +490,11 @@ const ShowGrid = () => {
   useEffect(() => {
     let toastTimerId;
     if (showSuccessToast) {
-      setModalCanClose(false); // Disable closing while toast is visible
+      setModalCanClose(false); 
       toastTimerId = setTimeout(() => {
         setShowSuccessToast(false);
-        setModalCanClose(true); // Re-enable closing after toast fades
-      }, 2500); // Toast visible for 2.5 seconds
+        setModalCanClose(true); 
+      }, 2500); 
     }
     return () => clearTimeout(toastTimerId);
   }, [showSuccessToast]);
@@ -557,14 +504,14 @@ const ShowGrid = () => {
   
   const modalVariants = {
     hidden: { opacity: 0, y: -50, scale: 0.95 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.25, ease: "easeOut" } }, // Faster enter
-    exit: { opacity: 0, y: 50, scale: 0.9, transition: { duration: 0.25, ease: "easeIn" } } // Faster exit
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.25, ease: "easeOut" } }, 
+    exit: { opacity: 0, y: 50, scale: 0.9, transition: { duration: 0.25, ease: "easeIn" } } 
   };
 
   const overlayVariants = { 
     hidden: { opacity: 0 }, 
     visible: { opacity: 1 }, 
-    exit: { opacity: 0, transition: { duration: 0.25 } } // Faster overlay exit
+    exit: { opacity: 0, transition: { duration: 0.25 } } 
   };
 
   const toastVariants = {
@@ -602,7 +549,13 @@ const ShowGrid = () => {
                   {exactMatches.map((show) => (
                     <motion.div key={show.id} className="bg-zinc-900 rounded-2xl overflow-hidden shadow-lg cursor-pointer" variants={fadeInUp} initial="hidden" animate="visible" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3, ease: "easeOut" }} onClick={() => handleCardClick(show)}>
                       <img src={show.poster_path ? IMAGE_BASE_URL + show.poster_path : "https://via.placeholder.com/500x750?text=No+Image"} alt={show.name} className="w-full h-72 object-cover"/>
-                      <div className="p-4"><h3 className="text-white text-lg font-bold mb-2 truncate">{show.name}</h3><p className="text-gray-400 text-sm font-semibold flex items-center gap-1"><Apple className="w-4 h-4 fill-yellow-500 text-yellow-500" />{show.vote_average ? Math.round((show.vote_average / 2) * 100) / 100 : "N/A"}</p></div>
+                      <div className="p-4">
+                        <h3 className="text-white text-lg font-bold mb-2 truncate">{show.name}</h3>
+                        <p className="text-gray-400 text-sm font-semibold flex items-center gap-1">
+                          <AppleRatingDisplay rating={show.vote_average / 2} appleSize="w-4 h-4" />
+                          {show.vote_average ? `${(show.vote_average / 2).toFixed(2)} (${show.vote_count})` : "N/A"}
+                        </p>
+                      </div>
                     </motion.div>
                   ))}
                 </div>
@@ -619,7 +572,13 @@ const ShowGrid = () => {
                     {filteredBroadenedShows.map((show) => (
                       <motion.div key={show.id} className="bg-zinc-900 rounded-2xl overflow-hidden shadow-lg cursor-pointer" variants={fadeInUp} initial="hidden" animate="visible" whileHover={{ scale: 1.05 }} transition={{ duration: 0.3, ease: "easeOut" }} onClick={() => handleCardClick(show)}>
                         <img src={show.poster_path ? IMAGE_BASE_URL + show.poster_path : "https://via.placeholder.com/500x750?text=No+Image"} alt={show.name} className="w-full h-72 object-cover"/>
-                        <div className="p-4"><h3 className="text-white text-lg font-bold mb-2 truncate">{show.name}</h3><p className="text-gray-400 text-sm font-semibold flex items-center gap-1"><Apple className="w-4 h-4 fill-yellow-500 text-yellow-500" />{show.vote_average ? Math.round((show.vote_average / 2) * 100) / 100 : "N/A"}</p></div>
+                        <div className="p-4">
+                            <h3 className="text-white text-lg font-bold mb-2 truncate">{show.name}</h3>
+                            <p className="text-gray-400 text-sm font-semibold flex items-center gap-1">
+                                <AppleRatingDisplay rating={show.vote_average / 2} appleSize="w-4 h-4" />
+                                {show.vote_average ? `${(show.vote_average / 2).toFixed(2)} (${show.vote_count})` : "N/A"}
+                            </p>
+                        </div>
                       </motion.div>
                     ))}
                   </div>
@@ -654,7 +613,7 @@ const ShowGrid = () => {
                 onClick={closeModal} 
                 className="absolute top-6 right-6 text-gray-400 hover:text-white z-20" 
                 aria-label="Close review modal"
-                disabled={!modalCanClose} // Disable if modalCanClose is false
+                disabled={!modalCanClose} 
               >
                 <X size={28} />
               </button>
@@ -690,8 +649,13 @@ const ShowGrid = () => {
 
                     <div className="mb-6">
                         <label className="block text-gray-300 mb-2 font-semibold text-lg">Rating</label>
-                        <AppleRating rating={ratingWhole + (Number(ratingDecimal) || 0) / 100} onClickApple={handleAppleClick}/>
-                        <div className="flex items-center gap-1.5 mt-1">
+                        <AppleRatingDisplay 
+                            rating={ratingWhole + (Number(ratingDecimal) || 0) / 100} 
+                            appleSize="w-8 h-8" 
+                            onAppleClick={handleInteractiveAppleClick}
+                            interactive={true}
+                        />
+                        <div className="flex items-center gap-1.5 mt-3">
                         <input type="number" min={0} max={5} value={ratingWhole} aria-label="Rating whole number" onFocus={(e) => {if (e.target.value === "0") setRatingWhole("");}} onChange={(e) => {const v=e.target.value;if(v==="")setRatingWhole("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=5)setRatingWhole(n);}}} onBlur={(e) => {if(e.target.value===""||e.target.value===null)setRatingWhole(0);}} className="bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none"/>
                         <span className="text-gray-200 text-lg font-bold select-none">.</span>
                         <input type="number" min={0} max={99} aria-label="Rating decimal part" value={ratingDecimal} onFocus={(e)=>{if(e.target.value==="0"||e.target.value==="00")setRatingDecimal("");}} onChange={(e)=>{const v=e.target.value;if(v==="")setRatingDecimal("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=99&&v.length<=2)setRatingDecimal(v);}}} onBlur={(e)=>{let s=e.target.value;if(s==="")setRatingDecimal(0);else{let n=Number(s);if(s.length===1&&n<10)setRatingDecimal("0"+n);else setRatingDecimal(s);}}} disabled={ratingWhole>=5} className={`bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none ${ratingWhole>=5?"opacity-50 cursor-not-allowed":""}`}/>
@@ -759,6 +723,7 @@ const ShowGrid = () => {
       <AnimatePresence>
         {showSuccessToast && (
             <motion.div
+                key="success-toast"
                 variants={toastVariants}
                 initial="hidden"
                 animate="visible"
