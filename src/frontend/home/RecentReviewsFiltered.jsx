@@ -74,7 +74,7 @@ function RecentReviewsFiltered() {
   return (
     <section className="ml-3 mt-6 mb-8">
       <div className="flex justify-between items-center mb-6 px-2">
-        <h3 className="text-2xl text-white font-bold">Recent Reviews</h3>
+        <h3 className="text-xl text-white font-bold">Recent Reviews</h3>
         
         <div className="flex items-center space-x-3">
           <button
