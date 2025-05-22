@@ -482,7 +482,7 @@ app.post('/api/reviews', async (req, res) => {
   }
 });
 
-app.put('/api/reviews/:id', authenticate, async (req, res) => {
+app.put('/api/reviews/:id', async (req, res) => {
   try {
     const reviewId = req.params.id;
     const { action } = req.body;
@@ -566,7 +566,7 @@ app.put('/api/reviews/:id', authenticate, async (req, res) => {
 
 
 
-app.get('/api/user', authenticate, async (req, res) => {
+app.get('/api/user', async (req, res) => {
   try {
     const user = await userCollection.findOne(
       { email: req.session.email },
@@ -583,7 +583,7 @@ app.get('/api/user', authenticate, async (req, res) => {
   }
 });
 
-app.get('/api/user/reviews', authenticate, async (req, res) => {
+app.get('/api/user/reviews', async (req, res) => {
   try {
     const user = await userCollection.findOne({ email: req.session.email });
     if (!user) {
