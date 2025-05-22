@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import TVShowCard from "../../components/TVShowCard";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext.jsx";
 
@@ -8,6 +8,7 @@ function RecentlyWatched({
   title = "Recently Watched",
   cardActualWidth = 130,
   userScrollBehavior = "smooth",
+  viewAllLink = "/view-all/recentlywatched"
 }) {
   const [shows, setShows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,7 @@ function RecentlyWatched({
       }
       setIsLoading(true);
       try {
-        const response = await fetch('/api/users/recently-watched', { 
+        const response = await fetch('/api/users/recently-watched', {
           credentials: "include"
         });
 
@@ -60,11 +61,10 @@ function RecentlyWatched({
 
     if (contentWidth === 0) return;
 
-
-    if (scrollPos >= contentWidth * 2 - containerWidth / 2 - itemWidth) {
+    if (scrollPos >= (contentWidth * 2) - containerWidth + (itemWidth / 2) ) {
       newScrollLeft = scrollPos - contentWidth;
       didTeleport = true;
-    } else if (scrollPos <= contentWidth - containerWidth / 2 + itemWidth) {
+    } else if (scrollPos <= contentWidth - (itemWidth / 2)) {
       newScrollLeft = scrollPos + contentWidth;
       didTeleport = true;
     }
@@ -86,21 +86,20 @@ function RecentlyWatched({
       return;
     }
 
-    const actualItemWidthWithMargin = itemWidth + 16; 
-    const contentWidth = shows.length * actualItemWidthWithMargin;
-    
-    if (contentWidth > 0) {
-        content.style.width = `${contentWidth * 3}px`;
-        const initialScrollPosition = contentWidth - (container.offsetWidth / 2) + (itemWidth / 2) ;
-        
+    const actualItemWidthWithMargin = itemWidth + 16;
+    const singleSetContentWidth = shows.length * actualItemWidthWithMargin;
+
+    if (singleSetContentWidth > 0) {
+        content.style.width = `${singleSetContentWidth * 3}px`;
+        const initialScrollPosition = singleSetContentWidth + (singleSetContentWidth / 2) - (container.offsetWidth / 2);
+
         const originalBehavior = container.style.scrollBehavior;
         container.style.scrollBehavior = "auto";
         container.scrollLeft = initialScrollPosition;
-        container.style.scrollBehavior = userScrollBehavior;
+        container.style.scrollBehavior = originalBehavior || userScrollBehavior;
     } else {
         content.style.width = "0px";
     }
-
 
     container.addEventListener("scroll", handleScroll, { passive: true });
 
@@ -110,7 +109,6 @@ function RecentlyWatched({
       }
     };
   }, [shows, itemWidth, handleScroll, userScrollBehavior]);
-
 
   if (isLoading) {
     const SkeletonCard = () => (
@@ -126,22 +124,22 @@ function RecentlyWatched({
           animate={{
             background: [
               "linear-gradient(90deg, #2d3748 0%, #4a5568 50%, #2d3748 100%)",
-              "linear-gradient(90deg, #2d3748 0%, #4a5568 100%, #2d3748 100%)",
+              "linear-gradient(90deg, #4a5568 0%, #2d3748 50%, #4a5568 100%)",
               "linear-gradient(90deg, #2d3748 0%, #4a5568 50%, #2d3748 100%)",
             ],
           }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
         />
       </motion.div>
     );
     return (
-      <section className="relative my-8 pl-2 mr-2">
-        <div className="flex justify-between items-center mb-4 px-4 md:px-0">
-          <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">{title}</h3>
+      <section className="relative my-8">
+        <div className="flex justify-between items-center mb-4 px-4">
+          <h3 className="text-xl text-white font-bold">{title}</h3>
         </div>
-        <div ref={containerRef} className="relative w-full overflow-x-auto no-scrollbar px-4">
+        <div ref={containerRef} className="relative w-full overflow-x-auto no-scrollbar px-2">
           <div ref={contentRef} className="flex">
-            {Array.from({ length: 5 }).map((_, index) => (
+            {Array.from({ length: Math.min(shows.length || 5, 7) }).map((_, index) => (
               <SkeletonCard key={`skeleton-recent-${index}`} />
             ))}
           </div>
@@ -152,18 +150,20 @@ function RecentlyWatched({
 
   if (!authUser) {
     return (
-      <section className="relative my-8 py-4 px-4 md:px-0">
+      <section className="relative my-8 py-4 px-4">
         <h3 className="text-xl font-bold mb-2">{title}</h3>
-        <p className="text-gray-400">Please <a href="/login" className="text-blue-400 hover:underline">log in</a> to see this section.</p>
+        <p className="text-gray-400">Please <RouterLink to="/login" className="text-blue-400 hover:underline">log in</RouterLink> to see this section.</p>
       </section>
     );
   }
-  
+
   if (!shows || shows.length === 0) {
     return (
-      <section className="relative my-8">
-        <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
-        <p className="px-4 md:px-0 text-gray-400">You haven't watched any shows recently.</p>
+      <section className="relative my-8 px-4">
+        <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-bold">{title}</h3>
+        </div>
+        <p className="text-gray-400">You haven't watched any shows recently.</p>
       </section>
     );
   }
@@ -171,24 +171,34 @@ function RecentlyWatched({
   const displayItems = shows.length > 0 ? [...shows, ...shows, ...shows] : [];
 
   return (
-    <section className="relative my-8 pl-2 mr-2">
-      <div className="flex justify-between items-center mb-4 px-4 md:px-0">
-        <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">
+    <section className="relative my-8">
+      <div className="flex justify-between items-center mb-4 px-4">
+        <h3 className="text-xl text-white font-bold">
           {title}
         </h3>
+        {shows && shows.length > 0 && (
+          <RouterLink
+            to={viewAllLink}
+            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            aria-label={`View all ${title}`}
+          >
+            View All
+          </RouterLink>
+        )}
       </div>
 
       <div
         ref={containerRef}
-        className="relative w-full overflow-x-auto no-scrollbar px-4"
+        className="relative w-full overflow-x-auto no-scrollbar px-2"
       >
         <div ref={contentRef} className="flex">
-          <AnimatePresence>
+          <AnimatePresence mode="popLayout">
             {displayItems.map((show, index) => (
               <motion.div
-                key={`${show.id || show.showId}-${index}`}
+                key={`${show.id}-${index}`}
                 className="flex-shrink-0 mx-2 py-2"
                 style={{ width: `${itemWidth}px` }}
+                layout
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{
                   opacity: 1,
@@ -204,11 +214,11 @@ function RecentlyWatched({
                 whileHover={{
                   scale: 1.05,
                   y: -5,
-                  transition: { duration: 0.2 },
+                  transition: { duration: 0.2, ease: "easeOut" },
                 }}
-                exit={{ opacity: 0 }}
+                exit={{ opacity: 0, scale: 0.9, transition: {duration: 0.15} }}
               >
-                <Link to={`/show/${show.id || show.showId}`}>
+                <RouterLink to={`/show/${show.id}`}>
                   <div className="transition-transform duration-300 ease-in-out hover:shadow-lg h-full">
                     <TVShowCard
                       imageUrl={
@@ -216,11 +226,11 @@ function RecentlyWatched({
                           ? `https://image.tmdb.org/t/p/w300${show.poster_path}`
                           : undefined
                       }
-                      title={show.name || show.showName}
-                      cardWidth={cardActualWidth}
+                      title={show.name}
+                      cardWidth={itemWidth}
                     />
                   </div>
-                </Link>
+                </RouterLink>
               </motion.div>
             ))}
           </AnimatePresence>
