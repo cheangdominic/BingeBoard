@@ -1,37 +1,32 @@
-import { useState } from 'react';
-import { Apple, ThumbsUp, ThumbsDown } from 'lucide-react';
+import React, { useState } from 'react';
+import { ThumbsUp, ThumbsDown } from 'lucide-react';
+import AppleRatingDisplay from '../../../components/AppleRatingDisplay';
 
 export default function ReviewCard({ review, onVote, currentUserId }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Convert IDs to strings for reliable comparison
   const userIdStr = currentUserId ? currentUserId.toString() : null;
   
-  // Check if user has liked/disliked
   const userLiked = Array.isArray(review.likes) &&
     review.likes.some(id => id && id.toString() === userIdStr);
   
   const userDisliked = Array.isArray(review.dislikes) &&
     review.dislikes.some(id => id && id.toString() === userIdStr);
   
-  // Check if this is the user's own review
   const isCurrentUser = review.userId && 
     userIdStr && 
     review.userId.toString() === userIdStr;
+
+  const displayRating = typeof review.rating === 'number' ? review.rating.toFixed(2) : 'N/A';
 
   return (
     <div className="bg-[#333333] rounded-xl p-6 shadow-[0_4px_12px_rgba(0,0,0,0.25)] mb-6 transition-all hover:shadow-[0_6px_16px_rgba(0,0,0,0.3)]">
       <div className="flex justify-between items-start mb-4">
         <div>
-          <h4 className="text-lg font-semibold text-white">{review.username}</h4>
+          <h4 className="text-lg font-semibold text-white">{review.username || "Anonymous"}</h4>
           <div className="flex items-center mt-1 space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <Apple
-                key={i}
-                className={`w-5 h-5 ${i < review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-500'}`}
-              />
-            ))}
-            <span className="ml-2 text-sm text-gray-400">{review.rating}/5</span>
+            <AppleRatingDisplay rating={review.rating} appleSize="w-5 h-5" />
+            <span className="ml-2 text-sm text-gray-400">{displayRating}/5</span>
           </div>
         </div>
         <span className="text-sm text-gray-400">
@@ -68,7 +63,6 @@ export default function ReviewCard({ review, onVote, currentUserId }) {
 
       <div className="flex justify-between items-center pt-3 border-t border-[#3a3a3a]">
         <div className="flex space-x-4">
-          {/* Like button */}
           <button
             onClick={() => currentUserId && !isCurrentUser && onVote(review._id || review.id, 'like')}
             className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors ${
@@ -86,7 +80,6 @@ export default function ReviewCard({ review, onVote, currentUserId }) {
             </span>
           </button>
 
-          {/* Dislike button */}
           <button
             onClick={() => currentUserId && !isCurrentUser && onVote(review._id || review.id, 'dislike')}
             className={`flex items-center space-x-1 px-3 py-1 rounded-lg transition-colors ${

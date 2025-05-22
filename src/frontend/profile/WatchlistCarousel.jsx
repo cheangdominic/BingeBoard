@@ -197,10 +197,10 @@ function WatchlistCarousel({
           {title}
         </h3>
         <Link to="/view-all/watchlist" state={{ watchlist: user.watchlist }}>
-          <button className="text-sm text-white font-semibold hover:underline">
-            View All
-          </button>
-        </Link>
+  <button className="text-sm text-white font-semibold hover:underline">
+    View All
+  </button>
+</Link>
       </div>
 
       <div
