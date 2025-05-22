@@ -212,7 +212,7 @@ function WatchlistCarousel({
     return (
       <section className="relative my-8">
         <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
-        <p className="px-4 md:px-0">Your watchlist is empty. Add some shows!</p>
+        <p className="px-4 md:px-0 text-gray-400">Your watchlist is empty. Add some shows!</p>
       </section>
     );
   }
@@ -221,7 +221,7 @@ function WatchlistCarousel({
     return (
       <section className="relative my-8">
         <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
-        <p className="px-4 md:px-0">Could not load watchlist shows.</p>
+        <p className="px-4 md:px-0 text-gray-400">Could not load watchlist shows.</p>
       </section>
     );
   }
