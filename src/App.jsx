@@ -17,7 +17,7 @@ import BrowseFeature from './frontend/featurecards/BrowseFeature.jsx';
 import NotFound from './frontend/NotFound.jsx';
 import ActivityPage from './frontend/activity/ActivityPage.jsx';
 import LogPage from './frontend/log/LogPage.jsx';
-import SearchUsers from './frontend/social/SearchUsers.jsx';
+import SearchUsers from './frontend/social/searchUsers.jsx';
 import UserProfile from './frontend/social/UserProfile.jsx';
 import Home from './frontend/home/Home.jsx';
 import ViewAllWatchlist from './frontend/profile/WatchlistViewAll.jsx';
