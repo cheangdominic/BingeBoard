@@ -357,25 +357,6 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.post('/api/logout', authenticate, (req, res) => {
-  const userIdToLog = req.currentUserId;
-  req.session.destroy(async (err) => {
-    if (err) {
-      console.error("Session destruction error:", err);
-      return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
-    }
-    if (userIdToLog) {
-      try {
-        await logActivity(userIdToLog, 'logout');
-      } catch (logErr) {
-        console.error("Error logging logout activity:", logErr);
-      }
-    }
-    res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
-    return res.json({ success: true, message: 'Logged out successfully' });
-  });
-});
-
 app.get('/api/user', authenticate, (req, res) => {
   const { password, ...userWithoutPassword } = req.currentUser;
   res.json({ ...userWithoutPassword, _id: userWithoutPassword._id.toString() });
@@ -1036,23 +1017,46 @@ app.get('/api/users/:username/watchlist', async (req, res) => {
   }
 });
 
-app.post('/api/logout', authenticate, (req, res) => {
-  const userIdToLog = req.currentUserId;
-  req.session.destroy(async (err) => {
-    if (err) {
-      console.error("Session destruction error:", err);
-      return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
-    }
-    if (userIdToLog) {
-      try {
-        await logActivity(userIdToLog, 'logout');
-      } catch (logErr) {
-        console.error("Error logging logout activity:", logErr);
+app.post('/api/logout', async (req, res) => {
+  if (req.session && req.session.authenticated) {
+    const userIdToLog = req.session.userId;
+    const userEmailForLog = req.session.email;
+
+    req.session.destroy(async (err) => {
+      if (err) {
+        console.error("Session destruction error:", err);
+        return res.status(500).json({ success: false, message: 'Could not log out, please try again.' });
       }
-    }
-    res.clearCookie('connect.sid', { path: '/', httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax' });
-    return res.json({ success: true, message: 'Logged out successfully' });
-  });
+
+      if (userIdToLog) {
+        try {
+          await logActivity(new mongoose.Types.ObjectId(userIdToLog), 'logout');
+        } catch (logErr) {
+          console.error("Error logging logout activity for userId:", userIdToLog, logErr);
+        }
+      } else if (userEmailForLog) {
+        console.warn(`Logout for ${userEmailForLog}, but userId not in session for direct logging. Attempting lookup.`);
+        try {
+          const user = await userCollection.findOne({email: userEmailForLog}, {projection: {_id: 1}});
+          if (user) {
+            await logActivity(user._id, 'logout');
+          } else {
+            console.warn(`User with email ${userEmailForLog} not found for logout logging.`);
+          }
+        } catch (lookupErr) {
+          console.error("Error fetching user by email for logout log:", lookupErr);
+        }
+      } else {
+        console.warn("Logout occurred, but no user identifier in session for activity logging.");
+      }
+      
+      res.clearCookie('connect.sid', { path: '/' });
+      return res.json({ success: true, message: 'Logged out successfully' });
+    });
+  } else {
+    res.clearCookie('connect.sid', { path: '/' });
+    return res.json({ success: true, message: 'No active session to log out from or already logged out' });
+  }
 });
 
 app.post('/api/watchlist/add', authenticate, async (req, res) => {
