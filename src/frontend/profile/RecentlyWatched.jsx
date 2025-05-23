@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import TVShowCard from "../../components/TVShowCard";
-import { Link as RouterLink, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext.jsx";
 
@@ -8,52 +8,52 @@ function RecentlyWatched({
   title = "Recently Watched",
   cardActualWidth = 130,
   userScrollBehavior = "smooth",
-  viewAllLink = "/view-all/recentlywatched"
 }) {
   const [shows, setShows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
   const containerRef = useRef(null);
   const contentRef = useRef(null);
   const { user: authUser } = useAuth();
-  const { username } = useParams();
   const itemWidth = cardActualWidth;
+  const MIN_SHOWS_FOR_INFINITE_SCROLL = 6;
 
   useEffect(() => {
     const fetchRecentlyWatchedData = async () => {
+      if (!authUser) {
+        setIsLoading(false);
+        setShows([]);
+        return;
+      }
       setIsLoading(true);
-      setError(null);
       try {
-        const endpoint = username 
-          ? `/api/users/${username}`
-          : '/api/getUserInfo';
-
-        const response = await fetch(endpoint, {
-          credentials: "include"
+        const response = await fetch("/api/users/recently-watched", {
+          credentials: "include",
         });
 
         if (!response.ok) {
-          throw new Error(`Failed to fetch user data: ${response.status}`);
+          const errorData = await response
+            .json()
+            .catch(() => ({
+              message: `HTTP error! status: ${response.status}`,
+            }));
+          throw new Error(
+            errorData.error ||
+              errorData.message ||
+              `HTTP error! status: ${response.status}`
+          );
         }
 
         const data = await response.json();
-
-        const watchedHistory = data.user?.watchedHistory || data.watchedHistory || [];
-
-        const transformedShows = watchedHistory
-          .sort((a, b) => new Date(b.lastWatchedAt) - new Date(a.lastWatchedAt))
-          .slice(0, 10)
-          .map(item => ({
-            id: item.showId,
-            name: item.showName,
-            poster_path: item.posterPath?.replace('/w500', '/w300') || null,
-            lastWatchedAt: item.lastWatchedAt
-          }));
-
-        setShows(transformedShows);
+        setShows(
+          data.map((s) => ({
+            ...s,
+            id: s.showId,
+            name: s.showName,
+            poster_path: s.posterPath,
+          }))
+        );
       } catch (error) {
         console.error("Error fetching recently watched shows:", error);
-        setError(error.message);
         setShows([]);
       } finally {
         setIsLoading(false);
@@ -61,11 +61,13 @@ function RecentlyWatched({
     };
 
     fetchRecentlyWatchedData();
-  }, [authUser, username]);
+  }, [authUser]);
 
   const handleScroll = useCallback(() => {
+    if (shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL) return;
+
     const container = containerRef.current;
-    if (!container || !shows || shows.length === 0 || itemWidth <= 0) return;
+    if (!container || shows.length === 0 || itemWidth <= 0) return;
 
     const contentWidth = shows.length * (itemWidth + 16);
     const scrollPos = container.scrollLeft;
@@ -74,12 +76,10 @@ function RecentlyWatched({
     let newScrollLeft = scrollPos;
     let didTeleport = false;
 
-    if (contentWidth === 0) return;
-
-    if (scrollPos >= (contentWidth * 2) - containerWidth + (itemWidth / 2) ) {
+    if (scrollPos >= contentWidth * 2 - containerWidth / 2) {
       newScrollLeft = scrollPos - contentWidth;
       didTeleport = true;
-    } else if (scrollPos <= contentWidth - (itemWidth / 2)) {
+    } else if (scrollPos <= contentWidth - containerWidth / 2) {
       newScrollLeft = scrollPos + contentWidth;
       didTeleport = true;
     }
@@ -96,32 +96,32 @@ function RecentlyWatched({
     const container = containerRef.current;
     const content = contentRef.current;
 
-    if (!container || !content || !shows || shows.length === 0 || itemWidth <= 0) {
+    if (!container || !content || shows.length === 0 || itemWidth <= 0) {
       if (content) content.style.width = "0px";
       return;
     }
 
     const actualItemWidthWithMargin = itemWidth + 16;
-    const singleSetContentWidth = shows.length * actualItemWidthWithMargin;
+    const contentWidth = shows.length * actualItemWidthWithMargin;
 
-    if (singleSetContentWidth > 0) {
-        content.style.width = `${singleSetContentWidth * 3}px`;
-        const initialScrollPosition = singleSetContentWidth + (singleSetContentWidth / 2) - (container.offsetWidth / 2);
-
-        const originalBehavior = container.style.scrollBehavior;
-        container.style.scrollBehavior = "auto";
-        container.scrollLeft = initialScrollPosition;
-        container.style.scrollBehavior = originalBehavior || userScrollBehavior;
+    if (shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL) {
+      content.style.width = `${contentWidth}px`;
+      container.style.scrollBehavior = userScrollBehavior;
+      container.removeEventListener("scroll", handleScroll);
     } else {
-        content.style.width = "0px";
+      content.style.width = `${contentWidth * 3}px`;
+      const initialScrollPosition = contentWidth;
+
+      const originalBehavior = container.style.scrollBehavior;
+      container.style.scrollBehavior = "auto";
+      container.scrollLeft = initialScrollPosition;
+      container.style.scrollBehavior = userScrollBehavior;
+
+      container.addEventListener("scroll", handleScroll, { passive: true });
     }
 
-    container.addEventListener("scroll", handleScroll, { passive: true });
-
     return () => {
-      if (container) {
-        container.removeEventListener("scroll", handleScroll);
-      }
+      container.removeEventListener("scroll", handleScroll);
     };
   }, [shows, itemWidth, handleScroll, userScrollBehavior]);
 
@@ -139,22 +139,27 @@ function RecentlyWatched({
           animate={{
             background: [
               "linear-gradient(90deg, #2d3748 0%, #4a5568 50%, #2d3748 100%)",
-              "linear-gradient(90deg, #4a5568 0%, #2d3748 50%, #4a5568 100%)",
+              "linear-gradient(90deg, #2d3748 0%, #4a5568 100%, #2d3748 100%)",
               "linear-gradient(90deg, #2d3748 0%, #4a5568 50%, #2d3748 100%)",
             ],
           }}
-          transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
         />
       </motion.div>
     );
     return (
-      <section className="relative my-8">
-        <div className="flex justify-between items-center mb-4 px-4">
-          <h3 className="text-xl text-white font-bold">{title}</h3>
+      <section className="relative my-8 pl-2 mr-2">
+        <div className="flex justify-between items-center mb-4 px-4 md:px-0">
+          <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">
+            {title}
+          </h3>
         </div>
-        <div ref={containerRef} className="relative w-full overflow-x-auto no-scrollbar px-2">
+        <div
+          ref={containerRef}
+          className="relative w-full overflow-x-auto no-scrollbar px-4"
+        >
           <div ref={contentRef} className="flex">
-            {Array.from({ length: Math.min(shows.length || 5, 7) }).map((_, index) => (
+            {Array.from({ length: 5 }).map((_, index) => (
               <SkeletonCard key={`skeleton-recent-${index}`} />
             ))}
           </div>
@@ -165,87 +170,82 @@ function RecentlyWatched({
 
   if (!authUser) {
     return (
-      <section className="relative my-8 py-4 px-4">
+      <section className="relative my-8 py-4 px-4 md:px-0">
         <h3 className="text-xl font-bold mb-2">{title}</h3>
-        <p className="text-gray-400">Please <RouterLink to="/login" className="text-blue-400 hover:underline">log in</RouterLink> to see this section.</p>
+        <p className="text-gray-400">
+          Please{" "}
+          <a href="/login" className="text-blue-400 hover:underline">
+            log in
+          </a>{" "}
+          to see this section.
+        </p>
       </section>
     );
   }
 
   if (!shows || shows.length === 0) {
     return (
-      <section className="relative my-8 px-4">
-        <div className="flex justify-between items-center mb-4">
-            <h3 className="text-xl font-bold">{title}</h3>
-        </div>
-        <p className="text-gray-400">You haven't watched any shows recently.</p>
+      <section className="relative my-8">
+        <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
+        <p className="px-4 md:px-0 text-gray-400">
+          You haven't watched any shows recently.
+        </p>
       </section>
     );
   }
 
-  const displayItems = shows.length > 0 ? [...shows, ...shows, ...shows] : [];
+  const displayItems =
+    shows.length < MIN_SHOWS_FOR_INFINITE_SCROLL
+      ? shows
+      : [...shows, ...shows, ...shows];
 
   return (
-    <section className="relative my-8">
-      <div className="flex justify-between items-center mb-4 px-4">
-        <h3 className="text-xl text-white font-bold">
+    <section className="relative my-8 pl-2 mr-2">
+      <div className="flex justify-between items-center mb-4 px-4 md:px-0">
+        <h3 className="text-xl text-white font-bold md:pl-2 md:m-0 -m-2">
           {title}
         </h3>
-        {shows && shows.length > 0 && (
-          <RouterLink
-            to={viewAllLink}
-            className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            aria-label={`View all ${title}`}
-          >
-            View All
-          </RouterLink>
-        )}
       </div>
-
       <div
         ref={containerRef}
-        className="relative w-full overflow-x-auto no-scrollbar px-2"
+        className="relative w-full overflow-x-auto no-scrollbar px-4"
       >
         <div ref={contentRef} className="flex">
-          <AnimatePresence mode="popLayout">
+          <AnimatePresence>
             {displayItems.map((show, index) => (
               <motion.div
                 key={`${show.id}-${index}`}
                 className="flex-shrink-0 mx-2 py-2"
                 style={{ width: `${itemWidth}px` }}
-                layout
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{
                   opacity: 1,
                   y: 0,
                   scale: 1,
                   transition: {
-                    delay: (index % shows.length) * 0.05,
+                    delay: (index % shows.length) * 0.03,
                     type: "spring",
                     stiffness: 100,
-                    damping: 12,
+                    damping: 10,
                   },
                 }}
                 whileHover={{
                   scale: 1.05,
-                  y: -5,
-                  transition: { duration: 0.2, ease: "easeOut" },
+                  transition: { duration: 0.2 },
                 }}
-                exit={{ opacity: 0, scale: 0.9, transition: {duration: 0.15} }}
+                exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
               >
-                <RouterLink to={`/show/${show.id}`}>
-                  <div className="transition-transform duration-300 ease-in-out hover:shadow-lg h-full">
-                    <TVShowCard
-                      imageUrl={
-                        show.poster_path
-                          ? `https://image.tmdb.org/t/p/w300${show.poster_path}`
-                          : undefined
-                      }
-                      title={show.name}
-                      cardWidth={itemWidth}
-                    />
-                  </div>
-                </RouterLink>
+                <Link to={`/show/${show.id}`}>
+                  <TVShowCard
+                    imageUrl={
+                      show.poster_path
+                        ? `https://image.tmdb.org/t/p/w300${show.poster_path}`
+                        : undefined
+                    }
+                    title={show.name || show.title}
+                    cardWidth={cardActualWidth}
+                  />
+                </Link>
               </motion.div>
             ))}
           </AnimatePresence>
