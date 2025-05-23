@@ -112,6 +112,11 @@ const mongoStore = MongoStore.create({
   ttl: expireTime / 1000,
 });
 
+app.set('trust proxy', 1);
+mongoose.connection.on('connected', () => {
+  console.log('Mongoose connected to DB cluster');
+});
+
 app.use(session({
   secret: node_session_secret,
   store: mongoStore,
