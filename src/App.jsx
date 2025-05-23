@@ -23,6 +23,7 @@ import Home from './frontend/home/Home.jsx';
 import ViewAllWatchlist from './frontend/profile/WatchlistViewAll.jsx';
 import FriendRequestsPage from './frontend/friends/FriendRequestsPage.jsx';
 import ViewAllRecentlyWatched from './frontend/profile/RecentlyWatchedViewAll.jsx';
+import FriendsListPage from './frontend/friends/FriendListPage.jsx';
 
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
         <Route path="/view-all/watchlist" element={<ViewAllWatchlist />} />
         <Route path="/requests" element={<FriendRequestsPage />} />
         <Route path="/view-all/recentlywatched" element={<ViewAllRecentlyWatched />} />
+        <Route path="/user/:username/friends" element={<FriendsListPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

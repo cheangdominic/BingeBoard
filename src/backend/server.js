@@ -779,9 +779,22 @@ app.get('/api/users/:username', async (req, res) => {
   try {
     const user = await userCollection.findOne(
       { username },
-      { projection: { username: 1, email: 1, profilePic: 1, createdAt: 1, watchedHistory: 1, watchlist: 1, _id: 1 } }
+      { 
+        projection: { 
+          username: 1, 
+          email: 1,
+          profilePic: 1, 
+          createdAt: 1, 
+          friends: 1,
+          friendRequestsSent: 1,
+          _id: 1 
+        } 
+      }
     );
-    // ... (error handling if user not found) ...
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
 
     const userActivities = await Activity.find({ userId: user._id })
       .sort({ createdAt: -1 })
@@ -790,12 +803,11 @@ app.get('/api/users/:username', async (req, res) => {
 
     res.json({
       success: true,
-      user: { ...user, _id: user._id.toString() }, // Ensure _id is a string
-      username: user.username,
-      profilePic: user.profilePic || null,
-      watchlist: user.watchlist || [],
-      activities: userActivities, // This data is what RecentlyWatched will use
-      _id: user._id.toString()
+      user: { 
+        ...user, 
+        _id: user._id.toString() 
+      },
+      activities: userActivities, 
     });
 
   } catch (error) {
