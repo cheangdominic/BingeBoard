@@ -6,10 +6,10 @@ import TopNavbar from './TopNavbar.jsx';
 import MottoBanner from './MottoBanner.jsx';
 import FeatureCards from './FeatureCards.jsx';
 import Statistics from './Statistics.jsx';
-import PopularReviews from './PopularReviews.jsx';
 import ShowCarousel from '../../components/ShowCarousel.jsx';
 import Footer from './Footer.jsx';
 import LoadingSpinner from '../../components/LoadingSpinner.jsx';
+import PopularReviews from '../landing/PopularReviews.jsx';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
