@@ -56,8 +56,6 @@ function SearchUsers() {
                     />
                     <div>
                         <p className="text-white font-semibold">@{user.username}</p>
-                        <p className="text-gray-400 text-sm">12 Connections</p>
-                        <p className="text-gray-400 text-sm">2 Groups</p>
                     </div>
                 </div>
             </Link>
