@@ -57,7 +57,7 @@ function LoginForm() {
     try {
       const response = await fetch('/api/login', {
         method: 'POST',
-        credentials: true,
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
