@@ -31,7 +31,7 @@ const expireTime = 24 * 60 * 60 * 1000;
 
 app.use(cors({
   origin: (origin, callback) => {
-    const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:3000', '/^https?://localhost(:\d+)?$/', process.env.FRONTEND_URL].filter(Boolean);
+    const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:3000','https://bingeboard-4zzn.onrender.com', '/^https?://localhost(:\d+)?$/', process.env.FRONTEND_URL].filter(Boolean);
     if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
       callback(null, true);
     } else {
