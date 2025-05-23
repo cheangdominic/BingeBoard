@@ -51,7 +51,7 @@ export default function FriendRequestsPage() {
         {loading ? (
           <p>Loading…</p>
         ) : requests.length === 0 ? (
-          <p>No friend requests.</p>
+          <p className="text-gray-400">No friend requests.</p>
         ) : (
           <ul className="space-y-4">
             {requests.map((user) => (
