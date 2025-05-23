@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import BottomNavbar from '../../components/BottomNavbar.jsx';
 import TrendingCarousel from './TrendingCarousel.jsx';
 import ShowCarousel from '../../components/ShowCarousel.jsx';
+import RecentReviewsFiltered from './RecentReviewsFiltered.jsx';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -43,10 +44,12 @@ function Home() {
         animate="visible"
         variants={fadeInUp}
         transition={{ delay: 0.2 }}
+        className="pb-20"
       >
         <TrendingCarousel tmdbEndpoint="tv/top_rated" />
         <ShowCarousel title="Trending Today" tmdbEndpoint="trending/tv/day" />
         <ShowCarousel title="Airing Today TV Shows" tmdbEndpoint="tv/airing_today" />
+        <RecentReviewsFiltered />
         <ShowCarousel title="Popular TV Shows" tmdbEndpoint="tv/popular" />
         <ShowCarousel title="Top Rated TV Shows" tmdbEndpoint="tv/top_rated" />
         <ShowCarousel title="On Air TV Shows" tmdbEndpoint="tv/on_the_air" />

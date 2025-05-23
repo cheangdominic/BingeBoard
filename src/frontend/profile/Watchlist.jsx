@@ -1,31 +1,21 @@
 import React from "react";
-import TVShowCard from "../../components/TVShowCard";
+import WatchlistCarousel from "./WatchlistCarousel"; 
+import { useAuth } from "../../context/AuthContext.jsx"; 
+import LoadingSpinner from "../../components/LoadingSpinner.jsx";
 
-function Watchlist() {
-  const watchlist = [ // TODO: replace with real tv shows from db
-    { imageUrl: "https://via.placeholder.com/300x450" },
-    { imageUrl: "https://via.placeholder.com/300x450" },
-    { imageUrl: "https://via.placeholder.com/300x450" },
-    { imageUrl: "https://via.placeholder.com/300x450" },
-    { imageUrl: "https://via.placeholder.com/300x450" },
-  ];
+function Watchlist({ username, isOwnProfile, userProfileData }) { 
+  const { user: authUser, loading: authLoading } = useAuth(); 
+
+  if (authLoading) {
+    return <LoadingSpinner small={true} />;
+  }
 
   return (
-    <section>
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-xl font-bold">Watchlist</h3>
-        <a href="/profile/watchlist" className="text-sm text-blue-400 hover:underline">
-          View All
-        </a>
-      </div>
-
-      <div className="flex overflow-x-auto space-x-4 pb-2 scroll-smooth">
-        {watchlist.map((show, index) => (
-          <div key={index} className="flex-shrink-0">
-            <TVShowCard imageUrl={show.imageUrl} />
-          </div>
-        ))}
-      </div>
+    <section className="mx-auto w-[97vw] sm:w-[97.5vw] mt-2 sm:mt-3 text-white">
+      <WatchlistCarousel
+        user={isOwnProfile ? authUser : userProfileData} 
+        title={isOwnProfile ? 'Your Watchlist' : `${username}'s Watchlist`}
+      />
     </section>
   );
 }

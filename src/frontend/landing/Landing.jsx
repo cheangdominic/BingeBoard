@@ -9,6 +9,7 @@ import Statistics from './Statistics.jsx';
 import PopularReviews from './PopularReviews.jsx';
 import ShowCarousel from '../../components/ShowCarousel.jsx';
 import Footer from './Footer.jsx';
+import LoadingSpinner from '../../components/LoadingSpinner.jsx';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -23,14 +24,23 @@ const fadeInUp = {
 };
 
 function Landing() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
+    if (!loading && user) {
       navigate('/home');
     }
-  }, [user, navigate]);
+  }, [user, loading, navigate]);
+
+  if (loading) {
+    return <LoadingSpinner/>;
+  }
+
+  if (user) {
+    return null;
+  }
+
   return (
     <>
       <TopNavbar />

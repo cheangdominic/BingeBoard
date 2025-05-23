@@ -25,20 +25,20 @@ export default function BottomNavbar() {
 
   // Combined user data fetcher (profile + watchlist)
   const fetchUserData = useCallback(async () => {
-    try {
-      const response = await axios.get("/api/getUserInfo", {
-        withCredentials: true,
-      });
-      if (response.data.success) {
-        const { profilePic, watchlist } = response.data;
-        localStorage.setItem('profileImage', profilePic);
-        setProfileImage(profilePic);
-        setUser({ watchlist }); // Store watchlist
-      }
-    } catch (error) {
-      console.error("Failed to fetch user data:", error);
+  try {
+    const response = await axios.get("/api/getUserInfo", {
+      withCredentials: true,
+    });
+    if (response.data.success) {
+      const { profilePic, watchlist, username } = response.data;
+      localStorage.setItem('profileImage', profilePic);
+      setProfileImage(profilePic);
+      setUser({ watchlist, username }); 
     }
-  }, []);
+  } catch (error) {
+    console.error("Failed to fetch user data:", error);
+  }
+}, []);
 
   useEffect(() => {
     fetchUserData();
@@ -62,6 +62,7 @@ export default function BottomNavbar() {
     { icon: <BiTimeFive size={20} />, label: "Activity", path: "/activity" },
   ];
 
+  // In BottomNavbar.jsx, update the navButtons array
   const navButtons = [
     { icon: <BiHome size={20} />, label: "Home", path: "/home" },
     { icon: <BiSearch size={20} />, label: "Search", path: "/search" },
@@ -98,7 +99,7 @@ export default function BottomNavbar() {
         </div>
       ),
       label: "Profile",
-      path: "/profile"
+      path: `/user/${user?.username || ""}` 
     },
   ];
 
@@ -107,10 +108,10 @@ export default function BottomNavbar() {
   // Updated click handler with watchlist support
   const handleButtonClick = (path) => {
     if (path === "/view-all/watchlist") {
-      navigate(path, { 
-        state: { 
-          watchlist: user?.watchlist || [] 
-        } 
+      navigate(path, {
+        state: {
+          watchlist: user?.watchlist || []
+        }
       });
     } else {
       navigate(path);
@@ -128,16 +129,14 @@ export default function BottomNavbar() {
               <motion.button
                 key={btn.label}
                 whileHover={{ scale: 1.05 }}
-                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${
-                  location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
-                }`}
+                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
+                  }`}
                 onClick={() => navigate(btn.path)}
               >
-                <div className={`p-2 rounded-full transition-all ${
-                  location.pathname === btn.path 
-                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" 
+                <div className={`p-2 rounded-full transition-all ${location.pathname === btn.path
+                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20"
                     : "hover:bg-[#2E2E2E]/50"
-                }`}>
+                  }`}>
                   {btn.icon}
                 </div>
                 <span className="mt-1">{btn.label}</span>
@@ -151,16 +150,14 @@ export default function BottomNavbar() {
               <motion.button
                 key={btn.label}
                 whileHover={{ scale: 1.05 }}
-                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${
-                  location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
-                }`}
+                className={`flex-1 flex flex-col items-center justify-end text-xs md:text-sm font-medium pb-2 ${location.pathname === btn.path ? "text-blue-400" : "text-gray-300"
+                  }`}
                 onClick={() => navigate(btn.path)}
               >
-                <div className={`p-2 rounded-full transition-all ${
-                  location.pathname === btn.path 
-                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20" 
+                <div className={`p-2 rounded-full transition-all ${location.pathname === btn.path
+                    ? "bg-[#2E2E2E] ring-2 ring-blue-400/20"
                     : "hover:bg-[#2E2E2E]/50"
-                }`}>
+                  }`}>
                   {btn.icon}
                 </div>
                 <span className="mt-1">{btn.label}</span>
