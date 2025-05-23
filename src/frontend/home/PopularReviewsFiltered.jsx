@@ -1,23 +1,20 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import ReviewCard from "../../components/ReviewCard";
 import { useAuth } from "../../context/AuthContext";
 import { motion } from "framer-motion";
 
-function RecentReviewsFiltered() {
+function PopularReviewsFiltered() {
   const { user } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showSpoilers, setShowSpoilers] = useState(false);
   const [filterByFriends, setFilterByFriends] = useState(false);
+  const [friendsList, setFriendsList] = useState([]);
   const defaultProfilePic = "/img/profilePhotos/generic_profile_picture.jpg";
 
-  useEffect(() => {
-    fetchMostLikedReviews();
-  }, []);
-
-  const fetchMostLikedReviews = async () => {
+  const fetchMostLikedReviews = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get('/api/reviews/most-liked');
@@ -28,8 +25,29 @@ function RecentReviewsFiltered() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  const fetchFriendsList = useCallback(async () => {
+    if (user && user._id) {
+      try {
+        const response = await axios.get(`/api/user`);
+        if (response.data && response.data.friends) {
+          setFriendsList(response.data.friends);
+        } else if (user.friends) {
+            setFriendsList(user.friends);
+        }
+      } catch (err) {
+        console.error("Failed to fetch friends list:", err);
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    fetchMostLikedReviews();
+    if (filterByFriends && user) {
+      fetchFriendsList();
+    }
+  }, [filterByFriends, user, fetchMostLikedReviews, fetchFriendsList]);
 
 
   const toggleSpoilers = () => {
@@ -38,12 +56,16 @@ function RecentReviewsFiltered() {
 
   const toggleFriendsFilter = () => {
     setFilterByFriends(!filterByFriends);
-    // TODO: Implement actual friends filter logic
   };
 
-  const filteredReviews = showSpoilers
-    ? reviews
-    : reviews.filter(review => !review.containsSpoiler);
+  const filteredReviews = reviews.filter(review => {
+    const spoilerCondition = showSpoilers || !review.containsSpoiler;
+    if (filterByFriends && user) {
+      const isFriendReview = friendsList.includes(review.userId?.toString()) || friendsList.includes(review.userId);
+      return spoilerCondition && isFriendReview;
+    }
+    return spoilerCondition;
+  });
 
   const handleVote = async (reviewId, action) => {
     try {
@@ -61,7 +83,7 @@ function RecentReviewsFiltered() {
     user: {
       username: review.username || "@unknown",
       profilePhoto: review.userProfilePic || defaultProfilePic,
-      _id: review.userId
+      _id: review.userId 
     },
     date: new Date(review.createdAt).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -80,8 +102,7 @@ function RecentReviewsFiltered() {
   return (
     <section className="ml-3 mt-6 mb-8">
       <div className="flex justify-between items-center mb-6 px-2">
-        <h3 className="text-xl text-white font-bold">Recent Reviews</h3>
-
+        <h3 className="text-xl text-white font-bold">Popular Reviews</h3>
         <div className="flex items-center space-x-3">
           <button
             onClick={toggleFriendsFilter}
@@ -98,7 +119,6 @@ function RecentReviewsFiltered() {
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-blue-600/20 animate-pulse" />
             )}
           </button>
-
           <button
             onClick={toggleSpoilers}
             className={`group relative overflow-hidden px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg ${showSpoilers
@@ -134,7 +154,8 @@ function RecentReviewsFiltered() {
           <div className="text-6xl mb-4">📝</div>
           <div className="text-lg font-medium mb-2">No Reviews Found</div>
           <div className="text-sm">
-            {showSpoilers ? 'No reviews available at the moment' : 'No spoiler-free reviews available'}
+            {filterByFriends && 'No reviews from friends found. '}
+            {showSpoilers ? (filterByFriends ? '' : 'No reviews available at the moment.') : (filterByFriends ? '' : 'No spoiler-free reviews available.')}
           </div>
         </div>
       ) : (
@@ -165,8 +186,6 @@ function RecentReviewsFiltered() {
               ))}
             </div>
           </div>
-
-          {/* Gradient fade on the right edge */}
           <div className="absolute top-0 right-0 h-full w-8 bg-gradient-to-l from-gray-900 to-transparent pointer-events-none" />
         </div>
       )}
@@ -174,4 +193,4 @@ function RecentReviewsFiltered() {
   );
 }
 
-export default RecentReviewsFiltered;
+export default PopularReviewsFiltered;
