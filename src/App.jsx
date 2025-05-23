@@ -21,6 +21,7 @@ import SearchUsers from './frontend/social/SearchUsers.jsx';
 import UserProfile from './frontend/social/UserProfile.jsx';
 import Home from './frontend/home/Home.jsx';
 import ViewAllWatchlist from './frontend/profile/WatchlistViewAll.jsx';
+import FriendRequestsPage from './frontend/friends/FriendRequestsPage.jsx';
 import ViewAllRecentlyWatched from './frontend/profile/RecentlyWatchedViewAll.jsx';
 
 
@@ -46,6 +47,7 @@ function App() {
         <Route path="/user/:username" element={<UserProfile />} />
         <Route path="/view-all/:tmdbEndpoint" element={<ViewAllPage />} />
         <Route path="/view-all/watchlist" element={<ViewAllWatchlist />} />
+        <Route path="/requests" element={<FriendRequestsPage />} />
         <Route path="/view-all/recentlywatched" element={<ViewAllRecentlyWatched />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

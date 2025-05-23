@@ -10,6 +10,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import path from 'path';
+import { connectToDatabase, userCollection, database } from './databaseConnection.js';
 import { MongoClient, ObjectId } from 'mongodb';
 import { Review, Activity, User } from './utils.js';
 import { v2 as cloudinary } from 'cloudinary';
@@ -17,7 +18,7 @@ import multer from 'multer';
 import { CloudinaryStorage } from 'multer-storage-cloudinary';
 import axios from 'axios';
 import { use } from 'react';
-
+import friendsRouter from './friends.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -74,31 +75,13 @@ const tmdbBaseUrl = process.env.VITE_TMDB_BASE_URL || 'https://api.themoviedb.or
 console.log(`TMDB API Key Loaded: ${tmdbApiKey ? 'Yes (first few chars: ' + String(tmdbApiKey).substring(0, 5) + '...)' : 'NO!!! KEY IS MISSING!'}`);
 console.log(`TMDB Base URL: ${tmdbBaseUrl}`);
 
-
 const mongooseURI = `mongodb+srv://${mongodb_user}:${mongodb_password}@${mongodb_host}/${mongodb_database}?retryWrites=true&w=majority`;
-
-let database;
-let userCollection;
-
-async function connectToNativeDriver() {
-  try {
-    const client = new MongoClient(mongooseURI);
-    await client.connect();
-    database = client.db(mongodb_database);
-    userCollection = database.collection('users');
-    console.log('Connected to MongoDB via Native Driver (MongoClient)');
-  } catch (error) {
-    console.error('Native MongoDB Driver connection error:', error);
-    process.exit(1);
-  }
-}
 
 mongoose.connect(mongooseURI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
 }).then(() => {
   console.log('Mongoose connected to DB cluster');
-  connectToNativeDriver();
 }).catch(err => {
   console.error('Mongoose connection error:', err);
   process.exit(1);
@@ -125,6 +108,7 @@ app.use(session({
   }
 }));
 
+app.use('/api/friends', friendsRouter);
 app.get('/api/users', async (req, res) => {
   const { search } = req.query;
 
@@ -302,12 +286,18 @@ app.post('/api/signup', async (req, res) => {
     if (existingUser) return res.status(400).json({ success: false, message: 'Username or email already exists' });
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const newUserDocument = {
-      username, email, password: hashedPassword,
-      watchlist: [], watchedHistory: [], profilePic: '',
-      createdAt: new Date(), updatedAt: new Date()
-    };
-    const insertResult = await userCollection.insertOne(newUserDocument);
+    const insertResult = await userCollection.insertOne({
+      username: username,
+      email: email,
+      password: hashedPassword,
+      watchlist: [],
+      profilePic: '',
+      friends: [],
+      friendRequestsSent: [],
+      friendRequestsRecieved: [],
+	  createdAt: new Date(),
+	  updatedAt: new Date()
+    });
 
     if (insertResult.insertedId) {
       await logActivity(insertResult.insertedId, 'account_creation');
@@ -1190,19 +1180,11 @@ app.get(/^(?!\/api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
 
-Promise.all([
-]).then(() => {
-  if (userCollection) {
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
-    });
-  } else {
-    console.error("Native driver (userCollection) not initialized. Server not started for API routes needing it.");
-    app.listen(port, () => {
-      console.warn(`Server running on port ${port}, BUT NATIVE DB DRIVER (userCollection) MAY NOT BE READY.`);
-    });
-  }
+connectToDatabase().then(() => {
+  app.listen(port, () => {
+    console.log(`✅ Server running on port ${port}`);
+  });
 }).catch(err => {
-  console.error("Failed to initialize services or Mongoose not ready before starting server:", err);
+  console.error("❌ Failed to connect to MongoDB:", err);
   process.exit(1);
 });
