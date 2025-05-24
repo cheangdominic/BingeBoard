@@ -2,11 +2,37 @@ import { useState } from 'react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 
+/**
+ * @file AddToWatchlistButton.js
+ * @description A React component that renders a button allowing users to add or remove a show from their watchlist.
+ * It visually indicates the current watchlist status, handles loading states during async requests,
+ * and animates text changes on hover and loading.
+ */
+
+/**
+ * @function AddToWatchlistButton
+ * @description React component that toggles a show’s presence in the user’s watchlist.
+ * It manages its own loading and hover states, and performs API calls to add or remove the show.
+ *
+ * @param {object} props - Component props.
+ * @param {string|number} props.showId - The unique identifier for the show to add or remove from the watchlist.
+ *
+ * @returns {JSX.Element} The interactive button element with animated text and loading spinner.
+ */
 const AddToWatchlistButton = ({ showId }) => {
+  // State to track if the show is currently in the watchlist.
   const [added, setAdded] = useState(false);
+
+  // State to track whether the button is currently hovered.
   const [hovered, setHovered] = useState(false);
+
+  // State to track whether an API call is in progress (disables button and triggers spinner).
   const [loading, setLoading] = useState(false);
 
+  /**
+   * Adds the show to the watchlist by calling the backend API.
+   * Updates button state accordingly.
+   */
   const handleAdd = async () => {
     setLoading(true);
     try {
@@ -27,6 +53,10 @@ const AddToWatchlistButton = ({ showId }) => {
     }
   };
 
+  /**
+   * Removes the show from the watchlist by calling the backend API.
+   * Updates button state accordingly.
+   */
   const handleRemove = async () => {
     setLoading(true);
     try {
@@ -44,11 +74,17 @@ const AddToWatchlistButton = ({ showId }) => {
     }
   };
 
+  /**
+   * Handles the button click event.
+   * If loading, does nothing.
+   * Otherwise, toggles between add or remove action depending on current state.
+   */
   const handleClick = () => {
     if (loading) return;
     added ? handleRemove() : handleAdd();
   };
 
+  // Base CSS classes for styling the button.
   const baseClasses = 'px-4 py-2 rounded-full font-semibold flex items-center justify-center';
 
   return (
