@@ -283,7 +283,7 @@ Testing has been performed using Jest and React Testing Library for frontend com
 - TV show data provided by The Movie Database (TMDB) API.  
 - UI icons sourced from SVGRepo and custom assets.  
 - Open-source packages licensed under MIT or respective licenses — see package.json for details.  
-- This project was developed as part of a university course at [Your University Name].  
+- This project was developed as part of a university course at BCIT.  
 
 ## 8. AI or API Usage Details  
 - **TMDB API:** Used to fetch TV show data, images, episodes, and ratings in real-time.  
