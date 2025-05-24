@@ -169,7 +169,7 @@ function ProfilePage() {
           variants={fadeInUp}
           transition={{ delay: 0.2 }} // Staggered animation delay
         >
-          <RecentlyWatched userId={user._id} />
+          <RecentlyWatched username={user.username} />
         </motion.div>
 
         {/* Animated section for "Recent Reviews". */}
