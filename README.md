@@ -11,7 +11,8 @@ Due to people often feeling disconnected while watching shows alone and having t
 ### Front-End
 - React  
 - Tailwind CSS  
-- HTML, CSS
+- HTML
+- CSS
 
 ### Back-End
 - Node.js  
@@ -196,8 +197,7 @@ C:.
     |           
     \---profile
             ProfilePage.jsx
-
-
+            
 ## 5. Setup Instructions
 
 To run the BingeBoard app locally, follow these steps:
@@ -290,30 +290,33 @@ Testing has been performed using Jest and React Testing Library for frontend com
 - **Joi:** Backend validation of input data to ensure data integrity.  
 - **ChatGPT API:** Used to implement AI features for the AI challenge portion of the project.   
 
+*AI Code Assistance Acknowledgment*  
+*Some portions of the codebase were generated or assisted by the ChatGPT API by OpenAI. This was used to help write or optimize code snippets, and all AI-generated code was reviewed and adapted to fit the project requirements.*
+
 ## 10. Contact Information  
 If you have questions, feedback, or want to contribute:  
 
 **Valley Balfour**  
-Email: [jpvbal4@gmail.com](mailto:jpvbal4@gmail.com) 
+Email: [jpvbal4@gmail.com](mailto:jpvbal4@gmail.com) <br>
 GitHub: [github.com/Jbalfour5](https://github.com/Jbalfour5)  
 LinkedIn: [linkedin.com/in/valleybalfour](https://www.linkedin.com/in/valleybalfour/)
 
 **Dominic Cheang**  
-Email: [dcheang@my.bcit.ca](mailto:dcheang@my.bcit.ca) 
+Email: [dcheang@my.bcit.ca](mailto:dcheang@my.bcit.ca) <br>
 GitHub: [github.com/cheangdominic](https://github.com/cheangdominic)  
 LinkedIn: [linkedin.com/in/dominic-cheang/](https://www.linkedin.com/in/dominic-cheang/ )
 
 **Tyrone Cheang**  
-Email: [kosabullen@gmail.com](mailto:kosabullen@gmail.com) 
-GitHub: [github.com/kkbullenn](https://github.com/kkbullenn)  
-LinkedIn: [linkedin.com/in/bullen-kosa-8b532a34a](https://www.linkedin.com/in/bullen-kosa-8b532a34a/)
+Email: [tcheang@my.bcit.ca](mailto:tcheang@my.bcit.ca) <br>
+GitHub: [github.com/tyronecheang](https://github.com/tyronecheang)  
+LinkedIn: [linkedin.com/in/tyronecheang/](https://www.linkedin.com/in/tyronecheang/)
 
 **Bullen Kosa**  
-Email: [kosabullen@gmail.com](mailto:kosabullen@gmail.com) 
+Email: [kosabullen@gmail.com](mailto:kosabullen@gmail.com)<br> 
 GitHub: [github.com/kkbullenn](https://github.com/kkbullenn)  
 LinkedIn: [linkedin.com/in/bullen-kosa-8b532a34a](https://www.linkedin.com/in/bullen-kosa-8b532a34a/)
 
-**Isaac**  
-Email: [caasik23@gmail.com](mailto:caasik23@gmail.com) 
+**Isaac Kehler**  
+Email: [caasik23@gmail.com](mailto:caasik23@gmail.com) <br>
 GitHub: [github.com/IsaacK23](https://github.com/IsaacK23)  
 LinkedIn: [linkedin.com/in/isaac-kehler-a23734255](https://www.linkedin.com/in/isaac-kehler-a23734255/)
