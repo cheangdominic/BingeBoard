@@ -1264,6 +1264,54 @@ app.get('/api/users/:username', async (req, res) => {
 });
 
 /**
+ * @route GET /api/users/:username/recently-watched
+ * @description Fetches the 10 most recently watched shows for the specified user.
+ * Public endpoint (no authentication required).
+ * @param {string} req.params.username - Username to fetch history for.
+ * @returns {Array<object>|object} JSON response:
+ *  - Array of recently watched shows (each with `showId`, `showName`, `posterPath`, `lastWatchedAt`). Empty array if no history.
+ *  - `{ error: string }` if user not found (404).
+ *  - `{ error: string, details?: string }` on server error (500).
+ * @async
+ */
+app.get('/api/users/:username/recently-watched', async (req, res) => {
+  const username = req.params.username;
+  console.log(`[PUBLIC_RECENTLY_WATCHED] Handler invoked for username: ${username}`);
+
+  try {
+    const userRecord = await userCollection.findOne({ username: username });
+
+    if (!userRecord) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    if (!userRecord.watchedHistory || userRecord.watchedHistory.length === 0) {
+      console.log(`[PUBLIC_RECENTLY_WATCHED] No watched history for user ${userRecord.username}`);
+      return res.json([]);
+    }
+
+    const sortedWatchedHistory = [...userRecord.watchedHistory].sort((a, b) => {
+      const dateA = a.lastWatchedAt ? new Date(a.lastWatchedAt) : new Date(0);
+      const dateB = b.lastWatchedAt ? new Date(b.lastWatchedAt) : new Date(0);
+      return dateB - dateA;
+    });
+
+    const recentlyWatched = sortedWatchedHistory.slice(0, 10).map(item => ({
+      showId: item.showId,
+      showName: item.showName,
+      posterPath: item.posterPath,
+      lastWatchedAt: item.lastWatchedAt,
+    }));
+
+    console.log(`[PUBLIC_RECENTLY_WATCHED] Sending ${recentlyWatched.length} shows for ${userRecord.username}.`);
+    res.json(recentlyWatched);
+  } catch (error) {
+    console.error('[PUBLIC_RECENTLY_WATCHED] Error processing request:', error);
+    res.status(500).json({ error: 'Failed to fetch recently watched shows', details: error.message });
+  }
+});
+
+/**
  * @route POST /api/upload-profile-image
  * @description Uploads a profile image for the authenticated user to Cloudinary.
  * Updates the user's `profilePic` URL in the database.

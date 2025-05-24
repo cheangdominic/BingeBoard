@@ -397,7 +397,7 @@ const ShowGrid = () => {
 
   // State for review form fields.
   const [reviewText, setReviewText] = useState("");
-  const [ratingWhole, setRatingWhole] = useState(0); // Integer part of rating (0-5)
+  const [ratingWhole, setRatingWhole] = useState(1); // Integer part of rating (0-5)
   const [ratingDecimal, setRatingDecimal] = useState(0); // Decimal part of rating (0-99), stored as string for leading zeros
   const [containsSpoilers, setContainsSpoilers] = useState(false);
   const [isSubmittingReview, setIsSubmittingReview] = useState(false); // Track review submission status
@@ -614,7 +614,7 @@ const ShowGrid = () => {
       setSelectedShow(show); // Set the selected show to open modal.
       // Reset review form and toast states.
       setReviewText("");
-      setRatingWhole(0);
+      setRatingWhole(1);
       setRatingDecimal(0);
       setContainsSpoilers(false);
       setIsSubmittingReview(false);
@@ -672,7 +672,7 @@ const ShowGrid = () => {
       if (response.data) { // Check if API returned data (implies success).
         // Reset review form fields.
         setReviewText("");
-        setRatingWhole(0);
+        setRatingWhole(1);
         setRatingDecimal(0);
         setContainsSpoilers(false);
         
@@ -920,7 +920,7 @@ const ShowGrid = () => {
                         />
                         {/* Numeric input for precise rating (whole and decimal parts) */}
                         <div className="flex items-center gap-1.5 mt-3">
-                        <input type="number" min={0} max={5} value={ratingWhole} aria-label="Rating whole number" onFocus={(e) => {if (e.target.value === "0") setRatingWhole("");}} onChange={(e) => {const v=e.target.value;if(v==="")setRatingWhole("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=5)setRatingWhole(n);}}} onBlur={(e) => {if(e.target.value===""||e.target.value===null)setRatingWhole(0);}} className="bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none"/>
+                        <input type="number" min={1} max={5} value={ratingWhole} aria-label="Rating whole number" onChange={(e) => { const v = e.target.value; if (v === "") { setRatingWhole(""); } else { const n = parseInt(v, 10); if (!isNaN(n) && n >= 1 && n <= 5) { setRatingWhole(n); } } }} onBlur={(e) => { const currentValInInput = e.target.value; if (currentValInInput === "") { setRatingWhole(1); } else { const n = parseInt(currentValInInput, 10); if (isNaN(n) || n < 1) { setRatingWhole(1); } else if (n > 5) { setRatingWhole(5); } else { setRatingWhole(n); } } }} className="bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none"/>
                         <span className="text-gray-200 text-lg font-bold select-none">.</span>
                         <input type="number" min={0} max={99} aria-label="Rating decimal part" value={ratingDecimal} onFocus={(e)=>{if(e.target.value==="0"||e.target.value==="00")setRatingDecimal("");}} onChange={(e)=>{const v=e.target.value;if(v==="")setRatingDecimal("");else{const n=Number(v);if(!isNaN(n)&&n>=0&&n<=99&&v.length<=2)setRatingDecimal(v);}}} onBlur={(e)=>{let s=e.target.value;if(s==="")setRatingDecimal(0);else{let n=Number(s);if(s.length===1&&n<10)setRatingDecimal("0"+n);else setRatingDecimal(s);}}} disabled={ratingWhole>=5} className={`bg-zinc-800 border-2 border-black p-2 rounded-md text-gray-200 w-15 text-center text-md focus:ring-1 focus:ring-[#1963da] outline-none ${ratingWhole>=5?"opacity-50 cursor-not-allowed":""}`}/>
                         </div>

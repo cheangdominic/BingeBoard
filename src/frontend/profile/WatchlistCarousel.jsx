@@ -9,6 +9,8 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 // Import TVShowCard component for displaying individual shows.
 import TVShowCard from "../../components/TVShowCard";
+// Import useAuth custom hook to access authentication context (current user data).
+import { useAuth } from "../../context/AuthContext.jsx";
 // Import axios for making HTTP requests.
 import axios from "axios";
 // Import Link for client-side navigation.
@@ -31,10 +33,11 @@ import { motion, AnimatePresence } from "framer-motion";
  */
 function WatchlistCarousel({
   user, // The user object containing the watchlist
-  title = "Your Watchlist", // Default title
+  title = "Watchlist", // Default title
   cardActualWidth = 130,   // Default card width
   onWatchlistChange,       // Optional callback for when watchlist changes
   userScrollBehavior = "smooth", // Default scroll behavior
+  username 
 }) {
   // State to store the array of show objects (with details fetched from TMDB).
   const [shows, setShows] = useState([]);
@@ -42,6 +45,8 @@ function WatchlistCarousel({
   const [isLoading, setIsLoading] = useState(true);
   // State to track the ID of the show currently being hovered over (for showing remove button).
   const [hoveredShowId, setHoveredShowId] = useState(null);
+  // Get the authenticated user from AuthContext.
+    const { user: authUser } = useAuth();
   // Ref for the scrollable container div.
   const containerRef = useRef(null);
   // Ref for the content div that holds all show cards.
@@ -50,8 +55,10 @@ function WatchlistCarousel({
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
   // Item width used for calculations.
   const itemWidth = cardActualWidth;
+  // Determine if the profile is the authenticated user's own profile.
+  const isOwnProfile = !username || username === authUser?.username;
   // Minimum number of shows required to enable the infinite scroll illusion.
-  const MIN_SHOWS_FOR_INFINITE_SCROLL = 6;
+  const MIN_SHOWS_FOR_INFINITE_SCROLL = 6
 
   /**
    * `useEffect` hook to fetch details for each show in the user's watchlist.
@@ -295,7 +302,9 @@ function WatchlistCarousel({
     return (
       <section className="relative my-8">
         <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
-        <p className="px-4 md:px-0 text-gray-400">Your watchlist is empty. Add some shows!</p>
+        <p className="px-4 md:px-0 text-gray-400">{isOwnProfile
+          ? "Your watchlist is empty."
+          : `${username} has an empty watchlist`}</p>
       </section>
     );
   }

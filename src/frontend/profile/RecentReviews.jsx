@@ -117,7 +117,7 @@ function RecentReviews({ userId, username, isOwnProfile }) {
         {/* Section header with dynamic title. */}
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold">
-            {isOwnProfile ? 'Recent Reviews' : `${username}'s Recent Reviews`}
+            Recent Reviews
           </h3>
           {/* "View All" button, shown only if it's the user's own profile.
               Navigates to the '/activity' page which might show all activities including reviews. */}
@@ -143,11 +143,11 @@ function RecentReviews({ userId, username, isOwnProfile }) {
 
   // Main render for when reviews are available.
   return (
-    <section>
+    <section className="relative my-8 pl-2 mr-2">
       {/* Section header. */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 px-4 md:px-0">
         <h3 className="text-xl font-bold">
-          {isOwnProfile ? 'Recent Reviews' : `${username}'s Recent Reviews`}
+          <p>Recent Reviews</p>
         </h3>
         {isOwnProfile && (
           <button

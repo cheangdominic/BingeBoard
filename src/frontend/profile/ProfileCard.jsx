@@ -1,7 +1,7 @@
 /**
  * @file ProfileCard.jsx
  * @description A React component that displays a user's profile information in a card format.
- * It shows the user's avatar, username, number of connections, and provides actions
+ * It shows the user's avatar, username, number of friends, and provides actions
  * like viewing friend requests/settings (for own profile) or sending a friend request (for other profiles).
  */
 
@@ -80,7 +80,7 @@ export default function ProfileCard({ user, profilePic, isOwnProfile }) {
   return (
     // Main section container for the profile card with styling.
     <section className="bg-[#2E2E2E] rounded-lg shadow-lg p-6 flex items-center justify-between">
-      {/* Left part of the card: Profile image, username, and connections count. */}
+      {/* Left part of the card: Profile image, username, and friends count. */}
       <div className="flex items-center space-x-4">
         {/* ProfileImage component to display the avatar. */}
         <ProfileImage
@@ -89,13 +89,13 @@ export default function ProfileCard({ user, profilePic, isOwnProfile }) {
           size="lg" // Size of the image.
           isOwnProfile={isOwnProfile} // Pass `isOwnProfile` for potential edit functionality within ProfileImage.
         />
-        {/* Container for username and connections link. */}
+        {/* Container for username and friends link. */}
         <div>
           <h2 className="text-2xl font-bold">@{user.username}</h2>
           {/* Link to the user's friends list page. */}
           <Link to={`/user/${user.username}/friends`} className="text-gray-400 text-md hover:text-blue-400 transition-colors">
-            {/* Display number of friends/connections, with correct singular/plural form. */}
-            {user.friends?.length || 0} {user.friends?.length === 1 ? 'Connection' : 'Connections'}
+            {/* Display number of friends, with correct singular/plural form. */}
+            {user.friends?.length || 0} {user.friends?.length === 1 ? 'Friend' : 'Friends'}
           </Link>
         </div>
       </div>
