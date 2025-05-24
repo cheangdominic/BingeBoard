@@ -58,6 +58,7 @@ function Watchlist({ username, isOwnProfile, userProfileData }) {
         title='Watchlist'
         // Other props for WatchlistCarousel (like cardActualWidth, userScrollBehavior)
         // would use their default values if not specified here.
+        username={username}
       />
     </section>
   );
