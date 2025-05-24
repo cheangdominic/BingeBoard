@@ -1819,6 +1819,58 @@ app.post('/api/chat', authenticate, async (req, res) => {
 });
 
 /**
+ * @route GET /api/statistics/total-users
+ * @description Returns the total number of registered user accounts in the system.
+ * Useful for displaying cumulative user statistics (e.g., in admin dashboards or landing pages).
+ *
+ * @returns {Object} JSON response:
+ *   - { success: true, totalUsers: number } — on successful query.
+ *   - { success: false, message: string } — if an error occurs or the user collection is unavailable.
+ *
+ * @example
+ * GET /api/statistics/total-users
+ * Response: { "success": true, "totalUsers": 1042 }
+ *
+ * @async
+ */
+app.get('/api/statistics/total-users', async (req, res) => {
+  try {
+    // Ensure the user collection is available before querying.
+    if (!userCollection) {
+      console.error("User collection not initialized or unavailable.");
+      return res.status(503).json({ success: false, message: 'User data service unavailable.' });
+    }
+
+    // Count all documents (users) in the user collection.
+    const totalUsersCount = await userCollection.countDocuments({});
+
+    // Return the result as a JSON response.
+    res.json({ success: true, totalUsers: totalUsersCount });
+  } catch (error) {
+    console.error("Error retrieving total user count:", error);
+    res.status(500).json({ success: false, message: 'Could not retrieve total user count.' });
+  }
+});
+
+/**
+ * @route GET /api/statistics/total-reviews
+ * @description Fetches the total count of reviews.
+ * @returns {object} JSON response:
+ *  - `{ success: true, totalReviews: number }` on success.
+ *  - `{ success: false, message: string }` on failure.
+ * @async
+ */
+app.get('/api/statistics/total-reviews', async (req, res) => {
+  try {
+    const totalReviewsCount = await Review.countDocuments({});
+    res.json({ success: true, totalReviews: totalReviewsCount });
+  } catch (error) {
+    console.error("Failed to fetch total reviews count:", error);
+    res.status(500).json({ success: false, message: 'Failed to fetch total reviews count' });
+  }
+});
+
+/**
  * @route GET /api/average-rating
  * @description Calculates and returns the average rating and total number of reviews for a given show.
  * @param {string} req.query.showId - The ID of the show for which to calculate the average rating.
