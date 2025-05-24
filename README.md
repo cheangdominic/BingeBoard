@@ -42,11 +42,11 @@ C:.<br>
 |   README.md<br>
 |   tailwind.config.js<br>
 |   vite.config.js<br>
-|<br>
+|   <br>
 +---public<br>
 |   |   vite.svg<br>
-|   |<br>
-|   \---img<br>
+|   |   <br>
+|   \\---img<br>
 |       +---favicon<br>
 |       |       android-chrome-192x192.png<br>
 |       |       android-chrome-512x512.png<br>
@@ -54,17 +54,17 @@ C:.<br>
 |       |       favicon-16x16.png<br>
 |       |       favicon-32x32.png<br>
 |       |       favicon.ico<br>
-|       |<br>
-|       \---profilePhotos<br>
+|       |       <br>
+|       \\---profilePhotos<br>
 |               alt_generic_profile_picture.jpg<br>
 |               generic_profile_picture.jpg<br>
-|<br>
-\---src<br>
+|               <br>
+\\---src<br>
     |   App.css<br>
     |   App.jsx<br>
     |   index.css<br>
     |   main.jsx<br>
-    |<br>
+    |   <br>
     +---assets<br>
     |       BingeBoard Icon.svg<br>
     |       browse_tv_icon.svg<br>
@@ -82,7 +82,7 @@ C:.<br>
     |       tiktok_footer_icon.svg<br>
     |       watchlist_icon.svg<br>
     |       X_footer_icon.svg<br>
-    |<br>
+    |       <br>
     +---backend<br>
     |       databaseConnection.js<br>
     |       friends.js<br>
@@ -90,7 +90,7 @@ C:.<br>
     |       tmdb.js<br>
     |       useAuth.js<br>
     |       utils.js<br>
-    |<br>
+    |       <br>
     +---components<br>
     |       ActivityCard.jsx<br>
     |       AppleRating.jsx<br>
@@ -103,39 +103,39 @@ C:.<br>
     |       ReviewCard.jsx<br>
     |       ShowCarousel.jsx<br>
     |       TVShowCard.jsx<br>
-    |<br>
+    |       <br>
     +---context<br>
     |       AuthContext.jsx<br>
-    |<br>
+    |       <br>
     +---frontend<br>
     |   |   NotFound.jsx<br>
-    |   |<br>
+    |   |   <br>
     |   +---aboutus<br>
     |   |       AboutUsInfo.jsx<br>
     |   |       AboutUsPage.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---activity<br>
     |   |       ActivityCard.jsx<br>
     |   |       ActivityPage.jsx<br>
     |   |       ActivityPageHeader.jsx<br>
     |   |       ActivitySectionHeader.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---featurecards<br>
     |   |       BrowseFeature.jsx<br>
     |   |       SocialFeature.jsx<br>
     |   |       WatchlistFeature.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---friends<br>
     |   |       FriendListPage.jsx<br>
     |   |       FriendRequestsPage.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---home<br>
     |   |       FriendsRecentlyWatched.jsx<br>
     |   |       Home.jsx<br>
     |   |       PopularReviewsFiltered.jsx<br>
     |   |       RecommendedByFriends.jsx<br>
     |   |       TrendingCarousel.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---landing<br>
     |   |       FeatureCards.jsx<br>
     |   |       Footer.jsx<br>
@@ -144,15 +144,15 @@ C:.<br>
     |   |       PopularReviews.jsx<br>
     |   |       Statistics.jsx<br>
     |   |       TopNavbar.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---log<br>
     |   |       LogPage.jsx<br>
     |   |       ShowGrid.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---login<br>
     |   |       LoginForm.jsx<br>
     |   |       LoginPage.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---profile<br>
     |   |       LogoutButton.jsx<br>
     |   |       ProfileCard.jsx<br>
@@ -163,14 +163,14 @@ C:.<br>
     |   |       Watchlist.jsx<br>
     |   |       WatchlistCarousel.jsx<br>
     |   |       WatchlistViewAll.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---search<br>
     |   |       ChatBox.jsx<br>
     |   |       SearchBar.jsx<br>
     |   |       SearchPage.jsx<br>
     |   |       TVShowFilters.jsx<br>
     |   |       TvShowSearchGrid.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---showdetails<br>
     |   |   |   AddToWatchlistButton.jsx<br>
     |   |   |   EpisodeList.jsx<br>
@@ -179,24 +179,25 @@ C:.<br>
     |   |   |   ShowDescription.jsx<br>
     |   |   |   ShowDetailsPage.jsx<br>
     |   |   |   ShowHero.jsx<br>
-    |   |   |<br>
-    |   |   \---ReviewSection<br>
+    |   |   |   <br>
+    |   |   \\---ReviewSection<br>
     |   |           ReviewCard.jsx<br>
     |   |           ReviewForm.jsx<br>
-    |   |<br>
+    |   |           <br>
     |   +---signup<br>
     |   |       SignupForm.jsx<br>
     |   |       SignupPage.jsx<br>
-    |   |<br>
+    |   |       <br>
     |   +---social<br>
     |   |       searchUsers.jsx<br>
     |   |       UserProfile.jsx<br>
-    |   |<br>
-    |   \---viewall<br>
+    |   |       <br>
+    |   \\---viewall<br>
     |           ViewAllPage.jsx<br>
-    |<br>
-    \---profile<br>
+    |           <br>
+    \\---profile<br>
             ProfilePage.jsx<br>
+
 
 
 ## 5. Setup Instructions
