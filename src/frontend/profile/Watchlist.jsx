@@ -55,7 +55,7 @@ function Watchlist({ username, isOwnProfile, userProfileData }) {
         // - Otherwise, pass `userProfileData` (data of the user whose profile is being viewed).
         user={isOwnProfile ? authUser : userProfileData} 
         // Dynamically set the title for the carousel.
-        title={isOwnProfile ? 'Your Watchlist' : `${username}'s Watchlist`}
+        title='Watchlist'
         // Other props for WatchlistCarousel (like cardActualWidth, userScrollBehavior)
         // would use their default values if not specified here.
       />

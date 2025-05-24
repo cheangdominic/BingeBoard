@@ -43,6 +43,8 @@ export default function ViewAllWatchlist() {
   const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
   // Hook for programmatic navigation (e.g., for the "Back" button).
   const navigate = useNavigate();
+  // Determine if the profile is the authenticated user's own profile.
+  const isOwnProfile = !username || username === authUser?.username;
 
   /**
    * `useEffect` hook to fetch details for each show in the watchlist.
@@ -124,8 +126,10 @@ export default function ViewAllWatchlist() {
         >
           ← Back
         </button>
-        <h1 className="text-4xl font-semibold mb-8">Your Watchlist</h1>
-        <p>Your watchlist is empty. Add some shows!</p>
+        <h1 className="text-4xl font-semibold mb-8">Watchlist</h1>
+        <p>{isOwnProfile
+          ? "You haven't added any shows your the watchlist ."
+          : `${username} hasn’t added any shows to their watchlist.`}</p>
       </div>
     );
   }

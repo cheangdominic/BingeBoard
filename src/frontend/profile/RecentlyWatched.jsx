@@ -30,6 +30,7 @@ function RecentlyWatched({
   title = "Recently Watched", // Default title
   cardActualWidth = 130,     // Default card width
   userScrollBehavior = "smooth", // Default scroll behavior
+  username, 
 }) {
   // State to store the array of recently watched shows.
   const [shows, setShows] = useState([]);
@@ -41,6 +42,12 @@ function RecentlyWatched({
   const contentRef = useRef(null);
   // Get the authenticated user from AuthContext.
   const { user: authUser } = useAuth();
+  // Determine if the profile is the authenticated user's own profile.
+  const isOwnProfile = !username || username === authUser?.username;
+  // Determine the API endpoint based on whether it's the user's own profile.
+  const endpoint = isOwnProfile
+    ? "/api/users/recently-watched"
+    : `/api/users/${username}/recently-watched`;
   // Item width used for calculations, derived from cardActualWidth.
   const itemWidth = cardActualWidth;
   // Minimum number of shows required to enable the infinite scroll illusion.
@@ -64,9 +71,9 @@ function RecentlyWatched({
       }
       setIsLoading(true);
       try {
-        // Fetch data from the "/api/users/recently-watched" endpoint.
+        // Fetch data from the endpoint.
         // `credentials: "include"` sends cookies (for session authentication).
-        const response = await fetch("/api/users/recently-watched", {
+        const response = await fetch(endpoint, {
           credentials: "include",
         });
 
@@ -79,8 +86,8 @@ function RecentlyWatched({
             }));
           throw new Error(
             errorData.error || // Prefer `error` field from backend
-              errorData.message || // Then `message` field
-              `HTTP error! status: ${response.status}` // Generic HTTP error
+            errorData.message || // Then `message` field
+            `HTTP error! status: ${response.status}` // Generic HTTP error
           );
         }
 
@@ -130,7 +137,7 @@ function RecentlyWatched({
     if (scrollPos >= contentWidth * 2 - containerWidth / 2) {
       newScrollLeft = scrollPos - contentWidth; // Teleport back.
       didTeleport = true;
-    } 
+    }
     // Check if scrolled near the beginning of the first clone (relative to initial middle).
     else if (scrollPos <= contentWidth - containerWidth / 2) {
       newScrollLeft = scrollPos + contentWidth; // Teleport forward.
@@ -261,7 +268,9 @@ function RecentlyWatched({
       <section className="relative my-8">
         <h3 className="text-xl font-bold px-4 md:px-0 mb-4">{title}</h3>
         <p className="px-4 md:px-0 text-gray-400">
-          You haven't watched any shows recently.
+          {isOwnProfile
+          ? "You haven't watched any shows recently."
+          : `${username} hasn’t watched any shows recently.`}
         </p>
       </section>
     );

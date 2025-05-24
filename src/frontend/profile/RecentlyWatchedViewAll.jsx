@@ -38,6 +38,8 @@ export default function ViewAllRecentlyWatched() {
   const navigate = useNavigate();
   // Get the authenticated user from AuthContext.
   const { user: authUser } = useAuth();
+ // Determine if the profile is the authenticated user's own profile.
+  const isOwnProfile = !username || username === authUser?.username;
 
   /**
    * `useEffect` hook to fetch recently watched shows when the component mounts
@@ -161,7 +163,7 @@ export default function ViewAllRecentlyWatched() {
           ← Back
         </button>
         <h1 className="text-4xl font-semibold mb-8">Recently Watched Shows</h1>
-        <p>You haven't watched any shows recently. Go watch some!</p>
+        <p>// Default scroll behavior</p>
       </div>
     );
   }
