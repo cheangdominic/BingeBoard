@@ -30,174 +30,175 @@ Due to people often feeling disconnected while watching shows alone and having t
 - express-session – for session management  
 
 ## 4. Listing of File Contents of Folder
-C:.
-|   .env
-|   .gitignore
-|   about.html
-|   eslint.config.js
-|   index.html
-|   package-lock.json
-|   package.json
-|   postcss.config.js
-|   README.md
-|   tailwind.config.js
-|   vite.config.js
-|   
-+---public
-|   |   vite.svg
-|   |   
-|   \---img
-|       +---favicon
-|       |       android-chrome-192x192.png
-|       |       android-chrome-512x512.png
-|       |       apple-touch-icon.png
-|       |       favicon-16x16.png
-|       |       favicon-32x32.png
-|       |       favicon.ico
-|       |       
-|       \---profilePhotos
-|               alt_generic_profile_picture.jpg
-|               generic_profile_picture.jpg
-|               
-\---src
-    |   App.css
-    |   App.jsx
-    |   index.css
-    |   main.jsx
-    |   
-    +---assets
-    |       BingeBoard Icon.svg
-    |       browse_tv_icon.svg
-    |       dragonballsuper1.jpg
-    |       dragonballsuper2.jpg
-    |       facebook_footer_icon.svg
-    |       fallback.jpg
-    |       friend_feature_icon.svg
-    |       instagram_footer_icon.svg
-    |       person_statistics_icon.svg
-    |       react.svg
-    |       review_rating_icon.svg
-    |       severance-apple-tv-plus.jpg
-    |       team_icon.svg
-    |       tiktok_footer_icon.svg
-    |       watchlist_icon.svg
-    |       X_footer_icon.svg
-    |       
-    +---backend
-    |       databaseConnection.js
-    |       friends.js
-    |       server.js
-    |       tmdb.js
-    |       useAuth.js
-    |       utils.js
-    |       
-    +---components
-    |       ActivityCard.jsx
-    |       AppleRating.jsx
-    |       AppleRatingDisplay.jsx
-    |       BottomNavbar.jsx
-    |       ImageUploadModal.jsx
-    |       LoadingSpinner.jsx
-    |       LocationInfo.jsx
-    |       ProfileImage.jsx
-    |       ReviewCard.jsx
-    |       ShowCarousel.jsx
-    |       TVShowCard.jsx
-    |       
-    +---context
-    |       AuthContext.jsx
-    |       
-    +---frontend
-    |   |   NotFound.jsx
-    |   |   
-    |   +---aboutus
-    |   |       AboutUsInfo.jsx
-    |   |       AboutUsPage.jsx
-    |   |       
-    |   +---activity
-    |   |       ActivityCard.jsx
-    |   |       ActivityPage.jsx
-    |   |       ActivityPageHeader.jsx
-    |   |       ActivitySectionHeader.jsx
-    |   |       
-    |   +---featurecards
-    |   |       BrowseFeature.jsx
-    |   |       SocialFeature.jsx
-    |   |       WatchlistFeature.jsx
-    |   |       
-    |   +---friends
-    |   |       FriendListPage.jsx
-    |   |       FriendRequestsPage.jsx
-    |   |       
-    |   +---home
-    |   |       FriendsRecentlyWatched.jsx
-    |   |       Home.jsx
-    |   |       PopularReviewsFiltered.jsx
-    |   |       RecommendedByFriends.jsx
-    |   |       TrendingCarousel.jsx
-    |   |       
-    |   +---landing
-    |   |       FeatureCards.jsx
-    |   |       Footer.jsx
-    |   |       Landing.jsx
-    |   |       MottoBanner.jsx
-    |   |       PopularReviews.jsx
-    |   |       Statistics.jsx
-    |   |       TopNavbar.jsx
-    |   |       
-    |   +---log
-    |   |       LogPage.jsx
-    |   |       ShowGrid.jsx
-    |   |       
-    |   +---login
-    |   |       LoginForm.jsx
-    |   |       LoginPage.jsx
-    |   |       
-    |   +---profile
-    |   |       LogoutButton.jsx
-    |   |       ProfileCard.jsx
-    |   |       ProfilePage.jsx
-    |   |       RecentlyWatched.jsx
-    |   |       RecentlyWatchedViewAll.jsx
-    |   |       RecentReviews.jsx
-    |   |       Watchlist.jsx
-    |   |       WatchlistCarousel.jsx
-    |   |       WatchlistViewAll.jsx
-    |   |       
-    |   +---search
-    |   |       ChatBox.jsx
-    |   |       SearchBar.jsx
-    |   |       SearchPage.jsx
-    |   |       TVShowFilters.jsx
-    |   |       TvShowSearchGrid.jsx
-    |   |       
-    |   +---showdetails
-    |   |   |   AddToWatchlistButton.jsx
-    |   |   |   EpisodeList.jsx
-    |   |   |   EpisodeListView.jsx
-    |   |   |   ReviewSection.jsx
-    |   |   |   ShowDescription.jsx
-    |   |   |   ShowDetailsPage.jsx
-    |   |   |   ShowHero.jsx
-    |   |   |   
-    |   |   \---ReviewSection
-    |   |           ReviewCard.jsx
-    |   |           ReviewForm.jsx
-    |   |           
-    |   +---signup
-    |   |       SignupForm.jsx
-    |   |       SignupPage.jsx
-    |   |       
-    |   +---social
-    |   |       searchUsers.jsx
-    |   |       UserProfile.jsx
-    |   |       
-    |   \---viewall
-    |           ViewAllPage.jsx
-    |           
-    \---profile
-            ProfilePage.jsx
-            
+C:.<br>
+|   .env<br>
+|   .gitignore<br>
+|   about.html<br>
+|   eslint.config.js<br>
+|   index.html<br>
+|   package-lock.json<br>
+|   package.json<br>
+|   postcss.config.js<br>
+|   README.md<br>
+|   tailwind.config.js<br>
+|   vite.config.js<br>
+|<br>
++---public<br>
+|   |   vite.svg<br>
+|   |<br>
+|   \---img<br>
+|       +---favicon<br>
+|       |       android-chrome-192x192.png<br>
+|       |       android-chrome-512x512.png<br>
+|       |       apple-touch-icon.png<br>
+|       |       favicon-16x16.png<br>
+|       |       favicon-32x32.png<br>
+|       |       favicon.ico<br>
+|       |<br>
+|       \---profilePhotos<br>
+|               alt_generic_profile_picture.jpg<br>
+|               generic_profile_picture.jpg<br>
+|<br>
+\---src<br>
+    |   App.css<br>
+    |   App.jsx<br>
+    |   index.css<br>
+    |   main.jsx<br>
+    |<br>
+    +---assets<br>
+    |       BingeBoard Icon.svg<br>
+    |       browse_tv_icon.svg<br>
+    |       dragonballsuper1.jpg<br>
+    |       dragonballsuper2.jpg<br>
+    |       facebook_footer_icon.svg<br>
+    |       fallback.jpg<br>
+    |       friend_feature_icon.svg<br>
+    |       instagram_footer_icon.svg<br>
+    |       person_statistics_icon.svg<br>
+    |       react.svg<br>
+    |       review_rating_icon.svg<br>
+    |       severance-apple-tv-plus.jpg<br>
+    |       team_icon.svg<br>
+    |       tiktok_footer_icon.svg<br>
+    |       watchlist_icon.svg<br>
+    |       X_footer_icon.svg<br>
+    |<br>
+    +---backend<br>
+    |       databaseConnection.js<br>
+    |       friends.js<br>
+    |       server.js<br>
+    |       tmdb.js<br>
+    |       useAuth.js<br>
+    |       utils.js<br>
+    |<br>
+    +---components<br>
+    |       ActivityCard.jsx<br>
+    |       AppleRating.jsx<br>
+    |       AppleRatingDisplay.jsx<br>
+    |       BottomNavbar.jsx<br>
+    |       ImageUploadModal.jsx<br>
+    |       LoadingSpinner.jsx<br>
+    |       LocationInfo.jsx<br>
+    |       ProfileImage.jsx<br>
+    |       ReviewCard.jsx<br>
+    |       ShowCarousel.jsx<br>
+    |       TVShowCard.jsx<br>
+    |<br>
+    +---context<br>
+    |       AuthContext.jsx<br>
+    |<br>
+    +---frontend<br>
+    |   |   NotFound.jsx<br>
+    |   |<br>
+    |   +---aboutus<br>
+    |   |       AboutUsInfo.jsx<br>
+    |   |       AboutUsPage.jsx<br>
+    |   |<br>
+    |   +---activity<br>
+    |   |       ActivityCard.jsx<br>
+    |   |       ActivityPage.jsx<br>
+    |   |       ActivityPageHeader.jsx<br>
+    |   |       ActivitySectionHeader.jsx<br>
+    |   |<br>
+    |   +---featurecards<br>
+    |   |       BrowseFeature.jsx<br>
+    |   |       SocialFeature.jsx<br>
+    |   |       WatchlistFeature.jsx<br>
+    |   |<br>
+    |   +---friends<br>
+    |   |       FriendListPage.jsx<br>
+    |   |       FriendRequestsPage.jsx<br>
+    |   |<br>
+    |   +---home<br>
+    |   |       FriendsRecentlyWatched.jsx<br>
+    |   |       Home.jsx<br>
+    |   |       PopularReviewsFiltered.jsx<br>
+    |   |       RecommendedByFriends.jsx<br>
+    |   |       TrendingCarousel.jsx<br>
+    |   |<br>
+    |   +---landing<br>
+    |   |       FeatureCards.jsx<br>
+    |   |       Footer.jsx<br>
+    |   |       Landing.jsx<br>
+    |   |       MottoBanner.jsx<br>
+    |   |       PopularReviews.jsx<br>
+    |   |       Statistics.jsx<br>
+    |   |       TopNavbar.jsx<br>
+    |   |<br>
+    |   +---log<br>
+    |   |       LogPage.jsx<br>
+    |   |       ShowGrid.jsx<br>
+    |   |<br>
+    |   +---login<br>
+    |   |       LoginForm.jsx<br>
+    |   |       LoginPage.jsx<br>
+    |   |<br>
+    |   +---profile<br>
+    |   |       LogoutButton.jsx<br>
+    |   |       ProfileCard.jsx<br>
+    |   |       ProfilePage.jsx<br>
+    |   |       RecentlyWatched.jsx<br>
+    |   |       RecentlyWatchedViewAll.jsx<br>
+    |   |       RecentReviews.jsx<br>
+    |   |       Watchlist.jsx<br>
+    |   |       WatchlistCarousel.jsx<br>
+    |   |       WatchlistViewAll.jsx<br>
+    |   |<br>
+    |   +---search<br>
+    |   |       ChatBox.jsx<br>
+    |   |       SearchBar.jsx<br>
+    |   |       SearchPage.jsx<br>
+    |   |       TVShowFilters.jsx<br>
+    |   |       TvShowSearchGrid.jsx<br>
+    |   |<br>
+    |   +---showdetails<br>
+    |   |   |   AddToWatchlistButton.jsx<br>
+    |   |   |   EpisodeList.jsx<br>
+    |   |   |   EpisodeListView.jsx<br>
+    |   |   |   ReviewSection.jsx<br>
+    |   |   |   ShowDescription.jsx<br>
+    |   |   |   ShowDetailsPage.jsx<br>
+    |   |   |   ShowHero.jsx<br>
+    |   |   |<br>
+    |   |   \---ReviewSection<br>
+    |   |           ReviewCard.jsx<br>
+    |   |           ReviewForm.jsx<br>
+    |   |<br>
+    |   +---signup<br>
+    |   |       SignupForm.jsx<br>
+    |   |       SignupPage.jsx<br>
+    |   |<br>
+    |   +---social<br>
+    |   |       searchUsers.jsx<br>
+    |   |       UserProfile.jsx<br>
+    |   |<br>
+    |   \---viewall<br>
+    |           ViewAllPage.jsx<br>
+    |<br>
+    \---profile<br>
+            ProfilePage.jsx<br>
+
+
 ## 5. Setup Instructions
 
 To run the BingeBoard app locally, follow these steps:
