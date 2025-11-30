@@ -216,8 +216,8 @@ To run the BingeBoard app locally, follow these steps:
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/cheangdominic/2800-202510-BBY12.git
-cd 2800-202510-BBY12
+git clone https://github.com/cheangdominic/BingeBoard.git
+cd BingeBoard
 ```
 
 2. **Install dependencies:**
@@ -285,16 +285,13 @@ Testing has been performed using Jest and React Testing Library for frontend com
 - Open-source packages licensed under MIT or respective licenses — see package.json for details.  
 - This project was developed as part of a university course at BCIT.  
 
-## 8. AI or API Usage Details  
+## 9. AI or API Usage Details  
 - **TMDB API:** Used to fetch TV show data, images, episodes, and ratings in real-time.  
 - **Cloudinary:** For image upload, storage, and CDN delivery of user profile photos.  
 - **bcrypt:** For securely hashing user passwords before storage.  
 - **express-session:** Manages user sessions to keep users logged in.  
 - **Joi:** Backend validation of input data to ensure data integrity.  
 - **ChatGPT API:** Used to implement AI features for the AI challenge portion of the project.   
-
-*AI Code Assistance Acknowledgment*  
-*Some portions of the codebase were generated or assisted by the ChatGPT API by OpenAI. This was used to help write or optimize code snippets, and all AI-generated code was reviewed and adapted to fit the project requirements.*
 
 ## 10. Contact Information  
 If you have questions, feedback, or want to contribute:  
@@ -305,12 +302,12 @@ GitHub: [github.com/Jbalfour5](https://github.com/Jbalfour5)
 LinkedIn: [linkedin.com/in/valleybalfour](https://www.linkedin.com/in/valleybalfour/)
 
 **Dominic Cheang**  
-Email: [dcheang@my.bcit.ca](mailto:dcheang@my.bcit.ca) <br>
+Email: [dcheang@my.bcit.ca](mailto:d.cheang@hotmail.com) <br>
 GitHub: [github.com/cheangdominic](https://github.com/cheangdominic)  
-LinkedIn: [linkedin.com/in/dominic-cheang/](https://www.linkedin.com/in/dominic-cheang/ )
+LinkedIn: [linkedin.com/in/cheangdominic/](https://www.linkedin.com/in/cheangdominic/)
 
 **Tyrone Cheang**  
-Email: [tcheang@my.bcit.ca](mailto:tcheang@my.bcit.ca) <br>
+Email: [tcheang@my.bcit.ca](mailto:t.cheang@hotmail.com) <br>
 GitHub: [github.com/tyronecheang](https://github.com/tyronecheang)  
 LinkedIn: [linkedin.com/in/tyronecheang/](https://www.linkedin.com/in/tyronecheang/)
 
