@@ -77,7 +77,7 @@ app.use(cors({
    */
   origin: (origin, callback) => {
     // List of allowed origins, including environment variable for frontend URL
-    const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:3000','https://bingeboard-4zzn.onrender.com', '/^https?://localhost(:\d+)?$/', process.env.FRONTEND_URL].filter(Boolean);
+    const allowedOrigins = ['http://localhost:5173', 'http://localhost:3001', 'http://localhost:3000','https://bingeboard-4zzn.onrender.com', 'https://bingeboard-4u40.onrender.com', '/^https?://localhost(:\d+)?$/', process.env.FRONTEND_URL].filter(Boolean);
     // Allow requests with no origin (like mobile apps or curl requests) or if origin is in the allowed list
     if (!origin || allowedOrigins.some(o => origin.startsWith(o))) {
       callback(null, true);
