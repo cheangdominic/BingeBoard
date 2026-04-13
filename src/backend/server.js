@@ -165,6 +165,7 @@ mongoose.connection.on('connected', () => {
   console.log('Mongoose connected to DB cluster'); // Duplicate log, but harmless
 });
 
+app.set("trust proxy", 1);
 // Configure and use express-session middleware
 app.use(session({
   secret: node_session_secret, // Secret used to sign the session ID cookie
