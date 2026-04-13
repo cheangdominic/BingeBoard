@@ -258,7 +258,7 @@ export default function TopNavbar() {
             <a href="/" className="-m-1.5 p-1.5 flex items-center space-x-2">
               <img
                 alt="BingeBoard logo"
-                src="src/assets/BingeBoard Icon.svg" // Note: Path might need adjustment depending on build process. Consider importing like `logo`.
+                src={logo}
                 className="h-8 w-auto"
               />
               <span className="text-white text-xl font-bold">
